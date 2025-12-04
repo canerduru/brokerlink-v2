@@ -1094,87 +1094,49 @@
             </div>
 
             <!-- MY DEMANDS LIST (3-column grid) -->
-            <div x-show="currentDemandTab === 'active'" class="px-5 py-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div x-show="currentDemandTab === 'active'" class="px-5 py-4 grid grid-cols-2 md:grid-cols-3 gap-3">
                 <template x-for="demand in demands" :key="demand.id">
                     <div
-                        class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow p-5">
-                        <!-- Header: Title & Status -->
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-bold text-gray-900 text-lg leading-tight mb-1" x-text="demand.title">
-                                </h3>
-                                <div class="flex items-center gap-2 text-sm text-gray-500">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <span x-text="demand.district"></span>
-                                </div>
-                            </div>
-                            <div class="flex flex-col items-end gap-1">
-                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold"
-                                    :class="demand.type === 'Satılık' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'"
-                                    x-text="demand.type">
-                                </span>
-                                <span x-show="demand.isUrgent"
-                                    class="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded-md">
-                                    ACİL
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Budget -->
-                        <div class="mb-5">
-                            <div class="text-xs text-gray-400 font-medium mb-1">Bütçe</div>
-                            <div class="text-2xl font-bold text-blue-600 tracking-tight"
-                                x-text="formatPrice(demand.budget)"></div>
-                            <div class="text-xs text-gray-400 mt-1" x-show="demand.maxBudget">
-                                Max: <span x-text="formatPrice(demand.maxBudget)"></span>
-                            </div>
-                        </div>
-
-                        <!-- Features -->
-                        <div class="flex items-center gap-3 mb-5">
+                        class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <div class="relative">
                             <div
-                                class="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-medium text-gray-600 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor"
+                                class="h-32 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+                                <svg class="w-12 h-12 text-blue-300" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                                    </path>
                                 </svg>
+                            </div>
+                            <div class="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-lg"
+                                :class="demand.type === 'Satılık' ? 'bg-emerald-500' : 'bg-orange-500'"
+                                x-text="demand.type"></div>
+                            <div x-show="demand.isUrgent"
+                                class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                                Acil
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <div class="text-blue-600 font-bold text-base mb-1" x-text="formatPrice(demand.budget)">
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-sm mb-1 truncate" x-text="demand.title">
+                            </h3>
+                            <p class="text-gray-500 text-xs mb-2 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <span x-text="demand.district"></span>
+                            </p>
+                            <div class="flex items-center gap-2 text-gray-400 text-xs">
+                                <span x-text="demand.rooms"></span>
+                                <span>•</span>
                                 <span x-text="demand.category"></span>
                             </div>
-                            <div
-                                class="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-medium text-gray-600 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                </svg>
-                                <span x-text="demand.rooms"></span>
+                            <div class="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
+                                <span class="text-xs text-gray-500" x-text="demand.matchCount + ' Eşleşme'"></span>
                             </div>
-                        </div>
-
-                        <!-- Footer: Matches & Actions -->
-                        <div class="pt-4 border-t border-gray-50 flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <div class="flex -space-x-2">
-                                    <template x-for="i in Math.min(3, demand.matchCount || 0)">
-                                        <div class="w-6 h-6 rounded-full bg-gray-200 border-2 border-white"></div>
-                                    </template>
-                                </div>
-                                <span class="text-xs font-medium text-blue-600"
-                                    x-text="(demand.matchCount || 0) + ' Eşleşme'"></span>
-                            </div>
-                            <button class="text-gray-400 hover:text-blue-600 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </button>
                         </div>
                     </div>
                 </template>
@@ -1183,70 +1145,40 @@
             <!-- Network Demands List -->
             <div class="px-5 space-y-4" x-show="currentDemandTab === 'network'">
                 <template x-for="demand in networkDemands" :key="demand.id">
-                    <div
-                        class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow p-5">
-                        <!-- Header: Broker Info & Status -->
-                        <div class="flex justify-between items-start mb-4">
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <!-- Header -->
+                        <div class="bg-red-50 p-4 flex justify-between items-center">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm"
+                                <!-- Avatar -->
+                                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm"
                                     x-text="demand.brokerInitials">
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-900 text-sm" x-text="demand.brokerName"></h3>
-                                    <p class="text-xs text-gray-500">Remax Pro</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <span class="px-2 py-1 rounded-lg text-xs font-bold" :class="{
-                                        'bg-red-50 text-red-600': demand.status === 'Hot',
-                                        'bg-orange-50 text-orange-600': demand.status === 'Warm',
-                                        'bg-blue-50 text-blue-600': demand.status === 'Cold'
-                                    }">
-                                    <span
-                                        x-text="demand.status === 'Hot' ? '🔥 Acil' : (demand.status === 'Warm' ? '⚡ Ilık' : '❄️ Normal')"></span>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Budget & Location -->
-                        <div class="mb-4">
-                            <div class="flex items-baseline gap-1 mb-1">
-                                <span class="text-xl font-bold text-emerald-600 tracking-tight"
-                                    x-text="formatPrice(demand.budget)"></span>
-                                <span class="text-xs text-gray-400" x-show="demand.maxBudget">
-                                    - <span x-text="formatPrice(demand.maxBudget)"></span>
-                                </span>
-                            </div>
-                            <div class="flex items-center gap-1 text-sm text-gray-500">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span x-text="demand.district"></span>
-                            </div>
-                        </div>
-
-                        <!-- Features & Action -->
-                        <div class="flex items-center justify-between pt-4 border-t border-gray-50">
-                            <div class="flex gap-2">
-                                <span
-                                    class="px-2.5 py-1 bg-gray-50 text-gray-600 rounded-lg text-xs font-medium border border-gray-100">
-                                    <span x-text="demand.rooms"></span>
-                                </span>
-                                <span
-                                    class="px-2.5 py-1 bg-gray-50 text-gray-600 rounded-lg text-xs font-medium border border-gray-100">
+                                    <h3 class="font-bold text-gray-900" x-text="demand.brokerName"></h3>
+                                    <div class="flex gap-2 mt-1">
+                                        <span
+                                            class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1 font-medium shadow-sm">
+                                            🔥 <span x-text="demand.status === 'Hot' ? 'Acil' : demand.status"></span>
+                                        </span>
+                                        <span
+                                            class="bg-white border border-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full flex items-center gap-1 font-medium">
+                                            👤 <span x-text="demand.category"></span>
+                                        </span>
+                                    </div>
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6
+                                    0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                                    </path>
+                                    </svg>
                                     <span x-text="demand.category"></span>
-                                </span>
+                                    </span>
+                                </div>
+
+                                <button
+                                    class="w-full py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-100 transition-colors"
+                                    @click="alert('Broker ile iletişime geçiliyor: ' + demand.brokerName)">
+                                    Brokera Mesaj At
+                                </button>
                             </div>
-                            <button
-                                class="px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold text-xs hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
-                                Eşleşme Öner
-                            </button>
-                        </div>
-                    </div>
                 </template>
             </div>
         </div>
