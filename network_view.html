@@ -1,0 +1,130 @@
+<!-- NETWORK/AĞ VIEW -->
+<div x-show="currentTab === 'network'" class="pb-24">
+    <!-- Header -->
+    <div class="px-5 py-4 border-b border-gray-100">
+        <h2 class="text-xl font-bold text-gray-900">Ağ</h2>
+        <p class="text-sm text-gray-500 mt-1">Broker ağınızı yönetin</p>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="px-5 py-4 border-b border-gray-50">
+        <div class="relative">
+            <input type="text" placeholder="İsim veya şehir ara..."
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500">
+            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Network List -->
+    <div class="px-5 py-4 space-y-3">
+        <!-- Broker 1 -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg flex-shrink-0">
+                    SY
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-gray-900">Selin Yılmaz</h3>
+                    <p class="text-sm text-gray-500">Kadıköy, İstanbul</p>
+                    <div class="flex gap-2 mt-1">
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">12 İlan</span>
+                        <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Aktif</span>
+                    </div>
+                </div>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    Mesaj
+                </button>
+            </div>
+        </div>
+
+        <!-- Broker 2 -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-lg flex-shrink-0">
+                    MK
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-gray-900">Mehmet Kara</h3>
+                    <p class="text-sm text-gray-500">Beşiktaş, İstanbul</p>
+                    <div class="flex gap-2 mt-1">
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">8 İlan</span>
+                        <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Aktif</span>
+                    </div>
+                </div>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    Mesaj
+                </button>
+            </div>
+        </div>
+
+        <!-- Broker 3 -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg flex-shrink-0">
+                    AY
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-gray-900">Ayşe Demir</h3>
+                    <p class="text-sm text-gray-500">Sarıyer, İstanbul</p>
+                    <div class="flex gap-2 mt-1">
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">15 İlan</span>
+                        <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Aktif</span>
+                    </div>
+                </div>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    Mesaj
+                </button>
+            </div>
+        </div>
+
+        <!-- Broker 4 -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-lg flex-shrink-0">
+                    EC
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-gray-900">Emre Çelik</h3>
+                    <p class="text-sm text-gray-500">Şişli, İstanbul</p>
+                    <div class="flex gap-2 mt-1">
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">6 İlan</span>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Çevrimdışı</span>
+                    </div>
+                </div>
+                <button
+                    class="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50">
+                    Mesaj
+                </button>
+            </div>
+        </div>
+
+        <!-- Broker 5 -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold text-lg flex-shrink-0">
+                    ZD
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-gray-900">Zeynep Demir</h3>
+                    <p class="text-sm text-gray-500">Üsküdar, İstanbul</p>
+                    <div class="flex gap-2 mt-1">
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">10 İlan</span>
+                        <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Aktif</span>
+                    </div>
+                </div>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    Mesaj
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
