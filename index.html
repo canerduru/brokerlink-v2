@@ -1642,8 +1642,8 @@
                                 const type = Math.random() > 0.3 ? 'Satılık' : 'Kiralık';
                                 // Logic: Sale prices higher than Rent prices
                                 const budget = type === 'Satılık'
-                                    ? Math.floor(Math.random() * 49000000) + 1000000 // 1M - 50M
-                                    : Math.floor(Math.random() * 190000) + 10000;    // 10k - 200k
+                                    ? (Math.floor(Math.random() * 49) + 1) * 1000000 // 1M - 49M (Tam milyonlar)
+                                    : (Math.floor(Math.random() * 38) + 2) * 5000;   // 10k - 200k (5k katları)
 
                                 return {
                                     ...d,
@@ -1729,9 +1729,9 @@
 
                         // 4. Mock Network Demands
                         this.networkDemands = [
-                            { id: 201, brokerName: 'Mehmet Demir', brokerInitials: 'MD', status: 'Hot', budget: 50000000, maxBudget: 60000000, district: 'Beşiktaş', rooms: '3+1', category: 'Daire' },
-                            { id: 202, brokerName: 'Ayşe Kaya', brokerInitials: 'AK', status: 'Warm', budget: 30000000, maxBudget: 35000000, district: 'Kadıköy', rooms: '2+1', category: 'Daire' },
-                            { id: 203, brokerName: 'Zeynep Çelik', brokerInitials: 'ZÇ', status: 'Cold', budget: 15000000, maxBudget: 18000000, district: 'Çekmeköy', rooms: '4+1', category: 'Daire' }
+                            { id: 201, brokerName: 'Mehmet Demir', brokerInitials: 'MD', status: 'Hot', budget: 45000000, maxBudget: 50000000, district: 'Beşiktaş', rooms: '3+1', category: 'Daire' },
+                            { id: 202, brokerName: 'Ayşe Kaya', brokerInitials: 'AK', status: 'Warm', budget: 45000, maxBudget: 50000, district: 'Kadıköy', rooms: '2+1', category: 'Daire' },
+                            { id: 203, brokerName: 'Zeynep Çelik', brokerInitials: 'ZÇ', status: 'Cold', budget: 12000000, maxBudget: 15000000, district: 'Çekmeköy', rooms: '4+1', category: 'Daire' }
                         ];
                     } catch (e) {
                         console.error('CRITICAL ERROR in fetchData:', e);
@@ -1752,9 +1752,9 @@
 
                     // 2. Insert Demands
                     const mockDemands = [
-                        { user_id: this.user.id, title: 'Bebek Sahil Lüks Daire', budget: 45000000, max_budget: 55000000, district: 'Bebek, Beşiktaş', rooms: '3+1', category: 'Daire', status: 'active' },
-                        { user_id: this.user.id, title: 'Yeniköy Boğaz Manzaralı Villa', budget: 85000000, max_budget: 100000000, district: 'Yeniköy, Sarıyer', rooms: '5+1', category: 'Villa', status: 'pending' },
-                        { user_id: this.user.id, title: 'Suadiye Bağdat Caddesi Yakını', budget: 25000000, max_budget: 30000000, district: 'Suadiye, Kadıköy', rooms: '4+1', category: 'Daire', status: 'active' }
+                        { user_id: this.user.id, title: 'Bebek Sahil Lüks Daire', budget: 45000000, max_budget: 50000000, district: 'Bebek, Beşiktaş', rooms: '3+1', category: 'Daire', status: 'active' },
+                        { user_id: this.user.id, title: 'Yeniköy Boğaz Manzaralı Villa', budget: 85000000, max_budget: 90000000, district: 'Yeniköy, Sarıyer', rooms: '5+1', category: 'Villa', status: 'pending' },
+                        { user_id: this.user.id, title: 'Suadiye Kiralık Daire', budget: 45000, max_budget: 50000, district: 'Suadiye, Kadıköy', rooms: '3+1', category: 'Daire', status: 'active' }
                     ];
                     const { data: demandData, error: demandError } = await supabase.from('demands').insert(mockDemands).select();
                     if (demandError) console.error('SeedData: Demand insert error:', demandError);
