@@ -1093,55 +1093,203 @@
                 </div>
             </div>
 
-            <!-- MY DEMANDS LIST (3-column grid) -->
-            <div x-show="currentDemandTab === 'active'" class="px-5 py-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+            <!-- Demands Header & Stats -->
+            <div class="px-5 mb-6" x-show="currentDemandTab === 'active'">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Talepler</h2>
+                    <p class="text-gray-500 text-sm">Müşteri taleplerini takip edin</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <!-- Total -->
+                    <div class="bg-blue-50 rounded-2xl p-4 border border-blue-100">
+                        <div class="flex items-center gap-2 text-blue-600 mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span class="font-medium text-sm">Toplam</span>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900" x-text="demands.length"></div>
+                    </div>
+
+                    <!-- Urgent -->
+                    <div class="bg-red-50 rounded-2xl p-4 border border-red-100">
+                        <div class="flex items-center gap-2 text-red-600 mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            <span class="font-medium text-sm">Acil</span>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900" x-text="demands.filter(d => d.isUrgent).length">
+                        </div>
+                    </div>
+
+                    <!-- Matches -->
+                    <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+                        <div class="flex items-center gap-2 text-emerald-600 mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium text-sm">Eşleşme</span>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900"
+                            x-text="demands.reduce((acc, d) => acc + (d.matchCount || 0), 0)"></div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tabs (Pills) -->
+                <div class="flex gap-2 bg-gray-50 p-1 rounded-xl w-fit mb-6">
+                    <button class="px-4 py-2 bg-white rounded-lg text-sm font-bold text-gray-900 shadow-sm">
+                        Aktif (<span x-text="demands.length"></span>)
+                    </button>
+                    <button
+                        class="px-4 py-2 text-gray-500 text-sm font-medium hover:bg-gray-100 rounded-lg transition-colors">
+                        Bekleyen (0)
+                    </button>
+                    <button
+                        class="px-4 py-2 text-gray-500 text-sm font-medium hover:bg-gray-100 rounded-lg transition-colors">
+                        Tamamlanan (0)
+                    </button>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="relative mb-6">
+                    <svg class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" placeholder="İsim, konum veya kriterlere göre ara..."
+                        class="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow shadow-sm">
+                </div>
+            </div>
+
+            <!-- MY DEMANDS LIST (Grid) -->
+            <div x-show="currentDemandTab === 'active'" class="px-5 pb-20 grid grid-cols-1 md:grid-cols-3 gap-5">
                 <template x-for="demand in demands" :key="demand.id">
                     <div
                         class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                        <div class="relative">
-                            <div
-                                class="h-32 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                                <svg class="w-12 h-12 text-blue-300" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
-                                    </path>
-                                </svg>
+                        <!-- Header -->
+                        <div class="p-4 flex justify-between items-start"
+                            :class="demand.isUrgent ? 'bg-red-50' : 'bg-orange-50'">
+                            <div class="flex items-center gap-3">
+                                <!-- Avatar -->
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm"
+                                    :class="demand.isUrgent ? 'bg-blue-600' : 'bg-blue-500'"
+                                    x-text="demand.title.charAt(0)">
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-sm" x-text="demand.title"></h3>
+                                    <div class="flex gap-2 mt-1">
+                                        <span
+                                            class="text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold shadow-sm"
+                                            :class="demand.isUrgent ? 'bg-red-500' : 'bg-orange-400'">
+                                            <span x-show="demand.isUrgent">🔥 Acil</span>
+                                            <span x-show="!demand.isUrgent">⚡ Aktif</span>
+                                        </span>
+                                        <span
+                                            class="bg-white/80 text-gray-600 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold border border-gray-100">
+                                            👤 <span x-text="demand.category"></span>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-lg"
-                                :class="demand.type === 'Satılık' ? 'bg-emerald-500' : 'bg-orange-500'"
-                                x-text="demand.type"></div>
-                            <div x-show="demand.isUrgent"
-                                class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                                Acil
+                            <!-- Match Badge -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-sm"
+                                    x-text="demand.matchCount || 0">
+                                </div>
+                                <span class="text-[10px] text-gray-500 mt-0.5 font-medium">eşleşme</span>
                             </div>
                         </div>
-                        <div class="p-3">
-                            <div class="text-blue-600 font-bold text-base mb-1" x-text="formatPrice(demand.budget)">
+
+                        <!-- Body -->
+                        <div class="p-4">
+                            <!-- Budget Box -->
+                            <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 mb-4">
+                                <div
+                                    class="text-emerald-700 text-[10px] uppercase tracking-wider font-bold mb-1 flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Bütçe Aralığı
+                                </div>
+                                <div class="text-emerald-600 font-bold text-lg">
+                                    <span x-text="formatPrice(demand.budget)"></span>
+                                    <span x-show="demand.maxBudget"> - <span
+                                            x-text="formatPrice(demand.maxBudget)"></span></span>
+                                </div>
                             </div>
-                            <h3 class="font-bold text-gray-900 text-sm mb-1 truncate" x-text="demand.title">
-                            </h3>
-                            <p class="text-gray-500 text-xs mb-2 flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                        clip-rule="evenodd" />
+
+                            <!-- Location -->
+                            <div class="mb-4">
+                                <div
+                                    class="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-1 flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Aranan Bölgeler
+                                </div>
+                                <div class="text-gray-900 font-bold text-sm ml-4" x-text="demand.district"></div>
+                            </div>
+
+                            <!-- Features Grid -->
+                            <div class="grid grid-cols-3 gap-2 mb-4">
+                                <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
+                                    <svg class="w-4 h-4 text-blue-500 mx-auto mb-1" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                    </svg>
+                                    <div class="font-bold text-gray-900 text-sm" x-text="demand.rooms"></div>
+                                    <div class="text-gray-400 text-[10px] font-medium">Oda</div>
+                                </div>
+                                <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
+                                    <svg class="w-4 h-4 text-blue-500 mx-auto mb-1" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    <div class="font-bold text-gray-900 text-sm" x-text="demand.category"></div>
+                                    <div class="text-gray-400 text-[10px] font-medium">Tip</div>
+                                </div>
+                                <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
+                                    <svg class="w-4 h-4 text-blue-500 mx-auto mb-1" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <div class="font-bold text-gray-900 text-sm">Evet</div>
+                                    <div class="text-gray-400 text-[10px] font-medium">Park</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-1 text-gray-400 text-xs">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span x-text="demand.district"></span>
-                            </p>
-                            <div class="flex items-center gap-2 text-gray-400 text-xs">
-                                <span x-text="demand.rooms"></span>
-                                <span>•</span>
-                                <span x-text="demand.category"></span>
+                                <span>2 saat önce</span>
                             </div>
-                            <div class="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
-                                <span class="text-xs text-gray-500" x-text="demand.matchCount + ' Eşleşme'"></span>
-                            </div>
+                            <button
+                                class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                Detaylar
+                            </button>
                         </div>
                     </div>
                 </template>
             </div>
-
             <!-- Network Demands List -->
             <div class="px-5 space-y-4" x-show="currentDemandTab === 'network'">
                 <template x-for="demand in networkDemands" :key="demand.id">
