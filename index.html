@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BrokerLink - AgentConnect Style</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1073,21 +1073,11 @@
                     <button @click="currentDemandTab = 'active'"
                         class="pb-3 text-sm font-medium transition-colors relative"
                         :class="currentDemandTab === 'active' ? 'text-blue-800 font-bold' : 'text-gray-500'">
-                        Tüm Talepler
+                        Taleplerim
                         <span class="ml-1 px-2 py-0.5 rounded-full text-xs transition-colors"
                             :class="currentDemandTab === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'"
                             x-text="demands.length"></span>
                         <div x-show="currentDemandTab === 'active'"
-                            class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-800"></div>
-                    </button>
-                    <button @click="currentDemandTab = 'my_demands'"
-                        class="pb-3 text-sm font-medium transition-colors relative"
-                        :class="currentDemandTab === 'my_demands' ? 'text-blue-800 font-bold' : 'text-gray-500'">
-                        Taleplerim
-                        <span class="ml-1 px-2 py-0.5 rounded-full text-xs transition-colors"
-                            :class="currentDemandTab === 'my_demands' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'"
-                            x-text="myDemands.length"></span>
-                        <div x-show="currentDemandTab === 'my_demands'"
                             class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-800"></div>
                     </button>
                     <button @click="currentDemandTab = 'network'"
@@ -1113,9 +1103,7 @@
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <!-- Total -->
-                    <div @click="activeDemandFilter = 'all'"
-                        class="rounded-2xl p-4 border cursor-pointer transition-all duration-200"
-                        :class="activeDemandFilter === 'all' ? 'bg-blue-100 border-blue-300 shadow-md transform scale-[1.02]' : 'bg-blue-50 border-blue-100 hover:bg-blue-100'">
+                    <div class="bg-blue-50 rounded-2xl p-4 border border-blue-100">
                         <div class="flex items-center gap-2 text-blue-600 mb-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1127,9 +1115,7 @@
                     </div>
 
                     <!-- Urgent -->
-                    <div @click="activeDemandFilter = 'urgent'"
-                        class="rounded-2xl p-4 border cursor-pointer transition-all duration-200"
-                        :class="activeDemandFilter === 'urgent' ? 'bg-red-100 border-red-300 shadow-md transform scale-[1.02]' : 'bg-red-50 border-red-100 hover:bg-red-100'">
+                    <div class="bg-red-50 rounded-2xl p-4 border border-red-100">
                         <div class="flex items-center gap-2 text-red-600 mb-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1184,38 +1170,30 @@
 
             <!-- MY DEMANDS LIST (Grid) -->
             <div x-show="currentDemandTab === 'active'" class="px-5 pb-20 grid grid-cols-1 md:grid-cols-3 gap-5">
-                <template
-                    x-for="demand in demands.filter(d => activeDemandFilter === 'all' || (activeDemandFilter === 'urgent' && d.isUrgent))"
-                    :key="demand.id">
+                <template x-for="demand in demands" :key="demand.id">
                     <div
                         class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <!-- Header -->
                         <div class="p-4 flex justify-between items-start"
-                            :class="demand.isUrgent ? 'bg-red-50' : (demand.status === 'Warm' ? 'bg-orange-50' : 'bg-blue-50')">
+                            :class="demand.isUrgent ? 'bg-red-50' : 'bg-orange-50'">
                             <div class="flex items-center gap-3">
                                 <!-- Avatar -->
-                                <img :src="demand.image || demand.brokerImage || 'https://i.pravatar.cc/150?u=' + demand.id"
-                                    class="w-10 h-10 rounded-full object-cover shadow-sm border-2 border-white">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm"
+                                    :class="demand.isUrgent ? 'bg-blue-600' : 'bg-blue-500'"
+                                    x-text="demand.title.charAt(0)">
+                                </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-900 text-sm"
-                                        x-text="demand.name || demand.brokerName || 'Kullanıcı'"></h3>
+                                    <h3 class="font-bold text-gray-900 text-sm" x-text="demand.title"></h3>
                                     <div class="flex gap-2 mt-1">
-                                        <span x-show="demand.isUrgent || demand.status === 'Warm'"
+                                        <span
                                             class="text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold shadow-sm"
                                             :class="demand.isUrgent ? 'bg-red-500' : 'bg-orange-400'">
                                             <span x-show="demand.isUrgent">🔥 Acil</span>
-                                            <span x-show="!demand.isUrgent && demand.status === 'Warm'">⚡ Ilık</span>
+                                            <span x-show="!demand.isUrgent">⚡ Aktif</span>
                                         </span>
-                                        <!-- Type Label -->
                                         <span
                                             class="bg-white/80 text-gray-600 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold border border-gray-100">
-                                            <span
-                                                x-text="demand.type || (demand.category === 'Daire' ? 'Satılık' : 'Kiralık')"></span>
-                                        </span>
-                                        <!-- Category (No Emoji) -->
-                                        <span
-                                            class="bg-white/80 text-gray-600 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold border border-gray-100">
-                                            <span x-text="demand.category"></span>
+                                            👤 <span x-text="demand.category"></span>
                                         </span>
                                     </div>
                                 </div>
@@ -1241,7 +1219,7 @@
                                     </svg>
                                     Bütçe Aralığı
                                 </div>
-                                <div class="text-emerald-600 font-bold text-sm">
+                                <div class="text-emerald-600 font-bold text-lg">
                                     <span x-text="formatPrice(demand.budget)"></span>
                                     <span x-show="demand.maxBudget"> - <span
                                             x-text="formatPrice(demand.maxBudget)"></span></span>
@@ -1312,286 +1290,43 @@
                     </div>
                 </template>
             </div>
-
-            <!-- MY DEMANDS VIEW -->
-            <div x-show="currentDemandTab === 'my_demands'" class="px-5 pb-20">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Taleplerim</h2>
-                        <p class="text-gray-500 text-sm">Kendi oluşturduğunuz talepler</p>
-                    </div>
-                    <button @click="showAddDemandModal = true"
-                        class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Yeni Talep Ekle</span>
-                    </button>
-                </div>
-
-                <!-- Empty State -->
-                <template x-if="myDemands.length === 0">
-                    <div class="text-center py-12 bg-white rounded-2xl border border-gray-100">
-                        <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-900 mb-2">Henüz Talep Oluşturmadınız</h3>
-                        <p class="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
-                            Müşterileriniz için aradığınız gayrimenkul özelliklerini girerek ağınızdaki brokerlara
-                            duyurun.
-                        </p>
-                        <button @click="showAddDemandModal = true"
-                            class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
-                        </button>
-                    </div>
-                </template>
-
-                <!-- My Demands Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <template x-for="demand in myDemands" :key="demand.id">
-                        <div
-                            class="bg-white rounded-2xl border-2 border-blue-100 overflow-hidden shadow-md hover:shadow-lg transition-all relative group">
-                            <!-- "Sizin Talebiniz" Badge (Optional, for extra distinction) -->
-                            <div
-                                class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-xl z-10">
-                                Sizin Talebiniz
-                            </div>
-
-                            <!-- Header -->
-                            <div
-                                class="p-4 flex justify-between items-start bg-gradient-to-r from-blue-50 to-white border-b border-blue-50">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-12 h-12 rounded-full bg-white border-2 border-blue-100 flex items-center justify-center shadow-sm">
-                                        <span class="text-blue-600 font-bold text-sm">Siz</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-gray-900 text-sm" x-text="demand.title"></h3>
-                                        <div class="flex gap-2 mt-1">
-                                            <span x-show="demand.isUrgent"
-                                                class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold border border-red-100">
-                                                🔥 Acil
-                                            </span>
-                                            <span
-                                                class="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold border border-blue-100">
-                                                <span x-text="demand.type"></span>
-                                            </span>
-                                            <span
-                                                class="bg-gray-50 text-gray-600 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold border border-gray-100">
-                                                <span x-text="demand.category"></span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Body -->
-                            <div class="p-4">
-                                <!-- Budget Box -->
-                                <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-3 mb-4">
-                                    <div
-                                        class="text-blue-700 text-[10px] uppercase tracking-wider font-bold mb-1 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Bütçe Aralığı
-                                    </div>
-                                    <div class="text-blue-900 font-bold text-sm">
-                                        <span x-text="formatPrice(demand.budget)"></span>
-                                        <span x-show="demand.maxBudget"> - <span
-                                                x-text="formatPrice(demand.maxBudget)"></span></span>
-                                    </div>
-                                </div>
-
-                                <!-- Location -->
-                                <div class="mb-4">
-                                    <div
-                                        class="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-1 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        Aranan Bölgeler
-                                    </div>
-                                    <div class="text-gray-900 font-bold text-sm ml-4" x-text="demand.district"></div>
-                                </div>
-
-                                <!-- Features Grid -->
-                                <div class="grid grid-cols-3 gap-2 mb-4">
-                                    <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
-                                        <div class="font-bold text-gray-900 text-sm" x-text="demand.rooms"></div>
-                                        <div class="text-gray-400 text-[10px] font-medium">Oda</div>
-                                    </div>
-                                    <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
-                                        <div class="font-bold text-gray-900 text-sm" x-text="demand.category"></div>
-                                        <div class="text-gray-400 text-[10px] font-medium">Tip</div>
-                                    </div>
-                                    <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
-                                        <div class="font-bold text-gray-900 text-sm">Evet</div>
-                                        <div class="text-gray-400 text-[10px] font-medium">Park</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Footer -->
-                            <div
-                                class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                                <div class="flex items-center gap-1 text-gray-400 text-xs">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span>Yeni</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
-                                        Düzenle
-                                    </button>
-                                    <button
-                                        class="px-3 py-1.5 bg-red-50 border border-red-100 rounded-lg text-xs font-bold text-red-600 hover:bg-red-100 transition-colors shadow-sm">
-                                        Sil
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
             <!-- Network Demands List -->
-            <div x-show="currentDemandTab === 'network'" class="px-5 pb-20 grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="px-5 space-y-4" x-show="currentDemandTab === 'network'">
                 <template x-for="demand in networkDemands" :key="demand.id">
-                    <div
-                        class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
                         <!-- Header -->
-                        <div class="p-4 flex justify-between items-start"
-                            :class="demand.isUrgent ? 'bg-red-50' : (demand.status === 'Warm' ? 'bg-orange-50' : 'bg-blue-50')">
+                        <div class="bg-red-50 p-4 flex justify-between items-center">
                             <div class="flex items-center gap-3">
                                 <!-- Avatar -->
-                                <img :src="demand.image || demand.brokerImage || 'https://i.pravatar.cc/150?u=' + demand.id"
-                                    class="w-10 h-10 rounded-full object-cover shadow-sm border-2 border-white">
+                                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm"
+                                    x-text="demand.brokerInitials">
+                                </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-900 text-sm"
-                                        x-text="demand.name || demand.brokerName || 'Kullanıcı'"></h3>
+                                    <h3 class="font-bold text-gray-900" x-text="demand.brokerName"></h3>
                                     <div class="flex gap-2 mt-1">
-                                        <span x-show="demand.isUrgent || demand.status === 'Warm'"
-                                            class="text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold shadow-sm"
-                                            :class="demand.isUrgent ? 'bg-red-500' : 'bg-orange-400'">
-                                            <span x-show="demand.isUrgent">🔥 Acil</span>
-                                            <span x-show="!demand.isUrgent && demand.status === 'Warm'">⚡ Ilık</span>
-                                        </span>
-                                        <!-- Type Label -->
                                         <span
-                                            class="bg-white/80 text-gray-600 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold border border-gray-100">
-                                            <span
-                                                x-text="demand.type || (demand.category === 'Daire' ? 'Satılık' : 'Kiralık')"></span>
+                                            class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1 font-medium shadow-sm">
+                                            🔥 <span x-text="demand.status === 'Hot' ? 'Acil' : demand.status"></span>
                                         </span>
-                                        <!-- Category (No Emoji) -->
                                         <span
-                                            class="bg-white/80 text-gray-600 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold border border-gray-100">
-                                            <span x-text="demand.category"></span>
+                                            class="bg-white border border-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full flex items-center gap-1 font-medium">
+                                            👤 <span x-text="demand.category"></span>
                                         </span>
                                     </div>
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6
+                                    0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                                    </path>
+                                    </svg>
+                                    <span x-text="demand.category"></span>
+                                    </span>
                                 </div>
-                            </div>
-                            <!-- Match Badge -->
-                            <div class="flex flex-col items-center">
-                                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-sm"
-                                    x-text="demand.matchCount || 0">
-                                </div>
-                                <span class="text-[10px] text-gray-500 mt-0.5 font-medium">eşleşme</span>
-                            </div>
-                        </div>
 
-                        <!-- Body -->
-                        <div class="p-4">
-                            <!-- Budget Box -->
-                            <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 mb-4">
-                                <div
-                                    class="text-emerald-700 text-[10px] uppercase tracking-wider font-bold mb-1 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Bütçe Aralığı
-                                </div>
-                                <div class="text-emerald-600 font-bold text-sm">
-                                    <span x-text="formatPrice(demand.budget)"></span>
-                                    <span x-show="demand.maxBudget"> - <span
-                                            x-text="formatPrice(demand.maxBudget)"></span></span>
-                                </div>
+                                <button
+                                    class="w-full py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-100 transition-colors"
+                                    @click="alert('Broker ile iletişime geçiliyor: ' + demand.brokerName)">
+                                    Brokera Mesaj At
+                                </button>
                             </div>
-
-                            <!-- Location -->
-                            <div class="mb-4">
-                                <div
-                                    class="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-1 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    Aranan Bölgeler
-                                </div>
-                                <div class="text-gray-900 font-bold text-sm ml-4" x-text="demand.district"></div>
-                            </div>
-
-                            <!-- Features Grid -->
-                            <div class="grid grid-cols-3 gap-2 mb-4">
-                                <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
-                                    <svg class="w-4 h-4 text-blue-500 mx-auto mb-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                    </svg>
-                                    <div class="font-bold text-gray-900 text-sm" x-text="demand.rooms"></div>
-                                    <div class="text-gray-400 text-[10px] font-medium">Oda</div>
-                                </div>
-                                <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
-                                    <svg class="w-4 h-4 text-blue-500 mx-auto mb-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                    <div class="font-bold text-gray-900 text-sm" x-text="demand.category"></div>
-                                    <div class="text-gray-400 text-[10px] font-medium">Tip</div>
-                                </div>
-                                <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
-                                    <svg class="w-4 h-4 text-blue-500 mx-auto mb-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    <div class="font-bold text-gray-900 text-sm">Evet</div>
-                                    <div class="text-gray-400 text-[10px] font-medium">Park</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Footer -->
-                        <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-1 text-gray-400 text-xs">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>2 saat önce</span>
-                            </div>
-                            <button
-                                class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
-                                Detaylar
-                            </button>
-                        </div>
-                    </div>
                 </template>
             </div>
         </div>
@@ -1828,741 +1563,626 @@
     </div>
     </div>
 
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Supabase Configuration
-        const supabaseUrl = 'https://redwdkfeypnpuyndvysl.supabase.co';
-        const supabaseKey = 'sb_publishable_-nD1cds8uhQ80CjphgIG1A__NrAP7v1';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        // Wait for Supabase to load, then initialize app
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if Supabase is loaded
+            if (typeof window.supabase === 'undefined') {
+                console.error('Supabase failed to load');
+                return;
+            }
 
-        function app() {
-            return {
-                // STATE
-                user: null,
-                authMode: 'login', // login, register
-                authEmail: '',
-                authPassword: '',
-                authName: '',
-                authError: '',
-                authLoading: false,
+            // Supabase Configuration
+            const supabaseUrl = 'https://redwdkfeypnpuyndvysl.supabase.co';
+            const supabaseKey = 'sb_publishable_-nD1cds8uhQ80CjphgIG1A__NrAP7v1';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-                currentTab: 'dashboard',
-                currentDemandTab: 'active', // active, pending, completed, archived, network
-                currentDemandFilter: 'all', // all, urgent, match
-                currentListingType: 'satilik', // satilik, kiralik
-                currentCategory: 'all', // all, Villa, Daire, Arsa, İş yeri
-                currentCity: 'all',
-                currentDistrict: 'all',
-                currentPortfolioCity: 'all',
-                currentPortfolioDistrict: 'all',
-                currentPortfolioListingType: 'satilik', // satilik, kiralik
-                currentPortfolioCategory: 'all', // all, Villa, Daire, Arsa, İşyeri
-                portfolioSortOrder: 'Tarih', // Tarih, Fiyat (Düşük), Fiyat (Yüksek)
-                currentMatchFilter: 'all', // all, top, favorites
-                activeConversation: null,
-                showMatchDetail: false,
-                showAddModal: false,
-                showAddDemandModal: false,
-                newListingImages: [],
-                showAddDemandModal: false,
-                activeDemandFilter: 'all', // 'all' or 'urgent'
-                newListingImages: [],
-                myDemands: [],
-                newDemand: {
-                    title: '',
-                    type: 'Satılık',
-                    category: 'Daire',
-                    budget: '',
-                    maxBudget: '',
-                    city: 'İstanbul',
-                    district: '',
-                    rooms: '',
-                    isUrgent: false
-                },
-                isCompressing: false,
-                newPortfolio: {
-                    title: '',
-                    type: 'Satılık',
-                    category: '',
-                    price: '',
-                    city: 'İstanbul',
-                    location: '',
-                    district: '',
-                    rooms: '',
-                    area: '',
-                    age: ''
-                },
-                demands: [],
-                portfolios: [],
-                networkPortfolios: [],
-                networkDemands: [],
-                conversations: [],
+            // Define app globally BEFORE Alpine loads
+            window.app = function () {
+                return {
+                    // STATE
+                    user: null,
+                    authMode: 'login', // login, register
+                    authEmail: '',
+                    authPassword: '',
+                    authName: '',
+                    authError: '',
+                    authLoading: false,
 
-                get filteredDemands() {
-                    let filtered = this.demands;
+                    currentTab: 'dashboard',
+                    currentDemandTab: 'active', // active, pending, completed, archived, network
+                    currentDemandFilter: 'all', // all, urgent, match
+                    currentListingType: 'satilik', // satilik, kiralik
+                    currentCategory: 'all', // all, Villa, Daire, Arsa, İş yeri
+                    currentCity: 'all',
+                    currentDistrict: 'all',
+                    currentPortfolioCity: 'all',
+                    currentPortfolioDistrict: 'all',
+                    currentPortfolioListingType: 'satilik', // satilik, kiralik
+                    currentPortfolioCategory: 'all', // all, Villa, Daire, Arsa, İşyeri
+                    portfolioSortOrder: 'Tarih', // Tarih, Fiyat (Düşük), Fiyat (Yüksek)
+                    currentMatchFilter: 'all', // all, top, favorites
+                    activeConversation: null,
+                    showMatchDetail: false,
+                    showAddModal: false,
+                    newListingImages: [],
+                    isCompressing: false,
+                    newPortfolio: {
+                        title: '',
+                        type: 'Satılık',
+                        category: '',
+                        price: '',
+                        city: 'İstanbul',
+                        location: '',
+                        district: '',
+                        rooms: '',
+                        area: '',
+                        age: ''
+                    },
+                    demands: [],
+                    portfolios: [],
+                    networkPortfolios: [],
+                    networkDemands: [],
+                    conversations: [],
 
-                    // Filter by Listing Type
-                    if (this.currentListingType) {
-                        filtered = filtered.filter(d => d.type === (this.currentListingType === 'satilik' ? 'Satılık' : 'Kiralık'));
-                    }
+                    get filteredDemands() {
+                        let filtered = this.demands;
 
-                    // Filter by Category
-                    if (this.currentCategory !== 'all') {
-                        filtered = filtered.filter(d => d.category === this.currentCategory);
-                    }
+                        // Filter by Listing Type
+                        if (this.currentListingType) {
+                            filtered = filtered.filter(d => d.type === (this.currentListingType === 'satilik' ? 'Satılık' : 'Kiralık'));
+                        }
 
-                    // Filter by City
-                    if (this.currentCity !== 'all') {
-                        filtered = filtered.filter(d => (d.district.split(',')[1]?.trim() || d.district) === this.currentCity);
-                    }
+                        // Filter by Category
+                        if (this.currentCategory !== 'all') {
+                            filtered = filtered.filter(d => d.category === this.currentCategory);
+                        }
 
-                    // Filter by District
-                    if (this.currentDistrict !== 'all') {
-                        filtered = filtered.filter(d => d.district.split(',')[0]?.trim() === this.currentDistrict);
-                    }
+                        // Filter by City
+                        if (this.currentCity !== 'all') {
+                            filtered = filtered.filter(d => (d.district.split(',')[1]?.trim() || d.district) === this.currentCity);
+                        }
 
-                    // Existing Filters
-                    if (this.currentDemandFilter === 'urgent') {
-                        filtered = filtered.filter(d => d.isUrgent);
-                    } else if (this.currentDemandFilter === 'match') {
-                        filtered = filtered.filter(d => d.matchCount > 0);
-                    }
-                    return filtered;
-                },
+                        // Filter by District
+                        if (this.currentDistrict !== 'all') {
+                            filtered = filtered.filter(d => d.district.split(',')[0]?.trim() === this.currentDistrict);
+                        }
 
-                get filteredMyPortfolios() {
-                    let filtered = [...this.portfolios]; // Create a copy to avoid mutating original array
+                        // Existing Filters
+                        if (this.currentDemandFilter === 'urgent') {
+                            filtered = filtered.filter(d => d.isUrgent);
+                        } else if (this.currentDemandFilter === 'match') {
+                            filtered = filtered.filter(d => d.matchCount > 0);
+                        }
+                        return filtered;
+                    },
 
-                    // Filter by Listing Type
-                    if (this.currentPortfolioListingType) {
-                        filtered = filtered.filter(p => p.type === (this.currentPortfolioListingType === 'satilik' ? 'Satılık' : 'Kiralık'));
-                    }
+                    get filteredMyPortfolios() {
+                        let filtered = [...this.portfolios]; // Create a copy to avoid mutating original array
 
-                    // Filter by Category
-                    if (this.currentPortfolioCategory !== 'all') {
-                        filtered = filtered.filter(p => p.category === this.currentPortfolioCategory);
-                    }
+                        // Filter by Listing Type
+                        if (this.currentPortfolioListingType) {
+                            filtered = filtered.filter(p => p.type === (this.currentPortfolioListingType === 'satilik' ? 'Satılık' : 'Kiralık'));
+                        }
 
-                    // Sort
-                    if (this.portfolioSortOrder === 'Fiyat (Düşük)') {
-                        filtered.sort((a, b) => a.price - b.price);
-                    } else if (this.portfolioSortOrder === 'Fiyat (Yüksek)') {
-                        filtered.sort((a, b) => b.price - a.price);
-                    } else {
-                        // Tarih (Varsayılan - Yeni en üstte)
-                        filtered.sort((a, b) => {
-                            // created_at varsa kullan, yoksa id (büyük id = yeni)
-                            if (a.created_at && b.created_at) {
-                                return new Date(b.created_at) - new Date(a.created_at);
-                            }
-                            return b.id - a.id;
-                        });
-                    }
+                        // Filter by Category
+                        if (this.currentPortfolioCategory !== 'all') {
+                            filtered = filtered.filter(p => p.category === this.currentPortfolioCategory);
+                        }
+
+                        // Sort
+                        if (this.portfolioSortOrder === 'Fiyat (Düşük)') {
+                            filtered.sort((a, b) => a.price - b.price);
+                        } else if (this.portfolioSortOrder === 'Fiyat (Yüksek)') {
+                            filtered.sort((a, b) => b.price - a.price);
+                        } else {
+                            // Tarih (Varsayılan - Yeni en üstte)
+                            filtered.sort((a, b) => {
+                                // created_at varsa kullan, yoksa id (büyük id = yeni)
+                                if (a.created_at && b.created_at) {
+                                    return new Date(b.created_at) - new Date(a.created_at);
+                                }
+                                return b.id - a.id;
+                            });
+                        }
 
 
-                    if (this.currentPortfolioCity !== 'all') {
-                        filtered = filtered.filter(p => (p.district.split(',')[1]?.trim() || p.district) === this.currentPortfolioCity);
-                    }
-                    if (this.currentPortfolioDistrict !== 'all') {
-                        filtered = filtered.filter(p => p.district.split(',')[0]?.trim() === this.currentPortfolioDistrict);
-                    }
-                    return filtered;
-                },
+                        if (this.currentPortfolioCity !== 'all') {
+                            filtered = filtered.filter(p => (p.district.split(',')[1]?.trim() || p.district) === this.currentPortfolioCity);
+                        }
+                        if (this.currentPortfolioDistrict !== 'all') {
+                            filtered = filtered.filter(p => p.district.split(',')[0]?.trim() === this.currentPortfolioDistrict);
+                        }
+                        return filtered;
+                    },
 
-                get filteredNetworkPortfolios() {
-                    let filtered = this.networkPortfolios;
+                    get filteredNetworkPortfolios() {
+                        let filtered = this.networkPortfolios;
 
-                    // Filter by Listing Type
-                    if (this.currentPortfolioListingType) {
-                        filtered = filtered.filter(p => p.type === (this.currentPortfolioListingType === 'satilik' ? 'Satılık' : 'Kiralık'));
-                    }
+                        // Filter by Listing Type
+                        if (this.currentPortfolioListingType) {
+                            filtered = filtered.filter(p => p.type === (this.currentPortfolioListingType === 'satilik' ? 'Satılık' : 'Kiralık'));
+                        }
 
-                    if (this.currentPortfolioCity !== 'all') {
-                        filtered = filtered.filter(p => (p.district.split(',')[1]?.trim() || p.district) === this.currentPortfolioCity);
-                    }
-                    if (this.currentPortfolioDistrict !== 'all') {
-                        filtered = filtered.filter(p => p.district.split(',')[0]?.trim() === this.currentPortfolioDistrict);
-                    }
-                    return filtered;
-                },
+                        if (this.currentPortfolioCity !== 'all') {
+                            filtered = filtered.filter(p => (p.district.split(',')[1]?.trim() || p.district) === this.currentPortfolioCity);
+                        }
+                        if (this.currentPortfolioDistrict !== 'all') {
+                            filtered = filtered.filter(p => p.district.split(',')[0]?.trim() === this.currentPortfolioDistrict);
+                        }
+                        return filtered;
+                    },
 
-                async init() {
-                    // Check active session
-                    const { data: { session } } = await supabase.auth.getSession();
-                    this.user = session?.user || null;
-
-                    // Listen for auth changes
-                    supabase.auth.onAuthStateChange((_event, session) => {
+                    async init() {
+                        // Check active session
+                        const { data: { session } } = await supabase.auth.getSession();
                         this.user = session?.user || null;
+
+                        // Listen for auth changes
+                        supabase.auth.onAuthStateChange((_event, session) => {
+                            this.user = session?.user || null;
+                            if (this.user) {
+                                this.fetchData();
+                            }
+                        });
+
                         if (this.user) {
                             this.fetchData();
                         }
-                    });
+                    },
 
-                    if (this.user) {
-                        this.fetchData();
-                    }
-                },
+                    async fetchData() {
+                        try {
+                            if (!this.user) {
+                                console.log('FetchData: No user logged in');
+                                return;
+                            }
+                            console.log('FetchData: Fetching for user:', this.user.id);
 
-                async fetchData() {
-                    try {
-                        if (!this.user) {
-                            console.log('FetchData: No user logged in');
-                            return;
-                        }
-                        console.log('FetchData: Fetching for user:', this.user.id);
+                            // Fetch Demands
+                            const { data: demands, error: demandError } = await supabase.from('demands').select('*');
+                            if (demandError) {
+                                console.error('Error fetching demands:', demandError);
+                                alert('Error fetching demands: ' + demandError.message);
+                            }
+                            console.log('Fetched Demands (No Filter):', demands);
+                            if (demands && demands.length > 0) {
+                                // Test Users Data
+                                const testUsers = [
+                                    { name: 'Mehmet Demir', image: 'https://i.pravatar.cc/150?img=3' },
+                                    { name: 'Ayşe Kaya', image: 'https://i.pravatar.cc/150?img=5' },
+                                    { name: 'Can Yıldız', image: 'https://i.pravatar.cc/150?img=8' },
+                                    { name: 'Zeynep Çelik', image: 'https://i.pravatar.cc/150?img=9' },
+                                    { name: 'Ali Yılmaz', image: 'https://i.pravatar.cc/150?img=11' }
+                                ];
 
-                        // Fetch Demands
-                        const { data: demands, error: demandError } = await supabase.from('demands').select('*');
-                        if (demandError) {
-                            console.error('Error fetching demands:', demandError);
-                            alert('Error fetching demands: ' + demandError.message);
-                        }
-                        console.log('Fetched Demands (No Filter):', demands);
-                        if (demands && demands.length > 0) {
-                            // Filter My Demands (where user_id matches current user)
-                            this.myDemands = demands.filter(d => d.user_id === this.user.id).map(d => ({
-                                ...d,
-                                // Map DB columns if they exist, otherwise default
-                                // Note: isUrgent/maxBudget might be missing in DB
-                                isUrgent: d.is_urgent || d.isUrgent || false,
-                                maxBudget: d.max_budget || d.maxBudget || null,
-                                matchCount: 0 // Default for now
-                            }));
+                                this.demands = demands.map((d, index) => {
+                                    const randomUser = testUsers[Math.floor(Math.random() * testUsers.length)];
+                                    const type = Math.random() > 0.3 ? 'Satılık' : 'Kiralık';
+                                    // Logic: Sale prices higher than Rent prices
+                                    const budget = type === 'Satılık'
+                                        ? (Math.floor(Math.random() * 49) + 1) * 1000000 // 1M - 49M (Tam milyonlar)
+                                        : (Math.floor(Math.random() * 38) + 2) * 5000;   // 10k - 200k (5k katları)
 
-                            // Filter Network Demands (where user_id DOES NOT match current user)
-                            // And apply the random user/budget logic ONLY to network demands for demo purposes
-                            const testUsers = [
-                                { name: 'Mehmet Demir', image: 'https://i.pravatar.cc/150?img=3' },
-                                { name: 'Ayşe Kaya', image: 'https://i.pravatar.cc/150?img=5' },
-                                { name: 'Can Yıldız', image: 'https://i.pravatar.cc/150?img=8' },
-                                { name: 'Zeynep Çelik', image: 'https://i.pravatar.cc/150?img=9' },
-                                { name: 'Ali Yılmaz', image: 'https://i.pravatar.cc/150?img=11' }
+                                    return {
+                                        ...d,
+                                        budget: budget, // Override budget for demo logic
+                                        maxBudget: budget * 1.2,
+                                        image: randomUser.image,
+                                        name: randomUser.name,
+                                        matchCount: Math.floor(Math.random() * 5) + 1,
+                                        isUrgent: index === 0 || Math.random() > 0.7,
+                                        type: type,
+                                        category: ['Villa', 'Daire', 'Arsa', 'İş yeri'][Math.floor(Math.random() * 4)]
+                                    };
+                                });
+                            }
+
+                            // Fetch Portfolios
+                            const { data: portfolios, error: portfolioError } = await supabase.from('portfolios').select('*');
+                            if (portfolioError) {
+                                console.error('Error fetching portfolios:', portfolioError);
+                                alert('Error fetching portfolios: ' + portfolioError.message);
+                            }
+                            console.log('Fetched Portfolios (No Filter):', portfolios);
+                            if (portfolios && portfolios.length > 0) {
+                                this.portfolios = portfolios.map(p => ({
+                                    ...p,
+                                    image: p.image_url || p.image,
+                                    location: p.location || p.district,
+                                    district: p.district,
+                                    rooms: p.rooms,
+                                    area: p.area || '-',
+                                    age: p.age || '-',
+                                    // Workaround: Assign type based on price (since DB doesn't have type column)
+                                    // Rental (Kiralık) properties have lower monthly prices (< 100k)
+                                    type: p.type || (p.price <= 100000 ? 'Kiralık' : 'Satılık'),
+                                    category: p.category,
+                                    features: p.features || []
+                                }));
+                            }
+
+                            // Fetch Matches
+                            const { data: matches, error: matchError } = await supabase.from('matches').select('*, demand:demands(*), portfolio:portfolios(*)');
+                            if (matchError) {
+                                console.error('Error fetching matches:', matchError);
+                                alert('Error fetching matches: ' + matchError.message);
+                            }
+                            console.log('Fetched Matches:', matches);
+                            if (matches && matches.length > 0) {
+                                this.matches = matches.map(m => ({
+                                    ...m,
+                                    title: m.portfolio?.title,
+                                    name: 'Ahmet Yılmaz', // Client name
+                                    price: this.formatPrice(m.portfolio?.price),
+                                    location: m.portfolio?.district,
+                                    specs: `${m.portfolio?.rooms} • ${m.portfolio?.category}`,
+                                    score: m.score || 95,
+                                    isFavorite: false
+                                }));
+                            }
+
+                            // MOCK DATA RESTORATION (For Demo Purposes)
+
+                            // 1. Mock Conversations
+                            this.conversations = [
+                                { id: 1, name: 'Mehmet Demir', message: 'Merhaba, ilanınızla ilgileniyorum.', time: '10:30', unread: 2, avatar: 'https://i.pravatar.cc/150?img=3' },
+                                { id: 2, name: 'Ayşe Kaya', message: 'Randevu için müsait misiniz?', time: 'Dün', unread: 0, avatar: 'https://i.pravatar.cc/150?img=5' },
+                                { id: 3, name: 'Can Yıldız', message: 'Fiyat konusunda son ne olur?', time: 'Pzt', unread: 0, avatar: 'https://i.pravatar.cc/150?img=8' }
                             ];
 
-                            this.demands = demands.filter(d => d.user_id !== this.user.id).map((d, index) => {
-                                const randomUser = testUsers[Math.floor(Math.random() * testUsers.length)];
-                                const type = Math.random() > 0.3 ? 'Satılık' : 'Kiralık';
-                                // Logic: Sale prices higher than Rent prices
-                                const budget = type === 'Satılık'
-                                    ? (Math.floor(Math.random() * 49) + 1) * 1000000 // 1M - 49M (Tam milyonlar)
-                                    : (Math.floor(Math.random() * 38) + 2) * 5000;   // 10k - 200k (5k katları)
+                            // 2. Mock Network (Brokers)
+                            this.network = [
+                                { id: 1, name: 'Mehmet Demir', role: 'Lüks Konut Uzmanı', company: 'Remax', score: 98, avatar: 'https://i.pravatar.cc/150?img=3' },
+                                { id: 2, name: 'Ayşe Kaya', role: 'Ticari Gayrimenkul', company: 'Keller Williams', score: 95, avatar: 'https://i.pravatar.cc/150?img=5' },
+                                { id: 3, name: 'Can Yıldız', role: 'Arsa & Arazi', company: 'Century 21', score: 92, avatar: 'https://i.pravatar.cc/150?img=8' },
+                                { id: 4, name: 'Zeynep Çelik', role: 'Konut Danışmanı', company: 'Coldwell Banker', score: 89, avatar: 'https://i.pravatar.cc/150?img=9' }
+                            ];
 
-                                return {
-                                    ...d,
-                                    budget: budget, // Override budget for demo logic
-                                    maxBudget: budget * 1.2,
-                                    image: randomUser.image,
-                                    name: randomUser.name,
-                                    matchCount: Math.floor(Math.random() * 5) + 1,
-                                    isUrgent: index === 0 || Math.random() > 0.7,
-                                    type: type,
-                                    category: ['Villa', 'Daire', 'Arsa', 'İş yeri'][Math.floor(Math.random() * 4)]
-                                };
-                            });
-                        }
+                            // 3. Mock Network Portfolios
+                            this.networkPortfolios = [
+                                { id: 101, title: 'Nişantaşı Lüks Daire', price: 65000000, district: 'Nişantaşı, Şişli', rooms: '3+1', category: 'Daire', type: 'Satılık', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80', brokerName: 'Mehmet Demir' },
+                                { id: 102, title: 'Etiler Bahçeli Villa', price: 125000000, district: 'Etiler, Beşiktaş', rooms: '5+2', category: 'Villa', type: 'Satılık', image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80', brokerName: 'Ayşe Kaya' },
+                                { id: 103, title: 'Maslak Plaza Ofis', price: 45000000, district: 'Maslak, Sarıyer', rooms: '250m²', category: 'Ofis', type: 'Satılık', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', brokerName: 'Can Yıldız' }
+                            ];
 
-                        // Fetch Portfolios
-                        const { data: portfolios, error: portfolioError } = await supabase.from('portfolios').select('*');
-                        if (portfolioError) {
-                            console.error('Error fetching portfolios:', portfolioError);
-                            alert('Error fetching portfolios: ' + portfolioError.message);
+                            // 4. Mock Network Demands
+                            this.networkDemands = [
+                                { id: 201, brokerName: 'Mehmet Demir', brokerInitials: 'MD', status: 'Hot', budget: 45000000, maxBudget: 50000000, district: 'Beşiktaş', rooms: '3+1', category: 'Daire' },
+                                { id: 202, brokerName: 'Ayşe Kaya', brokerInitials: 'AK', status: 'Warm', budget: 45000, maxBudget: 50000, district: 'Kadıköy', rooms: '2+1', category: 'Daire' },
+                                { id: 203, brokerName: 'Zeynep Çelik', brokerInitials: 'ZÇ', status: 'Cold', budget: 12000000, maxBudget: 15000000, district: 'Çekmeköy', rooms: '4+1', category: 'Daire' }
+                            ];
+                        } catch (e) {
+                            console.error('CRITICAL ERROR in fetchData:', e);
+                            alert('Bir hata oluştu: ' + e.message);
                         }
-                        console.log('Fetched Portfolios (No Filter):', portfolios);
-                        if (portfolios && portfolios.length > 0) {
-                            this.portfolios = portfolios.map(p => ({
-                                ...p,
-                                image: p.image_url || p.image,
-                                location: p.location || p.district,
-                                district: p.district,
-                                rooms: p.rooms,
-                                area: p.area || '-',
-                                age: p.age || '-',
-                                // Workaround: Assign type based on price (since DB doesn't have type column)
-                                // Rental (Kiralık) properties have lower monthly prices (< 100k)
-                                type: p.type || (p.price <= 100000 ? 'Kiralık' : 'Satılık'),
-                                category: p.category,
-                                features: p.features || []
-                            }));
-                        }
+                    },
 
-                        // Fetch Matches
-                        const { data: matches, error: matchError } = await supabase.from('matches').select('*, demand:demands(*), portfolio:portfolios(*)');
-                        if (matchError) {
-                            console.error('Error fetching matches:', matchError);
-                            alert('Error fetching matches: ' + matchError.message);
-                        }
-                        console.log('Fetched Matches:', matches);
-                        if (matches && matches.length > 0) {
-                            this.matches = matches.map(m => ({
-                                ...m,
-                                title: m.portfolio?.title,
-                                name: 'Ahmet Yılmaz', // Client name
-                                price: this.formatPrice(m.portfolio?.price),
-                                location: m.portfolio?.district,
-                                specs: `${m.portfolio?.rooms} • ${m.portfolio?.category}`,
-                                score: m.score || 95,
-                                isFavorite: false
-                            }));
-                        }
+                    async seedData() {
+                        if (!this.user) return;
+                        if (!confirm('Veritabanına örnek veriler eklenecek. Onaylıyor musunuz?')) return;
 
-                        // MOCK DATA RESTORATION (For Demo Purposes)
+                        console.log('SeedData: Starting seed for user:', this.user.id);
 
-                        // 1. Mock Conversations
-                        this.conversations = [
-                            { id: 1, name: 'Mehmet Demir', message: 'Merhaba, ilanınızla ilgileniyorum.', time: '10:30', unread: 2, avatar: 'https://i.pravatar.cc/150?img=3' },
-                            { id: 2, name: 'Ayşe Kaya', message: 'Randevu için müsait misiniz?', time: 'Dün', unread: 0, avatar: 'https://i.pravatar.cc/150?img=5' },
-                            { id: 3, name: 'Can Yıldız', message: 'Fiyat konusunda son ne olur?', time: 'Pzt', unread: 0, avatar: 'https://i.pravatar.cc/150?img=8' }
+                        // 1. Create/Update Profile
+                        const { error: profileError } = await supabase.from('profiles').update({ name: 'Ahmet Yılmaz', role: 'broker' }).eq('id', this.user.id);
+                        if (profileError) console.error('SeedData: Profile update error:', profileError);
+                        else console.log('SeedData: Profile updated');
+
+                        // 2. Insert Demands
+                        const mockDemands = [
+                            { user_id: this.user.id, title: 'Bebek Sahil Lüks Daire', budget: 45000000, max_budget: 50000000, district: 'Bebek, Beşiktaş', rooms: '3+1', category: 'Daire', status: 'active' },
+                            { user_id: this.user.id, title: 'Yeniköy Boğaz Manzaralı Villa', budget: 85000000, max_budget: 90000000, district: 'Yeniköy, Sarıyer', rooms: '5+1', category: 'Villa', status: 'pending' },
+                            { user_id: this.user.id, title: 'Suadiye Kiralık Daire', budget: 45000, max_budget: 50000, district: 'Suadiye, Kadıköy', rooms: '3+1', category: 'Daire', status: 'active' }
                         ];
+                        const { data: demandData, error: demandError } = await supabase.from('demands').insert(mockDemands).select();
+                        if (demandError) console.error('SeedData: Demand insert error:', demandError);
+                        else console.log('SeedData: Demands inserted:', demandData);
 
-                        // 2. Mock Network (Brokers)
-                        this.network = [
-                            { id: 1, name: 'Mehmet Demir', role: 'Lüks Konut Uzmanı', company: 'Remax', score: 98, avatar: 'https://i.pravatar.cc/150?img=3' },
-                            { id: 2, name: 'Ayşe Kaya', role: 'Ticari Gayrimenkul', company: 'Keller Williams', score: 95, avatar: 'https://i.pravatar.cc/150?img=5' },
-                            { id: 3, name: 'Can Yıldız', role: 'Arsa & Arazi', company: 'Century 21', score: 92, avatar: 'https://i.pravatar.cc/150?img=8' },
-                            { id: 4, name: 'Zeynep Çelik', role: 'Konut Danışmanı', company: 'Coldwell Banker', score: 89, avatar: 'https://i.pravatar.cc/150?img=9' }
+                        // 3. Insert Portfolios - 24 total (12 Satılık, 12 Kiralık)
+                        const mockPortfolios = [
+                            // SATILIK - Villa (3)
+                            { user_id: this.user.id, title: 'Bahçeli Müstakil Villa', price: 1200000, location: 'Sarıyer', district: 'Sarıyer, İstanbul', rooms: '5+1', area: '250m²', age: '2y', type: 'Satılık', category: 'Villa', features: ['Havuz', 'Bahçe'], image_url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Boğaz Manzaralı Villa', price: 2500000, location: 'Bebek', district: 'Bebek, İstanbul', rooms: '6+2', area: '350m²', age: '4y', type: 'Satılık', category: 'Villa', features: ['Deniz Manzarası', 'Jakuzi'], image_url: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Modern Villa', price: 1800000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '1y', type: 'Satılık', category: 'Villa', features: ['Akıllı Ev', 'Garaj'], image_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80' },
+                            // SATILIK - Daire (3)
+                            { user_id: this.user.id, title: 'Modern Aile Dairesi', price: 450000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '3+1', area: '140m²', age: '5y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Asansör'], image_url: 'https://images.unsplash.com/photo-1600596542815-2495db9dc2c3?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Deniz Manzaralı Daire', price: 890000, location: 'Beşiktaş', district: 'Beşiktaş, İstanbul', rooms: '4+1', area: '180m²', age: '2y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Güvenlik'], image_url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Lüks Rezidans', price: 750000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '120m²', age: '3y', type: 'Satılık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image_url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80' },
+                            // SATILIK - Arsa (3)
+                            { user_id: this.user.id, title: 'Yatırımlık Arsa', price: 850000, location: 'Çekmeköy', district: 'Çekmeköy, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['İmarlı'], image_url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Denize Sıfır Arsa', price: 1500000, location: 'Şile', district: 'Şile, İstanbul', rooms: '-', area: '1000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Deniz Manzarası'], image_url: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Köy Arsası', price: 350000, location: 'Silivri', district: 'Silivri, İstanbul', rooms: '-', area: '2000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Tarla'], image_url: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80' },
+                            // SATILIK - İşyeri (3)
+                            { user_id: this.user.id, title: 'Cadde Üzeri Dükkan', price: 950000, location: 'Bakırköy', district: 'Bakırköy, İstanbul', rooms: '-', area: '85m²', age: '8y', type: 'Satılık', category: 'İşyeri', features: ['Vitrin', 'Depo'], image_url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Plaza Ofis', price: 1200000, location: 'Maslak', district: 'Maslak, İstanbul', rooms: '3+1', area: '150m²', age: '5y', type: 'Satılık', category: 'İşyeri', features: ['Otopark', 'Toplantı Odası'], image_url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Fabrika Binası', price: 3500000, location: 'Tuzla', district: 'Tuzla, İstanbul', rooms: '-', area: '2000m²', age: '15y', type: 'Satılık', category: 'İşyeri', features: ['Yükleme Rampası'], image_url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80' },
+                            // KIRALIK - Villa (3)
+                            { user_id: this.user.id, title: 'Kiralık Havuzlu Villa', price: 45000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '2y', type: 'Kiralık', category: 'Villa', features: ['Bahçe', 'Havuz'], image_url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Deniz Kenarı Villa', price: 65000, location: 'Dragos', district: 'Dragos, İstanbul', rooms: '5+1', area: '320m²', age: '3y', type: 'Kiralık', category: 'Villa', features: ['Deniz Manzarası', 'İskele'], image_url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Orman Manzaralı Villa', price: 35000, location: 'Kemerburgaz', district: 'Kemerburgaz, İstanbul', rooms: '4+1', area: '240m²', age: '4y', type: 'Kiralık', category: 'Villa', features: ['Şömine', 'Bahçe'], image_url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80' },
+                            // KIRALIK - Daire (3)
+                            { user_id: this.user.id, title: 'Rezidans Dairesi', price: 25000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '110m²', age: '3y', type: 'Kiralık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image_url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Merkezi Daire', price: 18000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '3+1', area: '130m²', age: '6y', type: 'Kiralık', category: 'Daire', features: ['Metro Yakını', 'Asansör'], image_url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Boğaz Manzaralı Daire', price: 40000, location: 'Ortaköy', district: 'Ortaköy, İstanbul', rooms: '3+1', area: '145m²', age: '2y', type: 'Kiralık', category: 'Daire', features: ['Balkon', 'Manzara'], image_url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80' },
+                            // KIRALIK - Arsa (3)
+                            { user_id: this.user.id, title: 'Otopark Arsası', price: 8000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '-', area: '300m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Asfalt'], image_url: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Depolama Alanı', price: 12000, location: 'Ümraniye', district: 'Ümraniye, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Güvenlik'], image_url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Açık Hava Etkinlik Alanı', price: 15000, location: 'Beykoz', district: 'Beykoz, İstanbul', rooms: '-', area: '1500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Elektrik', 'Su'], image_url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80' },
+                            // KIRALIK - İşyeri (3)
+                            { user_id: this.user.id, title: 'Merkezi Lüks Ofis', price: 15000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '2+1', area: '95m²', age: '8y', type: 'Kiralık', category: 'İşyeri', features: ['Otopark'], image_url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'AVM Dükkanı', price: 35000, location: 'Nişantaşı', district: 'Nişantaşı, İstanbul', rooms: '-', area: '75m²', age: '10y', type: 'Kiralık', category: 'İşyeri', features: ['Vitrin', 'Yaya Trafiği'], image_url: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80' },
+                            { user_id: this.user.id, title: 'Restoran Alanı', price: 28000, location: 'Karaköy', district: 'Karaköy, İstanbul', rooms: '-', area: '200m²', age: '12y', type: 'Kiralık', category: 'İşyeri', features: ['Mutfak', 'Teras'], image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80' }
                         ];
+                        const { data: portfolioData, error: portfolioError } = await supabase.from('portfolios').insert(mockPortfolios).select();
+                        if (portfolioError) console.error('SeedData: Portfolio insert error:', portfolioError);
+                        else console.log('SeedData: Portfolios inserted:', portfolioData);
 
-                        // 3. Mock Network Portfolios
-                        this.networkPortfolios = [
-                            { id: 101, title: 'Nişantaşı Lüks Daire', price: 65000000, district: 'Nişantaşı, Şişli', rooms: '3+1', category: 'Daire', type: 'Satılık', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80', brokerName: 'Mehmet Demir' },
-                            { id: 102, title: 'Etiler Bahçeli Villa', price: 125000000, district: 'Etiler, Beşiktaş', rooms: '5+2', category: 'Villa', type: 'Satılık', image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80', brokerName: 'Ayşe Kaya' },
-                            { id: 103, title: 'Maslak Plaza Ofis', price: 45000000, district: 'Maslak, Sarıyer', rooms: '250m²', category: 'Ofis', type: 'Satılık', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', brokerName: 'Can Yıldız' }
-                        ];
+                        alert('Veriler başarıyla eklendi! Sayfa yenileniyor...');
+                        window.location.reload();
+                    },
 
-                        // 4. Mock Network Demands
-                        this.networkDemands = [
-                            {
-                                id: 201,
-                                name: 'Mehmet Demir',
-                                image: 'https://i.pravatar.cc/150?img=3',
-                                status: 'Hot',
-                                isUrgent: true,
-                                type: 'Satılık',
-                                budget: 45000000,
-                                maxBudget: 50000000,
-                                district: 'Beşiktaş',
-                                rooms: '3+1',
-                                category: 'Daire'
-                            },
-                            {
-                                id: 202,
-                                name: 'Ayşe Kaya',
-                                image: 'https://i.pravatar.cc/150?img=5',
-                                status: 'Warm',
-                                isUrgent: false,
-                                type: 'Kiralık',
-                                budget: 45000,
-                                maxBudget: 50000,
-                                district: 'Kadıköy',
-                                rooms: '2+1',
-                                category: 'Daire'
-                            },
-                            {
-                                id: 203,
-                                name: 'Zeynep Çelik',
-                                image: 'https://i.pravatar.cc/150?img=9',
-                                status: 'Cold',
-                                isUrgent: false,
-                                type: 'Satılık',
-                                budget: 12000000,
-                                maxBudget: 15000000,
-                                district: 'Çekmeköy',
-                                rooms: '4+1',
-                                category: 'Daire'
+                    handleImageUpload(event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        // Dosya boyutu kontrolü (max 2MB)
+                        if (file.size > 2 * 1024 * 1024) {
+                            alert('Dosya boyutu 2MB\'dan küçük olmalıdır.');
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.newListingImages = [e.target.result];
+                        };
+                        reader.readAsDataURL(file);
+                    },
+
+                    async saveNewPortfolio() {
+                        try {
+                            // Validation
+                            if (!this.newPortfolio.title || !this.newPortfolio.category || !this.newPortfolio.price) {
+                                alert('Lütfen zorunlu alanları doldurun (Başlık, Kategori, Fiyat)');
+                                return;
                             }
-                        ];
-                    } catch (e) {
-                        console.error('CRITICAL ERROR in fetchData:', e);
-                        alert('Bir hata oluştu: ' + e.message);
-                    }
-                },
 
-                async seedData() {
-                    if (!this.user) return;
-                    if (!confirm('Veritabanına örnek veriler eklenecek. Onaylıyor musunuz?')) return;
+                            if (!this.user) {
+                                alert('Lütfen giriş yapın');
+                                return;
+                            }
 
-                    console.log('SeedData: Starting seed for user:', this.user.id);
+                            // Prepare data for Supabase
+                            const portfolioData = {
+                                user_id: this.user.id,
+                                title: this.newPortfolio.title,
+                                price: parseInt(this.newPortfolio.price),
+                                type: this.newPortfolio.type,
+                                category: this.newPortfolio.category,
+                                rooms: this.newPortfolio.rooms || '-',
+                                // Format: "Semt, İlçe, Şehir" or "İlçe, Şehir" or "Şehir"
+                                district: [
+                                    this.newPortfolio.district,
+                                    this.newPortfolio.location,
+                                    this.newPortfolio.city || 'İstanbul'
+                                ].filter(Boolean).join(', '),
+                                image_url: this.newListingImages[0] || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80'
+                            };
 
-                    // 1. Create/Update Profile
-                    const { error: profileError } = await supabase.from('profiles').update({ name: 'Ahmet Yılmaz', role: 'broker' }).eq('id', this.user.id);
-                    if (profileError) console.error('SeedData: Profile update error:', profileError);
-                    else console.log('SeedData: Profile updated');
+                            // Insert to Supabase
+                            const { data, error } = await supabase
+                                .from('portfolios')
+                                .insert([portfolioData])
+                                .select();
 
-                    // 2. Insert Demands
-                    const mockDemands = [
-                        { user_id: this.user.id, title: 'Bebek Sahil Lüks Daire', budget: 45000000, max_budget: 50000000, district: 'Bebek, Beşiktaş', rooms: '3+1', category: 'Daire', status: 'active' },
-                        { user_id: this.user.id, title: 'Yeniköy Boğaz Manzaralı Villa', budget: 85000000, max_budget: 90000000, district: 'Yeniköy, Sarıyer', rooms: '5+1', category: 'Villa', status: 'pending' },
-                        { user_id: this.user.id, title: 'Suadiye Kiralık Daire', budget: 45000, max_budget: 50000, district: 'Suadiye, Kadıköy', rooms: '3+1', category: 'Daire', status: 'active' }
-                    ];
-                    const { data: demandData, error: demandError } = await supabase.from('demands').insert(mockDemands).select();
-                    if (demandError) console.error('SeedData: Demand insert error:', demandError);
-                    else console.log('SeedData: Demands inserted:', demandData);
+                            if (error) {
+                                console.error('Error saving portfolio:', error);
+                                alert('Kayıt sırasında hata oluştu: ' + error.message);
+                                return;
+                            }
 
-                    // 3. Insert Portfolios - 24 total (12 Satılık, 12 Kiralık)
-                    const mockPortfolios = [
-                        // SATILIK - Villa (3)
-                        { user_id: this.user.id, title: 'Bahçeli Müstakil Villa', price: 1200000, location: 'Sarıyer', district: 'Sarıyer, İstanbul', rooms: '5+1', area: '250m²', age: '2y', type: 'Satılık', category: 'Villa', features: ['Havuz', 'Bahçe'], image_url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Boğaz Manzaralı Villa', price: 2500000, location: 'Bebek', district: 'Bebek, İstanbul', rooms: '6+2', area: '350m²', age: '4y', type: 'Satılık', category: 'Villa', features: ['Deniz Manzarası', 'Jakuzi'], image_url: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Modern Villa', price: 1800000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '1y', type: 'Satılık', category: 'Villa', features: ['Akıllı Ev', 'Garaj'], image_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80' },
-                        // SATILIK - Daire (3)
-                        { user_id: this.user.id, title: 'Modern Aile Dairesi', price: 450000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '3+1', area: '140m²', age: '5y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Asansör'], image_url: 'https://images.unsplash.com/photo-1600596542815-2495db9dc2c3?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Deniz Manzaralı Daire', price: 890000, location: 'Beşiktaş', district: 'Beşiktaş, İstanbul', rooms: '4+1', area: '180m²', age: '2y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Güvenlik'], image_url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Lüks Rezidans', price: 750000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '120m²', age: '3y', type: 'Satılık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image_url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80' },
-                        // SATILIK - Arsa (3)
-                        { user_id: this.user.id, title: 'Yatırımlık Arsa', price: 850000, location: 'Çekmeköy', district: 'Çekmeköy, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['İmarlı'], image_url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Denize Sıfır Arsa', price: 1500000, location: 'Şile', district: 'Şile, İstanbul', rooms: '-', area: '1000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Deniz Manzarası'], image_url: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Köy Arsası', price: 350000, location: 'Silivri', district: 'Silivri, İstanbul', rooms: '-', area: '2000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Tarla'], image_url: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80' },
-                        // SATILIK - İşyeri (3)
-                        { user_id: this.user.id, title: 'Cadde Üzeri Dükkan', price: 950000, location: 'Bakırköy', district: 'Bakırköy, İstanbul', rooms: '-', area: '85m²', age: '8y', type: 'Satılık', category: 'İşyeri', features: ['Vitrin', 'Depo'], image_url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Plaza Ofis', price: 1200000, location: 'Maslak', district: 'Maslak, İstanbul', rooms: '3+1', area: '150m²', age: '5y', type: 'Satılık', category: 'İşyeri', features: ['Otopark', 'Toplantı Odası'], image_url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Fabrika Binası', price: 3500000, location: 'Tuzla', district: 'Tuzla, İstanbul', rooms: '-', area: '2000m²', age: '15y', type: 'Satılık', category: 'İşyeri', features: ['Yükleme Rampası'], image_url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80' },
-                        // KIRALIK - Villa (3)
-                        { user_id: this.user.id, title: 'Kiralık Havuzlu Villa', price: 45000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '2y', type: 'Kiralık', category: 'Villa', features: ['Bahçe', 'Havuz'], image_url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Deniz Kenarı Villa', price: 65000, location: 'Dragos', district: 'Dragos, İstanbul', rooms: '5+1', area: '320m²', age: '3y', type: 'Kiralık', category: 'Villa', features: ['Deniz Manzarası', 'İskele'], image_url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Orman Manzaralı Villa', price: 35000, location: 'Kemerburgaz', district: 'Kemerburgaz, İstanbul', rooms: '4+1', area: '240m²', age: '4y', type: 'Kiralık', category: 'Villa', features: ['Şömine', 'Bahçe'], image_url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80' },
-                        // KIRALIK - Daire (3)
-                        { user_id: this.user.id, title: 'Rezidans Dairesi', price: 25000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '110m²', age: '3y', type: 'Kiralık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image_url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Merkezi Daire', price: 18000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '3+1', area: '130m²', age: '6y', type: 'Kiralık', category: 'Daire', features: ['Metro Yakını', 'Asansör'], image_url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Boğaz Manzaralı Daire', price: 40000, location: 'Ortaköy', district: 'Ortaköy, İstanbul', rooms: '3+1', area: '145m²', age: '2y', type: 'Kiralık', category: 'Daire', features: ['Balkon', 'Manzara'], image_url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80' },
-                        // KIRALIK - Arsa (3)
-                        { user_id: this.user.id, title: 'Otopark Arsası', price: 8000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '-', area: '300m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Asfalt'], image_url: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Depolama Alanı', price: 12000, location: 'Ümraniye', district: 'Ümraniye, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Güvenlik'], image_url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Açık Hava Etkinlik Alanı', price: 15000, location: 'Beykoz', district: 'Beykoz, İstanbul', rooms: '-', area: '1500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Elektrik', 'Su'], image_url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80' },
-                        // KIRALIK - İşyeri (3)
-                        { user_id: this.user.id, title: 'Merkezi Lüks Ofis', price: 15000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '2+1', area: '95m²', age: '8y', type: 'Kiralık', category: 'İşyeri', features: ['Otopark'], image_url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'AVM Dükkanı', price: 35000, location: 'Nişantaşı', district: 'Nişantaşı, İstanbul', rooms: '-', area: '75m²', age: '10y', type: 'Kiralık', category: 'İşyeri', features: ['Vitrin', 'Yaya Trafiği'], image_url: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80' },
-                        { user_id: this.user.id, title: 'Restoran Alanı', price: 28000, location: 'Karaköy', district: 'Karaköy, İstanbul', rooms: '-', area: '200m²', age: '12y', type: 'Kiralık', category: 'İşyeri', features: ['Mutfak', 'Teras'], image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80' }
-                    ];
-                    const { data: portfolioData, error: portfolioError } = await supabase.from('portfolios').insert(mockPortfolios).select();
-                    if (portfolioError) console.error('SeedData: Portfolio insert error:', portfolioError);
-                    else console.log('SeedData: Portfolios inserted:', portfolioData);
+                            console.log('Portfolio saved:', data);
 
-                    alert('Veriler başarıyla eklendi! Sayfa yenileniyor...');
-                    window.location.reload();
-                },
+                            // Refresh data
+                            await this.fetchData();
 
-                handleImageUpload(event) {
-                    const file = event.target.files[0];
-                    if (!file) return;
+                            // Close modal and reset form
+                            this.showAddModal = false;
+                            this.newPortfolio = {
+                                title: '',
+                                type: 'Satılık',
+                                category: '',
+                                price: '',
+                                city: 'İstanbul',
+                                location: '',
+                                district: '',
+                                rooms: '',
+                                area: '',
+                                age: ''
+                            };
+                            this.newListingImages = [];
 
-                    // Dosya boyutu kontrolü (max 2MB)
-                    if (file.size > 2 * 1024 * 1024) {
-                        alert('Dosya boyutu 2MB\'dan küçük olmalıdır.');
-                        return;
-                    }
-
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.newListingImages = [e.target.result];
-                    };
-                    reader.readAsDataURL(file);
-                },
-
-                async saveNewPortfolio() {
-                    try {
-                        // Validation
-                        if (!this.newPortfolio.title || !this.newPortfolio.category || !this.newPortfolio.price) {
-                            alert('Lütfen zorunlu alanları doldurun (Başlık, Kategori, Fiyat)');
-                            return;
+                            alert('Portföy başarıyla eklendi!');
+                        } catch (e) {
+                            console.error('Error:', e);
+                            alert('Bir hata oluştu: ' + e.message);
                         }
+                    },
 
-                        if (!this.user) {
-                            alert('Lütfen giriş yapın');
-                            return;
-                        }
+                    async handleAuth() {
+                        this.authLoading = true;
+                        this.authError = '';
 
-                        // Prepare data for Supabase
-                        const portfolioData = {
-                            user_id: this.user.id,
-                            title: this.newPortfolio.title,
-                            price: parseInt(this.newPortfolio.price),
-                            type: this.newPortfolio.type,
-                            category: this.newPortfolio.category,
-                            rooms: this.newPortfolio.rooms || '-',
-                            // Format: "Semt, İlçe, Şehir" or "İlçe, Şehir" or "Şehir"
-                            district: [
-                                this.newPortfolio.district,
-                                this.newPortfolio.location,
-                                this.newPortfolio.city || 'İstanbul'
-                            ].filter(Boolean).join(', '),
-                            image_url: this.newListingImages[0] || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80'
-                        };
-
-                        // Insert to Supabase
-                        const { data, error } = await supabase
-                            .from('portfolios')
-                            .insert([portfolioData])
-                            .select();
-
-                        if (error) {
-                            console.error('Error saving portfolio:', error);
-                            alert('Kayıt sırasında hata oluştu: ' + error.message);
-                            return;
-                        }
-
-                        console.log('Portfolio saved:', data);
-
-                        // Refresh data
-                        await this.fetchData();
-
-                        // Close modal and reset form
-                        this.showAddModal = false;
-                        this.newPortfolio = {
-                            title: '',
-                            type: 'Satılık',
-                            category: '',
-                            price: '',
-                            city: 'İstanbul',
-                            location: '',
-                            district: '',
-                            rooms: '',
-                            area: '',
-                            age: ''
-                        };
-                        this.newListingImages = [];
-
-                        alert('Portföy başarıyla eklendi!');
-                    } catch (e) {
-                        console.error('Error:', e);
-                        alert('Bir hata oluştu: ' + e.message);
-                    }
-                },
-
-                async saveNewDemand() {
-                    try {
-                        if (!this.newDemand.title || !this.newDemand.budget) {
-                            alert('Lütfen başlık ve bütçe alanlarını doldurun.');
-                            return;
-                        }
-
-                        if (!this.user) {
-                            alert('Lütfen giriş yapın');
-                            return;
-                        }
-
-                        // Prepare data for Supabase
-                        const demandData = {
-                            user_id: this.user.id,
-                            title: this.newDemand.title,
-                            type: this.newDemand.type,
-                            category: this.newDemand.category,
-                            budget: parseInt(this.newDemand.budget),
-                            max_budget: this.newDemand.maxBudget ? parseInt(this.newDemand.maxBudget) : null,
-                            district: this.newDemand.district || 'İstanbul',
-                            rooms: this.newDemand.rooms || '-',
-                            is_urgent: this.newDemand.isUrgent
-                        };
-
-                        // Insert to Supabase
-                        const { data, error } = await supabase
-                            .from('demands')
-                            .insert([demandData])
-                            .select();
-
-                        if (error) {
-                            console.error('Error saving demand:', error);
-                            alert('Kayıt sırasında hata oluştu: ' + error.message);
-                            return;
-                        }
-
-                        console.log('Demand saved:', data);
-
-                        // Refresh data
-                        await this.fetchData();
-
-                        // Reset form
-                        this.newDemand = {
-                            title: '',
-                            type: 'Satılık',
-                            category: 'Daire',
-                            budget: '',
-                            maxBudget: '',
-                            city: 'İstanbul',
-                            district: '',
-                            rooms: '',
-                            isUrgent: false
-                        };
-                        this.showAddDemandModal = false;
-
-                        // Switch to My Demands tab
-                        this.currentDemandTab = 'my_demands';
-
-                        alert('Talep başarıyla oluşturuldu! (Not: Acil durumu veritabanı kısıtlaması nedeniyle kaydedilemedi)');
-
-                    } catch (e) {
-                        console.error('Error saving demand:', e);
-                        alert('Bir hata oluştu: ' + e.message);
-                    }
-                },
-
-                async handleAuth() {
-                    this.authLoading = true;
-                    this.authError = '';
-
-                    try {
-                        if (this.authMode === 'login') {
-                            const { error } = await supabase.auth.signInWithPassword({
-                                email: this.authEmail,
-                                password: this.authPassword
-                            });
-                            if (error) throw error;
-                        } else {
-                            const { error } = await supabase.auth.signUp({
-                                email: this.authEmail,
-                                password: this.authPassword,
-                                options: {
-                                    data: {
-                                        name: this.authName
+                        try {
+                            if (this.authMode === 'login') {
+                                const { error } = await supabase.auth.signInWithPassword({
+                                    email: this.authEmail,
+                                    password: this.authPassword
+                                });
+                                if (error) throw error;
+                            } else {
+                                const { error } = await supabase.auth.signUp({
+                                    email: this.authEmail,
+                                    password: this.authPassword,
+                                    options: {
+                                        data: {
+                                            name: this.authName
+                                        }
                                     }
-                                }
-                            });
-                            if (error) throw error;
-                            alert('Kayıt başarılı! Lütfen giriş yapın.');
-                            this.authMode = 'login';
+                                });
+                                if (error) throw error;
+                                alert('Kayıt başarılı! Lütfen giriş yapın.');
+                                this.authMode = 'login';
+                            }
+                        } catch (e) {
+                            this.authError = e.message;
+                        } finally {
+                            this.authLoading = false;
                         }
-                    } catch (e) {
-                        this.authError = e.message;
-                    } finally {
-                        this.authLoading = false;
-                    }
-                },
+                    },
 
-                async logout() {
-                    await supabase.auth.signOut();
-                    this.user = null;
-                    this.demands = [];
-                    this.portfolios = [];
-                    this.matches = [];
-                },
+                    async logout() {
+                        await supabase.auth.signOut();
+                        this.user = null;
+                        this.demands = [];
+                        this.portfolios = [];
+                        this.matches = [];
+                    },
 
-                // DATA ARRAYS
-                conversations: [
-                    { id: 1, name: 'Mehmet Demir', message: 'Merhaba, ilanınızla ilgileniyorum.', time: '10:30', unread: 2, avatar: 'https://i.pravatar.cc/150?img=3' },
-                    { id: 2, name: 'Ayşe Kaya', message: 'Randevu için müsait misiniz?', time: 'Dün', unread: 0, avatar: 'https://i.pravatar.cc/150?img=5' },
-                    { id: 3, name: 'Can Yıldız', message: 'Fiyat konusunda son ne olur?', time: 'Pzt', unread: 0, avatar: 'https://i.pravatar.cc/150?img=8' }
-                ],
-                demands: [
-                    { id: 1, title: 'Bebek Sahil Lüks Daire', budget: 45000000, maxBudget: 55000000, district: 'Bebek, Beşiktaş', rooms: '3+1', category: 'Daire', status: 'active', image: 'https://i.pravatar.cc/150?u=1', name: 'Ahmet Yılmaz', matchCount: 3, isUrgent: true },
-                    { id: 2, title: 'Yeniköy Boğaz Manzaralı Villa', budget: 85000000, maxBudget: 100000000, district: 'Yeniköy, Sarıyer', rooms: '5+1', category: 'Villa', status: 'pending', image: 'https://i.pravatar.cc/150?u=2', name: 'Ahmet Yılmaz', matchCount: 1, isUrgent: false },
-                    { id: 3, title: 'Suadiye Bağdat Caddesi Yakını', budget: 25000000, maxBudget: 30000000, district: 'Suadiye, Kadıköy', rooms: '4+1', category: 'Daire', status: 'active', image: 'https://i.pravatar.cc/150?u=3', name: 'Ahmet Yılmaz', matchCount: 5, isUrgent: false }
-                ],
-                networkDemands: [
-                    { id: 201, brokerName: 'Mehmet Demir', brokerInitials: 'MD', status: 'Hot', budget: 50000000, maxBudget: 60000000, district: 'Beşiktaş', rooms: '3+1', category: 'Daire' },
-                    { id: 202, brokerName: 'Ayşe Kaya', brokerInitials: 'AK', status: 'Warm', budget: 30000000, maxBudget: 35000000, district: 'Kadıköy', rooms: '2+1', category: 'Daire' },
-                    { id: 203, brokerName: 'Zeynep Çelik', brokerInitials: 'ZÇ', status: 'Cold', budget: 15000000, maxBudget: 18000000, district: 'Çekmeköy', rooms: '4+1', category: 'Daire' }
-                ],
-                portfolios: [
-                    // SATILIK - Villa (3)
-                    { id: 1, title: 'Bahçeli Müstakil Villa', price: 1200000, location: 'Sarıyer', district: 'Sarıyer, İstanbul', rooms: '5+1', area: '250m²', age: '2y', type: 'Satılık', category: 'Villa', features: ['Havuz', 'Bahçe'], image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80' },
-                    { id: 2, title: 'Boğaz Manzaralı Villa', price: 2500000, location: 'Bebek', district: 'Bebek, İstanbul', rooms: '6+2', area: '350m²', age: '4y', type: 'Satılık', category: 'Villa', features: ['Deniz Manzarası', 'Jakuzi'], image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80' },
-                    { id: 3, title: 'Modern Villa', price: 1800000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '1y', type: 'Satılık', category: 'Villa', features: ['Akıllı Ev', 'Garaj'], image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80' },
-                    // SATILIK - Daire (3)
-                    { id: 4, title: 'Modern Aile Dairesi', price: 450000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '3+1', area: '140m²', age: '5y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Asansör'], image: 'https://images.unsplash.com/photo-1600596542815-2495db9dc2c3?auto=format&fit=crop&w=800&q=80' },
-                    { id: 5, title: 'Deniz Manzaralı Daire', price: 890000, location: 'Beşiktaş', district: 'Beşiktaş, İstanbul', rooms: '4+1', area: '180m²', age: '2y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Güvenlik'], image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80' },
-                    { id: 6, title: 'Lüks Rezidans', price: 750000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '120m²', age: '3y', type: 'Satılık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80' },
-                    // SATILIK - Arsa (3)
-                    { id: 7, title: 'Yatırımlık Arsa', price: 850000, location: 'Çekmeköy', district: 'Çekmeköy, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['İmarlı'], image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80' },
-                    { id: 8, title: 'Denize Sıfır Arsa', price: 1500000, location: 'Şile', district: 'Şile, İstanbul', rooms: '-', area: '1000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Deniz Manzarası'], image: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?auto=format&fit=crop&w=800&q=80' },
-                    { id: 9, title: 'Köy Arsası', price: 350000, location: 'Silivri', district: 'Silivri, İstanbul', rooms: '-', area: '2000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Tarla'], image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80' },
-                    // SATILIK - İşyeri (3)
-                    { id: 10, title: 'Cadde Üzeri Dükkan', price: 950000, location: 'Bakırköy', district: 'Bakırköy, İstanbul', rooms: '-', area: '85m²', age: '8y', type: 'Satılık', category: 'İşyeri', features: ['Vitrin', 'Depo'], image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80' },
-                    { id: 11, title: 'Plaza Ofis', price: 1200000, location: 'Maslak', district: 'Maslak, İstanbul', rooms: '3+1', area: '150m²', age: '5y', type: 'Satılık', category: 'İşyeri', features: ['Otopark', 'Toplantı Odası'], image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80' },
-                    { id: 12, title: 'Fabrika Binası', price: 3500000, location: 'Tuzla', district: 'Tuzla, İstanbul', rooms: '-', area: '2000m²', age: '15y', type: 'Satılık', category: 'İşyeri', features: ['Yükleme Rampası'], image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80' },
-                    // KIRALIK - Villa (3)
-                    { id: 13, title: 'Kiralık Havuzlu Villa', price: 45000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '2y', type: 'Kiralık', category: 'Villa', features: ['Bahçe', 'Havuz'], image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80' },
-                    { id: 14, title: 'Deniz Kenarı Villa', price: 65000, location: 'Dragos', district: 'Dragos, İstanbul', rooms: '5+1', area: '320m²', age: '3y', type: 'Kiralık', category: 'Villa', features: ['Deniz Manzarası', 'İskele'], image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80' },
-                    { id: 15, title: 'Orman Manzaralı Villa', price: 35000, location: 'Kemerburgaz', district: 'Kemerburgaz, İstanbul', rooms: '4+1', area: '240m²', age: '4y', type: 'Kiralık', category: 'Villa', features: ['Şömine', 'Bahçe'], image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80' },
-                    // KIRALIK - Daire (3)
-                    { id: 16, title: 'Rezidans Dairesi', price: 25000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '110m²', age: '3y', type: 'Kiralık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80' },
-                    { id: 17, title: 'Merkezi Daire', price: 18000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '3+1', area: '130m²', age: '6y', type: 'Kiralık', category: 'Daire', features: ['Metro Yakını', 'Asansör'], image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80' },
-                    { id: 18, title: 'Boğaz Manzaralı Daire', price: 40000, location: 'Ortaköy', district: 'Ortaköy, İstanbul', rooms: '3+1', area: '145m²', age: '2y', type: 'Kiralık', category: 'Daire', features: ['Balkon', 'Manzara'], image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80' },
-                    // KIRALIK - Arsa (3)
-                    { id: 19, title: 'Otopark Arsası', price: 8000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '-', area: '300m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Asfalt'], image: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80' },
-                    { id: 20, title: 'Depolama Alanı', price: 12000, location: 'Ümraniye', district: 'Ümraniye, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Güvenlik'], image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80' },
-                    { id: 21, title: 'Açık Hava Etkinlik Alanı', price: 15000, location: 'Beykoz', district: 'Beykoz, İstanbul', rooms: '-', area: '1500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Elektrik', 'Su'], image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80' },
-                    // KIRALIK - İşyeri (3)
-                    { id: 22, title: 'Merkezi Lüks Ofis', price: 15000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '2+1', area: '95m²', age: '8y', type: 'Kiralık', category: 'İşyeri', features: ['Otopark'], image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80' },
-                    { id: 23, title: 'AVM Dükkanı', price: 35000, location: 'Nişantaşı', district: 'Nişantaşı, İstanbul', rooms: '-', area: '75m²', age: '10y', type: 'Kiralık', category: 'İşyeri', features: ['Vitrin', 'Yaya Trafiği'], image: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80' },
-                    { id: 24, title: 'Restoran Alanı', price: 28000, location: 'Karaköy', district: 'Karaköy, İstanbul', rooms: '-', area: '200m²', age: '12y', type: 'Kiralık', category: 'İşyeri', features: ['Mutfak', 'Teras'], image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80' }
-                ],
-                networkPortfolios: [
-                    { id: 101, title: 'Nişantaşı Lüks Daire', price: 65000000, district: 'Nişantaşı, Şişli', rooms: '3+1', category: 'Daire', type: 'Satılık', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80', brokerName: 'Mehmet Demir' },
-                    { id: 102, title: 'Etiler Bahçeli Villa', price: 125000000, district: 'Etiler, Beşiktaş', rooms: '5+2', category: 'Villa', type: 'Satılık', image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80', brokerName: 'Ayşe Kaya' },
-                    { id: 103, title: 'Maslak Plaza Ofis', price: 45000000, district: 'Maslak, Sarıyer', rooms: '250m²', category: 'Ofis', type: 'Satılık', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', brokerName: 'Can Yıldız' }
-                ],
-                matches: [
-                    { id: 1, title: 'Boğaz Manzaralı Lüks Daire', price: '48.0M ₺', location: 'Arnavutköy, Beşiktaş', specs: '3+1 • Daire', score: 98, isFavorite: false, name: 'Ahmet Yılmaz' },
-                    { id: 2, title: 'Panoramik Deniz Manzaralı', price: '32.0M ₺', location: 'Fenerbahçe, Kadıköy', specs: '4+1 • Daire', score: 95, isFavorite: true, name: 'Ahmet Yılmaz' },
-                    { id: 3, title: 'Nişantaşı Lüks Daire', price: '65.0M ₺', location: 'Nişantaşı, Şişli', specs: '3+1 • Daire', score: 92, isFavorite: false, name: 'Mehmet Demir' }
-                ],
-                network: [
-                    { id: 1, name: 'Mehmet Demir', role: 'Lüks Konut Uzmanı', company: 'Remax', score: 98, avatar: 'https://i.pravatar.cc/150?img=3' },
-                    { id: 2, name: 'Ayşe Kaya', role: 'Ticari Gayrimenkul', company: 'Keller Williams', score: 95, avatar: 'https://i.pravatar.cc/150?img=5' },
-                    { id: 3, name: 'Can Yıldız', role: 'Arsa & Arazi', company: 'Century 21', score: 92, avatar: 'https://i.pravatar.cc/150?img=8' },
-                    { id: 4, name: 'Zeynep Çelik', role: 'Konut Danışmanı', company: 'Coldwell Banker', score: 89, avatar: 'https://i.pravatar.cc/150?img=9' }
-                ],
-                networkActivities: [
-                    { id: 1, user: 'Selin Yılmaz', action: 'Yeni bir "Lüks Villa" ilanı ekledi.', time: '2s önce', avatar: 'https://i.pravatar.cc/150?img=5' },
-                    { id: 2, user: 'Mehmet Demir', action: '"3+1 Daire" talebi için eşleşme buldu.', time: '4s önce', avatar: 'https://i.pravatar.cc/150?img=3' },
-                    { id: 3, user: 'Can Yıldız', action: 'Portföy fiyatını güncelledi.', time: '1d önce', avatar: 'https://i.pravatar.cc/150?img=8' },
-                    { id: 4, user: 'Zeynep Çelik', action: 'Yeni bir talep oluşturdu.', time: '2d önce', avatar: 'https://i.pravatar.cc/150?img=9' }
-                ],
+                    // DATA ARRAYS
+                    conversations: [
+                        { id: 1, name: 'Mehmet Demir', message: 'Merhaba, ilanınızla ilgileniyorum.', time: '10:30', unread: 2, avatar: 'https://i.pravatar.cc/150?img=3' },
+                        { id: 2, name: 'Ayşe Kaya', message: 'Randevu için müsait misiniz?', time: 'Dün', unread: 0, avatar: 'https://i.pravatar.cc/150?img=5' },
+                        { id: 3, name: 'Can Yıldız', message: 'Fiyat konusunda son ne olur?', time: 'Pzt', unread: 0, avatar: 'https://i.pravatar.cc/150?img=8' }
+                    ],
+                    demands: [
+                        { id: 1, title: 'Bebek Sahil Lüks Daire', budget: 45000000, maxBudget: 55000000, district: 'Bebek, Beşiktaş', rooms: '3+1', category: 'Daire', status: 'active', image: 'https://i.pravatar.cc/150?u=1', name: 'Ahmet Yılmaz', matchCount: 3, isUrgent: true },
+                        { id: 2, title: 'Yeniköy Boğaz Manzaralı Villa', budget: 85000000, maxBudget: 100000000, district: 'Yeniköy, Sarıyer', rooms: '5+1', category: 'Villa', status: 'pending', image: 'https://i.pravatar.cc/150?u=2', name: 'Ahmet Yılmaz', matchCount: 1, isUrgent: false },
+                        { id: 3, title: 'Suadiye Bağdat Caddesi Yakını', budget: 25000000, maxBudget: 30000000, district: 'Suadiye, Kadıköy', rooms: '4+1', category: 'Daire', status: 'active', image: 'https://i.pravatar.cc/150?u=3', name: 'Ahmet Yılmaz', matchCount: 5, isUrgent: false }
+                    ],
+                    networkDemands: [
+                        { id: 201, brokerName: 'Mehmet Demir', brokerInitials: 'MD', status: 'Hot', budget: 50000000, maxBudget: 60000000, district: 'Beşiktaş', rooms: '3+1', category: 'Daire' },
+                        { id: 202, brokerName: 'Ayşe Kaya', brokerInitials: 'AK', status: 'Warm', budget: 30000000, maxBudget: 35000000, district: 'Kadıköy', rooms: '2+1', category: 'Daire' },
+                        { id: 203, brokerName: 'Zeynep Çelik', brokerInitials: 'ZÇ', status: 'Cold', budget: 15000000, maxBudget: 18000000, district: 'Çekmeköy', rooms: '4+1', category: 'Daire' }
+                    ],
+                    portfolios: [
+                        // SATILIK - Villa (3)
+                        { id: 1, title: 'Bahçeli Müstakil Villa', price: 1200000, location: 'Sarıyer', district: 'Sarıyer, İstanbul', rooms: '5+1', area: '250m²', age: '2y', type: 'Satılık', category: 'Villa', features: ['Havuz', 'Bahçe'], image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80' },
+                        { id: 2, title: 'Boğaz Manzaralı Villa', price: 2500000, location: 'Bebek', district: 'Bebek, İstanbul', rooms: '6+2', area: '350m²', age: '4y', type: 'Satılık', category: 'Villa', features: ['Deniz Manzarası', 'Jakuzi'], image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80' },
+                        { id: 3, title: 'Modern Villa', price: 1800000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '1y', type: 'Satılık', category: 'Villa', features: ['Akıllı Ev', 'Garaj'], image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80' },
+                        // SATILIK - Daire (3)
+                        { id: 4, title: 'Modern Aile Dairesi', price: 450000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '3+1', area: '140m²', age: '5y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Asansör'], image: 'https://images.unsplash.com/photo-1600596542815-2495db9dc2c3?auto=format&fit=crop&w=800&q=80' },
+                        { id: 5, title: 'Deniz Manzaralı Daire', price: 890000, location: 'Beşiktaş', district: 'Beşiktaş, İstanbul', rooms: '4+1', area: '180m²', age: '2y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Güvenlik'], image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80' },
+                        { id: 6, title: 'Lüks Rezidans', price: 750000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '120m²', age: '3y', type: 'Satılık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80' },
+                        // SATILIK - Arsa (3)
+                        { id: 7, title: 'Yatırımlık Arsa', price: 850000, location: 'Çekmeköy', district: 'Çekmeköy, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['İmarlı'], image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80' },
+                        { id: 8, title: 'Denize Sıfır Arsa', price: 1500000, location: 'Şile', district: 'Şile, İstanbul', rooms: '-', area: '1000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Deniz Manzarası'], image: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?auto=format&fit=crop&w=800&q=80' },
+                        { id: 9, title: 'Köy Arsası', price: 350000, location: 'Silivri', district: 'Silivri, İstanbul', rooms: '-', area: '2000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Tarla'], image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80' },
+                        // SATILIK - İşyeri (3)
+                        { id: 10, title: 'Cadde Üzeri Dükkan', price: 950000, location: 'Bakırköy', district: 'Bakırköy, İstanbul', rooms: '-', area: '85m²', age: '8y', type: 'Satılık', category: 'İşyeri', features: ['Vitrin', 'Depo'], image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80' },
+                        { id: 11, title: 'Plaza Ofis', price: 1200000, location: 'Maslak', district: 'Maslak, İstanbul', rooms: '3+1', area: '150m²', age: '5y', type: 'Satılık', category: 'İşyeri', features: ['Otopark', 'Toplantı Odası'], image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80' },
+                        { id: 12, title: 'Fabrika Binası', price: 3500000, location: 'Tuzla', district: 'Tuzla, İstanbul', rooms: '-', area: '2000m²', age: '15y', type: 'Satılık', category: 'İşyeri', features: ['Yükleme Rampası'], image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80' },
+                        // KIRALIK - Villa (3)
+                        { id: 13, title: 'Kiralık Havuzlu Villa', price: 45000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '2y', type: 'Kiralık', category: 'Villa', features: ['Bahçe', 'Havuz'], image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80' },
+                        { id: 14, title: 'Deniz Kenarı Villa', price: 65000, location: 'Dragos', district: 'Dragos, İstanbul', rooms: '5+1', area: '320m²', age: '3y', type: 'Kiralık', category: 'Villa', features: ['Deniz Manzarası', 'İskele'], image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80' },
+                        { id: 15, title: 'Orman Manzaralı Villa', price: 35000, location: 'Kemerburgaz', district: 'Kemerburgaz, İstanbul', rooms: '4+1', area: '240m²', age: '4y', type: 'Kiralık', category: 'Villa', features: ['Şömine', 'Bahçe'], image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80' },
+                        // KIRALIK - Daire (3)
+                        { id: 16, title: 'Rezidans Dairesi', price: 25000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '110m²', age: '3y', type: 'Kiralık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80' },
+                        { id: 17, title: 'Merkezi Daire', price: 18000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '3+1', area: '130m²', age: '6y', type: 'Kiralık', category: 'Daire', features: ['Metro Yakını', 'Asansör'], image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80' },
+                        { id: 18, title: 'Boğaz Manzaralı Daire', price: 40000, location: 'Ortaköy', district: 'Ortaköy, İstanbul', rooms: '3+1', area: '145m²', age: '2y', type: 'Kiralık', category: 'Daire', features: ['Balkon', 'Manzara'], image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80' },
+                        // KIRALIK - Arsa (3)
+                        { id: 19, title: 'Otopark Arsası', price: 8000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '-', area: '300m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Asfalt'], image: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80' },
+                        { id: 20, title: 'Depolama Alanı', price: 12000, location: 'Ümraniye', district: 'Ümraniye, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Güvenlik'], image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80' },
+                        { id: 21, title: 'Açık Hava Etkinlik Alanı', price: 15000, location: 'Beykoz', district: 'Beykoz, İstanbul', rooms: '-', area: '1500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Elektrik', 'Su'], image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80' },
+                        // KIRALIK - İşyeri (3)
+                        { id: 22, title: 'Merkezi Lüks Ofis', price: 15000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '2+1', area: '95m²', age: '8y', type: 'Kiralık', category: 'İşyeri', features: ['Otopark'], image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80' },
+                        { id: 23, title: 'AVM Dükkanı', price: 35000, location: 'Nişantaşı', district: 'Nişantaşı, İstanbul', rooms: '-', area: '75m²', age: '10y', type: 'Kiralık', category: 'İşyeri', features: ['Vitrin', 'Yaya Trafiği'], image: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80' },
+                        { id: 24, title: 'Restoran Alanı', price: 28000, location: 'Karaköy', district: 'Karaköy, İstanbul', rooms: '-', area: '200m²', age: '12y', type: 'Kiralık', category: 'İşyeri', features: ['Mutfak', 'Teras'], image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80' }
+                    ],
+                    networkPortfolios: [
+                        { id: 101, title: 'Nişantaşı Lüks Daire', price: 65000000, district: 'Nişantaşı, Şişli', rooms: '3+1', category: 'Daire', type: 'Satılık', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80', brokerName: 'Mehmet Demir' },
+                        { id: 102, title: 'Etiler Bahçeli Villa', price: 125000000, district: 'Etiler, Beşiktaş', rooms: '5+2', category: 'Villa', type: 'Satılık', image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80', brokerName: 'Ayşe Kaya' },
+                        { id: 103, title: 'Maslak Plaza Ofis', price: 45000000, district: 'Maslak, Sarıyer', rooms: '250m²', category: 'Ofis', type: 'Satılık', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', brokerName: 'Can Yıldız' }
+                    ],
+                    matches: [
+                        { id: 1, title: 'Boğaz Manzaralı Lüks Daire', price: '48.0M ₺', location: 'Arnavutköy, Beşiktaş', specs: '3+1 • Daire', score: 98, isFavorite: false, name: 'Ahmet Yılmaz' },
+                        { id: 2, title: 'Panoramik Deniz Manzaralı', price: '32.0M ₺', location: 'Fenerbahçe, Kadıköy', specs: '4+1 • Daire', score: 95, isFavorite: true, name: 'Ahmet Yılmaz' },
+                        { id: 3, title: 'Nişantaşı Lüks Daire', price: '65.0M ₺', location: 'Nişantaşı, Şişli', specs: '3+1 • Daire', score: 92, isFavorite: false, name: 'Mehmet Demir' }
+                    ],
+                    network: [
+                        { id: 1, name: 'Mehmet Demir', role: 'Lüks Konut Uzmanı', company: 'Remax', score: 98, avatar: 'https://i.pravatar.cc/150?img=3' },
+                        { id: 2, name: 'Ayşe Kaya', role: 'Ticari Gayrimenkul', company: 'Keller Williams', score: 95, avatar: 'https://i.pravatar.cc/150?img=5' },
+                        { id: 3, name: 'Can Yıldız', role: 'Arsa & Arazi', company: 'Century 21', score: 92, avatar: 'https://i.pravatar.cc/150?img=8' },
+                        { id: 4, name: 'Zeynep Çelik', role: 'Konut Danışmanı', company: 'Coldwell Banker', score: 89, avatar: 'https://i.pravatar.cc/150?img=9' }
+                    ],
+                    networkActivities: [
+                        { id: 1, user: 'Selin Yılmaz', action: 'Yeni bir "Lüks Villa" ilanı ekledi.', time: '2s önce', avatar: 'https://i.pravatar.cc/150?img=5' },
+                        { id: 2, user: 'Mehmet Demir', action: '"3+1 Daire" talebi için eşleşme buldu.', time: '4s önce', avatar: 'https://i.pravatar.cc/150?img=3' },
+                        { id: 3, user: 'Can Yıldız', action: 'Portföy fiyatını güncelledi.', time: '1d önce', avatar: 'https://i.pravatar.cc/150?img=8' },
+                        { id: 4, user: 'Zeynep Çelik', action: 'Yeni bir talep oluşturdu.', time: '2d önce', avatar: 'https://i.pravatar.cc/150?img=9' }
+                    ],
 
-                // ACTIONS
-                formatPrice(price) {
-                    if (!price) return '0 TL';
-                    return new Intl.NumberFormat('tr-TR').format(price) + ' TL';
-                },
-                formatFullPrice(price) {
-                    if (!price) return '0 TL';
-                    return new Intl.NumberFormat('tr-TR').format(price) + ' TL';
-                },
-                deletePortfolio(id) {
-                    if (confirm('Bu portföyü silmek istediğinize emin misiniz?')) {
-                        this.portfolios = this.portfolios.filter(p => p.id !== id);
-                        alert('Portföy silindi.');
-                    }
-                },
-                editPortfolio(id) {
-                    alert('Portföy düzenleme ekranı açılıyor... (ID: ' + id + ')');
-                },
-                approveMatch(id) {
-                    alert('Eşleşme onaylandı! (ID: ' + id + ')');
-                },
-                rejectMatch(id) {
-                    if (confirm('Bu eşleşmeyi reddetmek istiyor musunuz?')) {
-                        this.matches = this.matches.filter(m => m.id !== id);
-                    }
-                },
-                toggleFavorite(id) {
-                    const match = this.matches.find(m => m.id === id);
-                    if (match) {
-                        match.isFavorite = !match.isFavorite;
-                    }
-                },
-                sendMessage(name) {
-                    alert(name + ' kişisine mesaj gönderiliyor...');
-                },
-                viewAll(section) {
-                    alert(section + ' tümü görüntüleniyor...');
-                },
-            }
-        }
-
-        // Unregister Service Worker to fix caching issues
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegisions().then(function (registrations) {
-                for (let registration of registrations) {
-                    registration.unregister();
-                    sole.log('Service Worker unregistered');
+                    // ACTIONS
+                    formatPrice(price) {
+                        if (!price) return '0 TL';
+                        return new Intl.NumberFormat('tr-TR').format(price) + ' TL';
+                    },
+                    formatFullPrice(price) {
+                        if (!price) return '0 TL';
+                        return new Intl.NumberFormat('tr-TR').format(price) + ' TL';
+                    },
+                    deletePortfolio(id) {
+                        if (confirm('Bu portföyü silmek istediğinize emin misiniz?')) {
+                            this.portfolios = this.portfolios.filter(p => p.id !== id);
+                            alert('Portföy silindi.');
+                        }
+                    },
+                    editPortfolio(id) {
+                        alert('Portföy düzenleme ekranı açılıyor... (ID: ' + id + ')');
+                    },
+                    approveMatch(id) {
+                        alert('Eşleşme onaylandı! (ID: ' + id + ')');
+                    },
+                    rejectMatch(id) {
+                        if (confirm('Bu eşleşmeyi reddetmek istiyor musunuz?')) {
+                            this.matches = this.matches.filter(m => m.id !== id);
+                        }
+                    },
+                    toggleFavorite(id) {
+                        const match = this.matches.find(m => m.id === id);
+                        if (match) {
+                            match.isFavorite = !match.isFavorite;
+                        }
+                    },
+                    sendMessage(name) {
+                        alert(name + ' kişisine mesaj gönderiliyor...');
+                    },
+                    viewAll(section) {
+                        alert(section + ' tümü görüntüleniyor...');
+                    },
                 }
-            });
-        }
+            }
+
+            // Unregister Service Worker to fix caching issues
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                        console.log('Service Worker unregistered');
+                    }
+                });
+            }
+
+            // NOW load Alpine.js AFTER app() is defined
+            const alpineScript = document.createElement('script');
+            alpineScript.src = 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js';
+            alpineScript.defer = true;
+            document.head.appendChild(alpineScript);
+        }); // Close DOMContentLoaded event listener
     </script>
     <!-- ADD PORTFOLIO MODAL (Popup) -->
     <div x-show="showAddModal" x-cloak class="fixed inset-0 z-[9999] overflow-y-auto"
@@ -2716,120 +2336,6 @@
                     <button @click="saveNewPortfolio()"
                         class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                         Kaydet
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- ADD DEMAND MODAL (Popup) -->
-    <div x-show="showAddDemandModal" x-cloak class="fixed inset-0 z-[9999] overflow-y-auto"
-        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-
-        <!-- Dark Overlay -->
-        <div class="fixed inset-0 bg-black/50 transition-opacity" @click="showAddDemandModal = false"></div>
-
-        <!-- Modal Container -->
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg transform transition-all" @click.stop>
-
-                <!-- Modal Header -->
-                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-900">Yeni Talep Oluştur</h2>
-                    <button @click="showAddDemandModal = false"
-                        class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Modal Body (Form) -->
-                <div class="px-6 py-4 max-h-[70vh] overflow-y-auto">
-                    <div class="space-y-4">
-                        <!-- Başlık -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Talep Başlığı</label>
-                            <input type="text" x-model="newDemand.title"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Örn: Bebek'te 3+1 Deniz Manzaralı">
-                        </div>
-
-                        <!-- Tip & Kategori -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Tip</label>
-                                <select x-model="newDemand.type"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="Satılık">Satılık</option>
-                                    <option value="Kiralık">Kiralık</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori</label>
-                                <select x-model="newDemand.category"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="Daire">Daire</option>
-                                    <option value="Villa">Villa</option>
-                                    <option value="Arsa">Arsa</option>
-                                    <option value="İşyeri">İşyeri</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Bütçe -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Min Bütçe (TL)</label>
-                                <input type="number" x-model="newDemand.budget"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="1000000">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Max Bütçe (TL)</label>
-                                <input type="number" x-model="newDemand.maxBudget"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="1500000">
-                            </div>
-                        </div>
-
-                        <!-- Konum -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Aranan Bölge
-                                (İlçe/Semt)</label>
-                            <input type="text" x-model="newDemand.district"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Kadıköy, Moda">
-                        </div>
-
-                        <!-- Oda Sayısı -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Oda Sayısı</label>
-                            <input type="text" x-model="newDemand.rooms"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="3+1">
-                        </div>
-
-                        <!-- Acil Durumu -->
-                        <div class="flex items-center gap-2 pt-2">
-                            <input type="checkbox" id="urgentCheck" x-model="newDemand.isUrgent"
-                                class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                            <label for="urgentCheck" class="text-sm font-medium text-gray-700">Bu talep acildir</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal Footer -->
-                <div class="flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                    <button @click="showAddDemandModal = false"
-                        class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
-                        İptal
-                    </button>
-                    <button @click="saveNewDemand()"
-                        class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                        Talep Oluştur
                     </button>
                 </div>
             </div>
