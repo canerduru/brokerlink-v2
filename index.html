@@ -8,6 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -296,7 +301,7 @@
                     </div>
                     <div class="flex-1 overflow-y-auto">
                         <template x-for="conv in conversations" :key="conv.id">
-                            <div @click="activeConversation = conv"
+                            <div @click="activeConversation = conv; loadMessages(conv.id)"
                                 class="p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors flex gap-3"
                                 :class="activeConversation && activeConversation.id === conv.id ? 'bg-blue-50/50' : ''">
                                 <div class="relative">
@@ -364,15 +369,29 @@
 
                             <!-- Messages -->
                             <div class="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/50">
-                                <template x-for="msg in activeConversation.messages" :key="msg.id">
-                                    <div class="flex" :class="msg.sender === 'me' ? 'justify-end' : 'justify-start'">
+                                <template x-for="msg in messages[activeConversation.id] || []" :key="msg.id">
+                                    <div class="flex" :class="msg.sender === 'sent' ? 'justify-end' : 'justify-start'">
                                         <div class="max-w-[70%] rounded-2xl px-4 py-2.5 shadow-sm"
-                                            :class="msg.sender === 'me' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'">
-                                            <p class="text-sm leading-relaxed" x-text="msg.text"></p>
+                                            :class="msg.sender === 'sent' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'">
+                                            <p class="text-sm leading-relaxed" x-text="msg.content"></p>
                                             <p class="text-[10px] mt-1 opacity-70 text-right" x-text="msg.time"></p>
                                         </div>
                                     </div>
                                 </template>
+                                <!-- Empty state -->
+                                <div x-show="!messages[activeConversation.id] || messages[activeConversation.id].length === 0"
+                                    class="flex items-center justify-center h-full text-gray-400 text-sm">
+                                    <div class="text-center">
+                                        <svg class="w-16 h-16 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                                            </path>
+                                        </svg>
+                                        <p>Henüz mesaj yok</p>
+                                        <p class="text-xs mt-1">İlk mesajı gönderin!</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Input -->
@@ -386,9 +405,11 @@
                                             </path>
                                         </svg>
                                     </button>
-                                    <input type="text" placeholder="Bir mesaj yazın..."
+                                    <input type="text" x-model="newMessageText" @keydown.enter="sendNewMessage()"
+                                        placeholder="Bir mesaj yazın..."
                                         class="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-200 transition-all">
-                                    <button
+                                    <button @click="sendNewMessage()" :disabled="!newMessageText.trim()"
+                                        :class="!newMessageText.trim() ? 'opacity-50 cursor-not-allowed' : ''"
                                         class="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -525,8 +546,20 @@
                                     <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                         @click="openMatchDetail()">
                                         <div class="h-28 bg-gray-100 relative">
-                                            <div class="absolute top-2 left-2 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
-                                                x-text="match.score + '% Eşleşme'"></div>
+                                            <div class="absolute top-2 left-2 flex gap-1">
+                                                <div class="bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
+                                                    x-text="match.score + '% Eşleşme'"></div>
+                                                <div class="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
+                                                    x-text="match.type"></div>
+                                                <div x-show="match.status === 'approved'"
+                                                    class="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                                                    ✓ Onaylı
+                                                </div>
+                                                <div x-show="match.status === 'rejected'"
+                                                    class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                                                    ✗ Reddedildi
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="p-3">
                                             <h3 class="font-bold text-gray-900 text-sm mb-1" x-text="match.name"></h3>
@@ -656,10 +689,23 @@
                         <!-- Header -->
                         <div class="p-4 flex justify-between items-start border-b border-gray-50">
                             <div>
-                                <h3 class="font-bold text-gray-900 mb-1" x-text="match.title + ' ↔ ' + match.name">
+                                <h3 class="font-bold text-gray-900 mb-1">
+                                    <span x-text="match.title + ' ↔ ' + match.name"></span>
+                                    <span x-show="match.type" class="text-gray-500 font-normal text-xs ml-2"
+                                        x-text="'(' + match.type + ')'"></span>
                                 </h3>
-                                <p class="text-emerald-600 text-xs font-medium" x-text="match.score + '% Eşleşme'">
-                                </p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-emerald-600 text-xs font-medium" x-text="match.score + '% Eşleşme'">
+                                    </p>
+                                    <span x-show="match.status === 'approved'"
+                                        class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                        ✓ Onaylı
+                                    </span>
+                                    <span x-show="match.status === 'rejected'"
+                                        class="bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                        ✗ Reddedildi
+                                    </span>
+                                </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button @click="toggleFavorite(match.id)"
@@ -735,22 +781,34 @@
 
                             <!-- Actions -->
                             <div class="flex gap-2">
-                                <button @click="rejectMatch(match.id)"
-                                    class="flex-1 py-2.5 border-2 border-red-200 text-red-600 rounded-xl font-semibold text-sm hover:bg-red-50 flex items-center justify-center gap-1 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                    Reddet
-                                </button>
-                                <button @click="approveMatch(match.id)"
-                                    class="flex-1 py-2.5 bg-emerald-500 text-white rounded-xl font-semibold text-sm hover:bg-emerald-600 flex items-center justify-center gap-1 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Onayla
-                                </button>
+                                <template x-if="match.status === 'pending' || !match.status">
+                                    <button @click="rejectMatch(match.id)"
+                                        class="flex-1 py-2.5 border-2 border-red-200 text-red-600 rounded-xl font-semibold text-sm hover:bg-red-50 flex items-center justify-center gap-1 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        Reddet
+                                    </button>
+                                </template>
+                                <template x-if="match.status === 'pending' || !match.status">
+                                    <button @click="approveMatch(match.id)"
+                                        class="flex-1 py-2.5 bg-emerald-500 text-white rounded-xl font-semibold text-sm hover:bg-emerald-600 flex items-center justify-center gap-1 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Onayla
+                                    </button>
+                                </template>
+                                <div x-show="match.status === 'approved'"
+                                    class="w-full py-2.5 bg-green-50 text-green-700 rounded-xl font-semibold text-sm text-center">
+                                    ✓ Bu eşleşme onaylandı
+                                </div>
+                                <div x-show="match.status === 'rejected'"
+                                    class="w-full py-2.5 bg-red-50 text-red-700 rounded-xl font-semibold text-sm text-center">
+                                    ✗ Bu eşleşme reddedildi
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -783,22 +841,22 @@
                 <template x-for="broker in network" :key="broker.id">
                     <div
                         class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                             <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0"
                                 :class="broker.color" x-text="broker.initials"></div>
-                            <div class="flex-1 min-w-0">
+                            <div class="flex-1 min-w-0 w-full sm:w-auto">
                                 <h3 class="font-bold text-gray-900" x-text="broker.name"></h3>
                                 <p class="text-sm text-gray-500" x-text="broker.location"></p>
-                                <div class="flex gap-2 mt-1">
+                                <div class="flex flex-wrap gap-2 mt-1">
                                     <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full"
-                                        x-text="broker.listings + ' İlan'"></span>
+                                        x-text="(broker.listings || 0) + ' İlan'"></span>
                                     <span class="text-xs px-2 py-0.5 rounded-full"
                                         :class="broker.status === 'Aktif' ? 'bg-green-50 text-green-700' : (broker.status === 'Meşgul' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600')"
                                         x-text="broker.status"></span>
                                 </div>
                             </div>
                             <button @click="sendMessage(broker.name)"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Mesaj</button>
+                                class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Mesaj</button>
                         </div>
                     </div>
                 </template>
@@ -1063,8 +1121,19 @@
         <div x-show="currentTab === 'demands'" class="pb-24 animate-fade-in w-full" x-cloak>
             <!-- Header -->
             <div class="px-5 py-4 border-b border-gray-100">
-                <h2 class="text-xl font-bold text-gray-900">Talepler</h2>
-                <p class="text-sm text-gray-500 mt-1">Müşteri talepleri</p>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Talepler</h2>
+                        <p class="text-sm text-gray-500 mt-1">Müşteri talepleri</p>
+                    </div>
+                    <button @click="showAddDemandModal = true"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Talep
+                    </button>
+                </div>
             </div>
 
             <!-- Tabs -->
@@ -1183,7 +1252,11 @@
                                     x-text="demand.title.charAt(0)">
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-900 text-sm" x-text="demand.title"></h3>
+                                    <h3 class="font-bold text-gray-900 text-sm">
+                                        <span x-text="demand.title"></span>
+                                        <span x-show="demand.type" class="text-gray-500 font-normal text-xs ml-2"
+                                            x-text="'(' + demand.type + ')'"></span>
+                                    </h3>
                                     <div class="flex gap-2 mt-1">
                                         <span
                                             class="text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold shadow-sm"
@@ -1274,17 +1347,22 @@
                         </div>
 
                         <!-- Footer -->
-                        <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-1 text-gray-400 text-xs">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex gap-2">
+                            <button @click="editDemand(demand.id)"
+                                class="flex-1 py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold text-blue-600 hover:bg-blue-50 transition-colors">
+                                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
-                                <span>2 saat önce</span>
-                            </div>
-                            <button
-                                class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
-                                Detaylar
+                                Düzenle
+                            </button>
+                            <button @click="deleteDemand(demand.id)"
+                                class="flex-1 py-2 bg-white border border-red-200 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 transition-colors">
+                                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Sil
                             </button>
                         </div>
                     </div>
@@ -1609,6 +1687,19 @@
                     activeConversation: null,
                     showMatchDetail: false,
                     showAddModal: false,
+                    editingPortfolioId: null,
+                    showAddDemandModal: false,
+                    editingDemandId: null,
+                    newDemand: {
+                        title: '',
+                        type: 'Satılık',
+                        category: '',
+                        budget: '',
+                        maxBudget: '',
+                        district: '',
+                        rooms: '',
+                        isUrgent: false
+                    },
                     newListingImages: [],
                     isCompressing: false,
                     newPortfolio: {
@@ -1628,6 +1719,8 @@
                     networkPortfolios: [],
                     networkDemands: [],
                     conversations: [],
+                    newMessageText: '', // For message input
+                    messages: {}, // Message storage by conversation ID
 
                     get filteredDemands() {
                         let filtered = this.demands;
@@ -1717,6 +1810,67 @@
                         return filtered;
                     },
 
+                    get networkActivities() {
+                        const activities = [];
+
+                        // 1. From portfolios (last 3)
+                        (this.portfolios || [])
+                            .filter(p => p.created_at)
+                            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                            .slice(0, 3)
+                            .forEach(p => {
+                                activities.push({
+                                    id: `portfolio-${p.id}`,
+                                    user: p.broker_name || 'Broker',
+                                    action: `"${p.title}" ilanı ekledi`,
+                                    time: this.formatTime(p.created_at),
+                                    avatar: p.broker_avatar || `https://i.pravatar.cc/150?u=${p.id}`,
+                                    created_at: p.created_at
+                                });
+                            });
+
+                        // 2. From matches (last 3)
+                        (this.matches || [])
+                            .filter(m => m.created_at)
+                            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                            .slice(0, 3)
+                            .forEach(m => {
+                                activities.push({
+                                    id: `match-${m.id}`,
+                                    user: m.name || 'Kullanıcı',
+                                    action: 'Yeni eşleşme bulundu',
+                                    time: this.formatTime(m.created_at),
+                                    avatar: m.avatar || `https://i.pravatar.cc/150?u=${m.id}`,
+                                    created_at: m.created_at
+                                });
+                            });
+
+                        // 3. From conversations (last 3)
+                        (this.conversations || [])
+                            .filter(c => c.updated_at || c.last_message_time)
+                            .sort((a, b) => {
+                                const timeA = new Date(a.updated_at || a.last_message_time);
+                                const timeB = new Date(b.updated_at || b.last_message_time);
+                                return timeB - timeA;
+                            })
+                            .slice(0, 3)
+                            .forEach(c => {
+                                activities.push({
+                                    id: `conversation-${c.id}`,
+                                    user: c.userName || 'Kullanıcı',
+                                    action: 'Mesaj gönderdi',
+                                    time: this.formatTime(c.updated_at || c.last_message_time),
+                                    avatar: c.userImage || `https://i.pravatar.cc/150?u=${c.id}`,
+                                    created_at: c.updated_at || c.last_message_time
+                                });
+                            });
+
+                        // 4. Sort by time and take top 5
+                        return activities
+                            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                            .slice(0, 5);
+                    },
+
                     async init() {
                         // Check active session
                         const { data: { session } } = await supabase.auth.getSession();
@@ -1750,37 +1904,13 @@
                                 alert('Error fetching demands: ' + demandError.message);
                             }
                             console.log('Fetched Demands (No Filter):', demands);
-                            if (demands && demands.length > 0) {
-                                // Test Users Data
-                                const testUsers = [
-                                    { name: 'Mehmet Demir', image: 'https://i.pravatar.cc/150?img=3' },
-                                    { name: 'Ayşe Kaya', image: 'https://i.pravatar.cc/150?img=5' },
-                                    { name: 'Can Yıldız', image: 'https://i.pravatar.cc/150?img=8' },
-                                    { name: 'Zeynep Çelik', image: 'https://i.pravatar.cc/150?img=9' },
-                                    { name: 'Ali Yılmaz', image: 'https://i.pravatar.cc/150?img=11' }
-                                ];
-
-                                this.demands = demands.map((d, index) => {
-                                    const randomUser = testUsers[Math.floor(Math.random() * testUsers.length)];
-                                    const type = Math.random() > 0.3 ? 'Satılık' : 'Kiralık';
-                                    // Logic: Sale prices higher than Rent prices
-                                    const budget = type === 'Satılık'
-                                        ? (Math.floor(Math.random() * 49) + 1) * 1000000 // 1M - 49M (Tam milyonlar)
-                                        : (Math.floor(Math.random() * 38) + 2) * 5000;   // 10k - 200k (5k katları)
-
-                                    return {
-                                        ...d,
-                                        budget: budget, // Override budget for demo logic
-                                        maxBudget: budget * 1.2,
-                                        image: randomUser.image,
-                                        name: randomUser.name,
-                                        matchCount: Math.floor(Math.random() * 5) + 1,
-                                        isUrgent: index === 0 || Math.random() > 0.7,
-                                        type: type,
-                                        category: ['Villa', 'Daire', 'Arsa', 'İş yeri'][Math.floor(Math.random() * 4)]
-                                    };
-                                });
-                            }
+                            // Map snake_case fields from Supabase to camelCase for frontend
+                            this.demands = (demands || []).map(d => ({
+                                ...d,
+                                maxBudget: d.max_budget,
+                                isUrgent: d.is_urgent,
+                                matchCount: d.match_count || 0
+                            }));
 
                             // Fetch Portfolios
                             const { data: portfolios, error: portfolioError } = await supabase.from('portfolios').select('*');
@@ -1821,6 +1951,7 @@
                                     price: this.formatPrice(m.portfolio?.price),
                                     location: m.portfolio?.district,
                                     specs: `${m.portfolio?.rooms} • ${m.portfolio?.category}`,
+                                    type: m.demand?.type || m.portfolio?.type, // Get type from demand or portfolio
                                     score: m.score || 95,
                                     isFavorite: false
                                 }));
@@ -1828,19 +1959,18 @@
 
                             // MOCK DATA RESTORATION (For Demo Purposes)
 
-                            // 1. Mock Conversations
-                            this.conversations = [
-                                { id: 1, name: 'Mehmet Demir', message: 'Merhaba, ilanınızla ilgileniyorum.', time: '10:30', unread: 2, avatar: 'https://i.pravatar.cc/150?img=3' },
-                                { id: 2, name: 'Ayşe Kaya', message: 'Randevu için müsait misiniz?', time: 'Dün', unread: 0, avatar: 'https://i.pravatar.cc/150?img=5' },
-                                { id: 3, name: 'Can Yıldız', message: 'Fiyat konusunda son ne olur?', time: 'Pzt', unread: 0, avatar: 'https://i.pravatar.cc/150?img=8' }
-                            ];
+                            // 1. Mock Conversations - REMOVED
+                            // Now loaded from Supabase only
+
+                            // 2. Mock Messages - REMOVED  
+                            // Now loaded from Supabase only
 
                             // 2. Mock Network (Brokers)
                             this.network = [
-                                { id: 1, name: 'Mehmet Demir', role: 'Lüks Konut Uzmanı', company: 'Remax', score: 98, avatar: 'https://i.pravatar.cc/150?img=3' },
-                                { id: 2, name: 'Ayşe Kaya', role: 'Ticari Gayrimenkul', company: 'Keller Williams', score: 95, avatar: 'https://i.pravatar.cc/150?img=5' },
-                                { id: 3, name: 'Can Yıldız', role: 'Arsa & Arazi', company: 'Century 21', score: 92, avatar: 'https://i.pravatar.cc/150?img=8' },
-                                { id: 4, name: 'Zeynep Çelik', role: 'Konut Danışmanı', company: 'Coldwell Banker', score: 89, avatar: 'https://i.pravatar.cc/150?img=9' }
+                                { id: 1, name: 'Mehmet Demir', role: 'Lüks Konut Uzmanı', location: 'Beşiktaş', company: 'Remax', score: 98, listings: 12, status: 'Aktif', avatar: 'https://i.pravatar.cc/150?img=3' },
+                                { id: 2, name: 'Ayşe Kaya', role: 'Ticari Gayrimenkul', location: 'Maslak', company: 'Keller Williams', score: 95, listings: 8, status: 'Aktif', avatar: 'https://i.pravatar.cc/150?img=5' },
+                                { id: 3, name: 'Can Yıldız', role: 'Arsa & Arazi', location: 'Sarıyer', company: 'Century 21', score: 92, listings: 15, status: 'Meşgul', avatar: 'https://i.pravatar.cc/150?img=8' },
+                                { id: 4, name: 'Zeynep Çelik', role: 'Konut Danışmanı', location: 'Kadıköy', company: 'Coldwell Banker', score: 89, listings: 6, status: 'Aktif', avatar: 'https://i.pravatar.cc/150?img=9' }
                             ];
 
                             // 3. Mock Network Portfolios
@@ -1856,9 +1986,74 @@
                                 { id: 202, brokerName: 'Ayşe Kaya', brokerInitials: 'AK', status: 'Warm', budget: 45000, maxBudget: 50000, district: 'Kadıköy', rooms: '2+1', category: 'Daire' },
                                 { id: 203, brokerName: 'Zeynep Çelik', brokerInitials: 'ZÇ', status: 'Cold', budget: 12000000, maxBudget: 15000000, district: 'Çekmeköy', rooms: '4+1', category: 'Daire' }
                             ];
+
+                            // 5. Load conversations from Supabase
+                            await this.loadConversations();
                         } catch (e) {
                             console.error('CRITICAL ERROR in fetchData:', e);
                             alert('Bir hata oluştu: ' + e.message);
+                        }
+                    },
+
+                    async loadConversations() {
+                        if (!this.user) return;
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('conversations')
+                                .select('*')
+                                .order('updated_at', { ascending: false });
+
+                            if (error) throw error;
+
+                            if (data && data.length > 0) {
+                                this.conversations = data.map(c => ({
+                                    id: c.id,
+                                    userName: c.participant_name,
+                                    lastMessage: c.last_message || 'Yeni konuşma',
+                                    time: this.formatTime(c.last_message_time),
+                                    unread: c.unread_count || 0,
+                                    userImage: c.participant_avatar || 'https://i.pravatar.cc/150?u=' + encodeURIComponent(c.participant_name),
+                                    receiverId: c.receiver_id
+                                }));
+                                console.log('Loaded conversations from Supabase:', this.conversations.length);
+                            } else {
+                                console.log('No conversations in Supabase, keeping mock data');
+                            }
+                        } catch (error) {
+                            console.error('Error loading conversations:', error);
+                        }
+                    },
+
+                    async loadMessages(conversationId) {
+                        if (!this.user || !conversationId) return;
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('messages')
+                                .select('*')
+                                .eq('conversation_id', conversationId)
+                                .order('created_at', { ascending: true });
+
+                            if (error) throw error;
+
+                            const messages = data.map(m => ({
+                                id: m.id,
+                                sender: m.sender_id === this.user.id ? 'sent' : 'received',
+                                content: m.content,
+                                time: new Date(m.created_at).toLocaleTimeString('tr-TR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }),
+                                read: m.read
+                            }));
+
+                            this.messages[conversationId] = messages;
+                            console.log(`Loaded ${messages.length} messages for conversation ${conversationId}`);
+                            return messages;
+                        } catch (error) {
+                            console.error('Error loading messages:', error);
+                            return [];
                         }
                     },
 
@@ -1922,6 +2117,18 @@
                         if (portfolioError) console.error('SeedData: Portfolio insert error:', portfolioError);
                         else console.log('SeedData: Portfolios inserted:', portfolioData);
 
+                        // 4. Insert Matches (using inserted demand and portfolio IDs)
+                        if (demandData && demandData.length > 0 && portfolioData && portfolioData.length > 0) {
+                            const mockMatches = [
+                                { demand_id: demandData[0].id, portfolio_id: portfolioData[0].id, score: 98, status: 'pending', is_favorite: false },
+                                { demand_id: demandData[0].id, portfolio_id: portfolioData[1].id, score: 95, status: 'pending', is_favorite: true },
+                                { demand_id: demandData[1].id, portfolio_id: portfolioData[2].id, score: 92, status: 'pending', is_favorite: false }
+                            ];
+                            const { data: matchData, error: matchError } = await supabase.from('matches').insert(mockMatches).select();
+                            if (matchError) console.error('SeedData: Match insert error:', matchError);
+                            else console.log('SeedData: Matches inserted:', matchData);
+                        }
+
                         alert('Veriler başarıyla eklendi! Sayfa yenileniyor...');
                         window.location.reload();
                     },
@@ -1970,14 +2177,42 @@
                                     this.newPortfolio.location,
                                     this.newPortfolio.city || 'İstanbul'
                                 ].filter(Boolean).join(', '),
-                                image_url: this.newListingImages[0] || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80'
+                                area: this.newPortfolio.area || null,
+                                age: this.newPortfolio.age || null
                             };
 
-                            // Insert to Supabase
-                            const { data, error } = await supabase
-                                .from('portfolios')
-                                .insert([portfolioData])
-                                .select();
+                            // Only update image if a new one was uploaded
+                            if (this.newListingImages.length > 0) {
+                                portfolioData.image_url = this.newListingImages[0];
+                            } else if (!this.editingPortfolioId) {
+                                // For new portfolios, use default image if none uploaded
+                                portfolioData.image_url = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80';
+                            }
+                            // If editing and no new image, don't include image_url (keeps existing)
+
+                            // Check if editing or adding
+                            let data, error;
+
+                            if (this.editingPortfolioId) {
+                                // EDIT MODE: Update existing portfolio
+                                const result = await supabase
+                                    .from('portfolios')
+                                    .update(portfolioData)
+                                    .eq('id', this.editingPortfolioId)
+                                    .select();
+
+                                data = result.data;
+                                error = result.error;
+                            } else {
+                                // ADD MODE: Insert new portfolio
+                                const result = await supabase
+                                    .from('portfolios')
+                                    .insert([portfolioData])
+                                    .select();
+
+                                data = result.data;
+                                error = result.error;
+                            }
 
                             if (error) {
                                 console.error('Error saving portfolio:', error);
@@ -1990,8 +2225,12 @@
                             // Refresh data
                             await this.fetchData();
 
+                            // Success message
+                            alert(this.editingPortfolioId ? 'Portföy güncellendi!' : 'Portföy eklendi!');
+
                             // Close modal and reset form
                             this.showAddModal = false;
+                            this.editingPortfolioId = null;
                             this.newPortfolio = {
                                 title: '',
                                 type: 'Satılık',
@@ -2005,8 +2244,6 @@
                                 age: ''
                             };
                             this.newListingImages = [];
-
-                            alert('Portföy başarıyla eklendi!');
                         } catch (e) {
                             console.error('Error:', e);
                             alert('Bir hata oluştu: ' + e.message);
@@ -2054,77 +2291,14 @@
                     },
 
                     // DATA ARRAYS
-                    conversations: [
-                        { id: 1, name: 'Mehmet Demir', message: 'Merhaba, ilanınızla ilgileniyorum.', time: '10:30', unread: 2, avatar: 'https://i.pravatar.cc/150?img=3' },
-                        { id: 2, name: 'Ayşe Kaya', message: 'Randevu için müsait misiniz?', time: 'Dün', unread: 0, avatar: 'https://i.pravatar.cc/150?img=5' },
-                        { id: 3, name: 'Can Yıldız', message: 'Fiyat konusunda son ne olur?', time: 'Pzt', unread: 0, avatar: 'https://i.pravatar.cc/150?img=8' }
-                    ],
-                    demands: [
-                        { id: 1, title: 'Bebek Sahil Lüks Daire', budget: 45000000, maxBudget: 55000000, district: 'Bebek, Beşiktaş', rooms: '3+1', category: 'Daire', status: 'active', image: 'https://i.pravatar.cc/150?u=1', name: 'Ahmet Yılmaz', matchCount: 3, isUrgent: true },
-                        { id: 2, title: 'Yeniköy Boğaz Manzaralı Villa', budget: 85000000, maxBudget: 100000000, district: 'Yeniköy, Sarıyer', rooms: '5+1', category: 'Villa', status: 'pending', image: 'https://i.pravatar.cc/150?u=2', name: 'Ahmet Yılmaz', matchCount: 1, isUrgent: false },
-                        { id: 3, title: 'Suadiye Bağdat Caddesi Yakını', budget: 25000000, maxBudget: 30000000, district: 'Suadiye, Kadıköy', rooms: '4+1', category: 'Daire', status: 'active', image: 'https://i.pravatar.cc/150?u=3', name: 'Ahmet Yılmaz', matchCount: 5, isUrgent: false }
-                    ],
-                    networkDemands: [
-                        { id: 201, brokerName: 'Mehmet Demir', brokerInitials: 'MD', status: 'Hot', budget: 50000000, maxBudget: 60000000, district: 'Beşiktaş', rooms: '3+1', category: 'Daire' },
-                        { id: 202, brokerName: 'Ayşe Kaya', brokerInitials: 'AK', status: 'Warm', budget: 30000000, maxBudget: 35000000, district: 'Kadıköy', rooms: '2+1', category: 'Daire' },
-                        { id: 203, brokerName: 'Zeynep Çelik', brokerInitials: 'ZÇ', status: 'Cold', budget: 15000000, maxBudget: 18000000, district: 'Çekmeköy', rooms: '4+1', category: 'Daire' }
-                    ],
-                    portfolios: [
-                        // SATILIK - Villa (3)
-                        { id: 1, title: 'Bahçeli Müstakil Villa', price: 1200000, location: 'Sarıyer', district: 'Sarıyer, İstanbul', rooms: '5+1', area: '250m²', age: '2y', type: 'Satılık', category: 'Villa', features: ['Havuz', 'Bahçe'], image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80' },
-                        { id: 2, title: 'Boğaz Manzaralı Villa', price: 2500000, location: 'Bebek', district: 'Bebek, İstanbul', rooms: '6+2', area: '350m²', age: '4y', type: 'Satılık', category: 'Villa', features: ['Deniz Manzarası', 'Jakuzi'], image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80' },
-                        { id: 3, title: 'Modern Villa', price: 1800000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '1y', type: 'Satılık', category: 'Villa', features: ['Akıllı Ev', 'Garaj'], image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80' },
-                        // SATILIK - Daire (3)
-                        { id: 4, title: 'Modern Aile Dairesi', price: 450000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '3+1', area: '140m²', age: '5y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Asansör'], image: 'https://images.unsplash.com/photo-1600596542815-2495db9dc2c3?auto=format&fit=crop&w=800&q=80' },
-                        { id: 5, title: 'Deniz Manzaralı Daire', price: 890000, location: 'Beşiktaş', district: 'Beşiktaş, İstanbul', rooms: '4+1', area: '180m²', age: '2y', type: 'Satılık', category: 'Daire', features: ['Otopark', 'Güvenlik'], image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80' },
-                        { id: 6, title: 'Lüks Rezidans', price: 750000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '120m²', age: '3y', type: 'Satılık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80' },
-                        // SATILIK - Arsa (3)
-                        { id: 7, title: 'Yatırımlık Arsa', price: 850000, location: 'Çekmeköy', district: 'Çekmeköy, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['İmarlı'], image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80' },
-                        { id: 8, title: 'Denize Sıfır Arsa', price: 1500000, location: 'Şile', district: 'Şile, İstanbul', rooms: '-', area: '1000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Deniz Manzarası'], image: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?auto=format&fit=crop&w=800&q=80' },
-                        { id: 9, title: 'Köy Arsası', price: 350000, location: 'Silivri', district: 'Silivri, İstanbul', rooms: '-', area: '2000m²', age: '-', type: 'Satılık', category: 'Arsa', features: ['Tarla'], image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80' },
-                        // SATILIK - İşyeri (3)
-                        { id: 10, title: 'Cadde Üzeri Dükkan', price: 950000, location: 'Bakırköy', district: 'Bakırköy, İstanbul', rooms: '-', area: '85m²', age: '8y', type: 'Satılık', category: 'İşyeri', features: ['Vitrin', 'Depo'], image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80' },
-                        { id: 11, title: 'Plaza Ofis', price: 1200000, location: 'Maslak', district: 'Maslak, İstanbul', rooms: '3+1', area: '150m²', age: '5y', type: 'Satılık', category: 'İşyeri', features: ['Otopark', 'Toplantı Odası'], image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80' },
-                        { id: 12, title: 'Fabrika Binası', price: 3500000, location: 'Tuzla', district: 'Tuzla, İstanbul', rooms: '-', area: '2000m²', age: '15y', type: 'Satılık', category: 'İşyeri', features: ['Yükleme Rampası'], image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80' },
-                        // KIRALIK - Villa (3)
-                        { id: 13, title: 'Kiralık Havuzlu Villa', price: 45000, location: 'Zekeriyaköy', district: 'Zekeriyaköy, İstanbul', rooms: '4+2', area: '280m²', age: '2y', type: 'Kiralık', category: 'Villa', features: ['Bahçe', 'Havuz'], image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80' },
-                        { id: 14, title: 'Deniz Kenarı Villa', price: 65000, location: 'Dragos', district: 'Dragos, İstanbul', rooms: '5+1', area: '320m²', age: '3y', type: 'Kiralık', category: 'Villa', features: ['Deniz Manzarası', 'İskele'], image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80' },
-                        { id: 15, title: 'Orman Manzaralı Villa', price: 35000, location: 'Kemerburgaz', district: 'Kemerburgaz, İstanbul', rooms: '4+1', area: '240m²', age: '4y', type: 'Kiralık', category: 'Villa', features: ['Şömine', 'Bahçe'], image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80' },
-                        // KIRALIK - Daire (3)
-                        { id: 16, title: 'Rezidans Dairesi', price: 25000, location: 'Levent', district: 'Levent, İstanbul', rooms: '2+1', area: '110m²', age: '3y', type: 'Kiralık', category: 'Daire', features: ['Spor Salonu', 'Havuz'], image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80' },
-                        { id: 17, title: 'Merkezi Daire', price: 18000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '3+1', area: '130m²', age: '6y', type: 'Kiralık', category: 'Daire', features: ['Metro Yakını', 'Asansör'], image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80' },
-                        { id: 18, title: 'Boğaz Manzaralı Daire', price: 40000, location: 'Ortaköy', district: 'Ortaköy, İstanbul', rooms: '3+1', area: '145m²', age: '2y', type: 'Kiralık', category: 'Daire', features: ['Balkon', 'Manzara'], image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80' },
-                        // KIRALIK - Arsa (3)
-                        { id: 19, title: 'Otopark Arsası', price: 8000, location: 'Kadıköy', district: 'Kadıköy, İstanbul', rooms: '-', area: '300m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Asfalt'], image: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80' },
-                        { id: 20, title: 'Depolama Alanı', price: 12000, location: 'Ümraniye', district: 'Ümraniye, İstanbul', rooms: '-', area: '500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Güvenlik'], image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80' },
-                        { id: 21, title: 'Açık Hava Etkinlik Alanı', price: 15000, location: 'Beykoz', district: 'Beykoz, İstanbul', rooms: '-', area: '1500m²', age: '-', type: 'Kiralık', category: 'Arsa', features: ['Elektrik', 'Su'], image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80' },
-                        // KIRALIK - İşyeri (3)
-                        { id: 22, title: 'Merkezi Lüks Ofis', price: 15000, location: 'Şişli', district: 'Şişli, İstanbul', rooms: '2+1', area: '95m²', age: '8y', type: 'Kiralık', category: 'İşyeri', features: ['Otopark'], image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80' },
-                        { id: 23, title: 'AVM Dükkanı', price: 35000, location: 'Nişantaşı', district: 'Nişantaşı, İstanbul', rooms: '-', area: '75m²', age: '10y', type: 'Kiralık', category: 'İşyeri', features: ['Vitrin', 'Yaya Trafiği'], image: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80' },
-                        { id: 24, title: 'Restoran Alanı', price: 28000, location: 'Karaköy', district: 'Karaköy, İstanbul', rooms: '-', area: '200m²', age: '12y', type: 'Kiralık', category: 'İşyeri', features: ['Mutfak', 'Teras'], image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80' }
-                    ],
-                    networkPortfolios: [
-                        { id: 101, title: 'Nişantaşı Lüks Daire', price: 65000000, district: 'Nişantaşı, Şişli', rooms: '3+1', category: 'Daire', type: 'Satılık', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80', brokerName: 'Mehmet Demir' },
-                        { id: 102, title: 'Etiler Bahçeli Villa', price: 125000000, district: 'Etiler, Beşiktaş', rooms: '5+2', category: 'Villa', type: 'Satılık', image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80', brokerName: 'Ayşe Kaya' },
-                        { id: 103, title: 'Maslak Plaza Ofis', price: 45000000, district: 'Maslak, Sarıyer', rooms: '250m²', category: 'Ofis', type: 'Satılık', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', brokerName: 'Can Yıldız' }
-                    ],
-                    matches: [
-                        { id: 1, title: 'Boğaz Manzaralı Lüks Daire', price: '48.0M ₺', location: 'Arnavutköy, Beşiktaş', specs: '3+1 • Daire', score: 98, isFavorite: false, name: 'Ahmet Yılmaz' },
-                        { id: 2, title: 'Panoramik Deniz Manzaralı', price: '32.0M ₺', location: 'Fenerbahçe, Kadıköy', specs: '4+1 • Daire', score: 95, isFavorite: true, name: 'Ahmet Yılmaz' },
-                        { id: 3, title: 'Nişantaşı Lüks Daire', price: '65.0M ₺', location: 'Nişantaşı, Şişli', specs: '3+1 • Daire', score: 92, isFavorite: false, name: 'Mehmet Demir' }
-                    ],
-                    network: [
-                        { id: 1, name: 'Mehmet Demir', role: 'Lüks Konut Uzmanı', company: 'Remax', score: 98, avatar: 'https://i.pravatar.cc/150?img=3' },
-                        { id: 2, name: 'Ayşe Kaya', role: 'Ticari Gayrimenkul', company: 'Keller Williams', score: 95, avatar: 'https://i.pravatar.cc/150?img=5' },
-                        { id: 3, name: 'Can Yıldız', role: 'Arsa & Arazi', company: 'Century 21', score: 92, avatar: 'https://i.pravatar.cc/150?img=8' },
-                        { id: 4, name: 'Zeynep Çelik', role: 'Konut Danışmanı', company: 'Coldwell Banker', score: 89, avatar: 'https://i.pravatar.cc/150?img=9' }
-                    ],
-                    networkActivities: [
-                        { id: 1, user: 'Selin Yılmaz', action: 'Yeni bir "Lüks Villa" ilanı ekledi.', time: '2s önce', avatar: 'https://i.pravatar.cc/150?img=5' },
-                        { id: 2, user: 'Mehmet Demir', action: '"3+1 Daire" talebi için eşleşme buldu.', time: '4s önce', avatar: 'https://i.pravatar.cc/150?img=3' },
-                        { id: 3, user: 'Can Yıldız', action: 'Portföy fiyatını güncelledi.', time: '1d önce', avatar: 'https://i.pravatar.cc/150?img=8' },
-                        { id: 4, user: 'Zeynep Çelik', action: 'Yeni bir talep oluşturdu.', time: '2d önce', avatar: 'https://i.pravatar.cc/150?img=9' }
-                    ],
+                    conversations: [], // Load from Supabase only
+                    demands: [], // Load from Supabase only
+                    networkDemands: [], // Load from Supabase only
+                    portfolios: [], // Load from Supabase only
+                    networkPortfolios: [], // Load from Supabase only
+                    matches: [], // Load from Supabase only
+                    network: [], // Load from Supabase only
+                    // networkActivities: computed property defined above
 
                     // ACTIONS
                     formatPrice(price) {
@@ -2135,31 +2309,463 @@
                         if (!price) return '0 TL';
                         return new Intl.NumberFormat('tr-TR').format(price) + ' TL';
                     },
-                    deletePortfolio(id) {
-                        if (confirm('Bu portföyü silmek istediğinize emin misiniz?')) {
+                    formatTime(timestamp) {
+                        if (!timestamp) return 'Şimdi';
+
+                        const date = new Date(timestamp);
+                        const now = new Date();
+                        const diffMs = now - date;
+                        const diffMins = Math.floor(diffMs / 60000);
+                        const diffHours = Math.floor(diffMs / 3600000);
+                        const diffDays = Math.floor(diffMs / 86400000);
+
+                        if (diffMins < 1) return 'Şimdi';
+                        if (diffMins < 60) return diffMins + ' dk önce';
+                        if (diffHours < 24) return diffHours + ' sa önce';
+                        if (diffDays === 1) return 'Dün';
+                        if (diffDays < 7) return diffDays + ' gün önce';
+
+                        return date.toLocaleDateString('tr-TR');
+                    },
+                    async deletePortfolio(id) {
+                        if (!confirm('Bu portföyü silmek istediğinize emin misiniz? This action cannot be undone.')) {
+                            return;
+                        }
+
+                        try {
+                            console.log('Attempting to delete portfolio:', id);
+                            console.log('Current user:', this.user?.id);
+
+                            // First, check if portfolio exists and belongs to user
+                            const { data: checkData, error: checkError } = await supabase
+                                .from('portfolios')
+                                .select('*')
+                                .eq('id', id);
+
+                            console.log('Portfolio check result:', checkData);
+
+                            if (checkError) {
+                                console.error('Check error:', checkError);
+                                throw new Error('Portföy kontrol edilemedi: ' + checkError.message);
+                            }
+
+                            if (!checkData || checkData.length === 0) {
+                                throw new Error('Portföy bulunamadı. ID: ' + id);
+                            }
+
+                            // Now attempt delete
+                            const { data, error } = await supabase
+                                .from('portfolios')
+                                .delete()
+                                .eq('id', id)
+                                .select();
+
+                            console.log('Delete result:', { data, error });
+
+                            if (error) throw error;
+
+                            if (!data || data.length === 0) {
+                                throw new Error('Portföy silinemedi. Supabase RLS politikası silmeye izin vermiyor olabilir.');
+                            }
+
+                            // Update local state immediately
                             this.portfolios = this.portfolios.filter(p => p.id !== id);
-                            alert('Portföy silindi.');
+                            alert('Portföy başarıyla silindi.');
+                        } catch (e) {
+                            console.error('Delete error:', e);
+                            alert('Silme işlemi başarısız: ' + e.message);
                         }
                     },
                     editPortfolio(id) {
-                        alert('Portföy düzenleme ekranı açılıyor... (ID: ' + id + ')');
+                        // Find the portfolio
+                        const portfolio = this.portfolios.find(p => p.id === id);
+
+                        if (!portfolio) {
+                            alert('Portföy bulunamadı');
+                            return;
+                        }
+
+                        // Set edit mode
+                        this.editingPortfolioId = id;
+
+                        // Populate form with existing data
+                        this.newPortfolio = {
+                            title: portfolio.title || '',
+                            type: portfolio.type || 'Satılık',
+                            category: portfolio.category || '',
+                            price: portfolio.price ? portfolio.price.toString() : '',
+                            city: portfolio.city || 'İstanbul',
+                            location: portfolio.location || '',
+                            district: portfolio.district || '',
+                            rooms: portfolio.rooms || '',
+                            area: portfolio.area || '',
+                            age: portfolio.age || ''
+                        };
+
+                        // Open modal
+                        this.showAddModal = true;
                     },
-                    approveMatch(id) {
-                        alert('Eşleşme onaylandı! (ID: ' + id + ')');
-                    },
-                    rejectMatch(id) {
-                        if (confirm('Bu eşleşmeyi reddetmek istiyor musunuz?')) {
-                            this.matches = this.matches.filter(m => m.id !== id);
+
+                    // ====== DEMAND MANAGEMENT FUNCTIONS ======
+                    async saveDemand() {
+                        try {
+                            // Validation
+                            if (!this.newDemand.title || !this.newDemand.category || !this.newDemand.budget) {
+                                alert('Lütfen zorunlu alanları doldurun (Başlık, Kategori, Bütçe)');
+                                return;
+                            }
+
+                            if (!this.user) {
+                                alert('Lütfen giriş yapın');
+                                return;
+                            }
+
+                            // Prepare data for Supabase
+                            const demandData = {
+                                user_id: this.user.id,
+                                title: this.newDemand.title,
+                                type: this.newDemand.type,
+                                category: this.newDemand.category,
+                                budget: parseInt(this.newDemand.budget),
+                                max_budget: this.newDemand.maxBudget ? parseInt(this.newDemand.maxBudget) : null,
+                                district: this.newDemand.district,
+                                rooms: this.newDemand.rooms || '-',
+                                is_urgent: this.newDemand.isUrgent || false,
+                                status: 'active',
+                                match_count: 0
+                            };
+
+                            // Check if editing or adding
+                            let data, error;
+
+                            if (this.editingDemandId) {
+                                // EDIT MODE: Update existing demand
+                                const result = await supabase
+                                    .from('demands')
+                                    .update(demandData)
+                                    .eq('id', this.editingDemandId)
+                                    .select();
+
+                                data = result.data;
+                                error = result.error;
+                            } else {
+                                // ADD MODE: Insert new demand
+                                const result = await supabase
+                                    .from('demands')
+                                    .insert([demandData])
+                                    .select();
+
+                                data = result.data;
+                                error = result.error;
+                            }
+
+                            if (error) {
+                                console.error('Error saving demand:', error);
+                                alert('Kayıt sırasında hata oluştu: ' + error.message);
+                                return;
+                            }
+
+                            console.log('Demand saved:', data);
+
+                            // Refresh data
+                            await this.fetchData();
+
+                            // Success message
+                            alert(this.editingDemandId ? 'Talep güncellendi!' : 'Talep eklendi!');
+
+                            // Close modal and reset form
+                            this.showAddDemandModal = false;
+                            this.editingDemandId = null;
+                            this.newDemand = {
+                                title: '',
+                                type: 'Satılık',
+                                category: '',
+                                budget: '',
+                                maxBudget: '',
+                                district: '',
+                                rooms: '',
+                                isUrgent: false
+                            };
+                        } catch (e) {
+                            console.error('Error:', e);
+                            alert('Bir hata oluştu: ' + e.message);
                         }
                     },
+
+                    editDemand(id) {
+                        // Find the demand
+                        const demand = this.demands.find(d => d.id === id);
+
+                        if (!demand) {
+                            alert('Talep bulunamadı');
+                            return;
+                        }
+
+                        // Set edit mode
+                        this.editingDemandId = id;
+
+                        // Populate form with existing data
+                        this.newDemand = {
+                            title: demand.title || '',
+                            type: demand.type || 'Satılık',
+                            category: demand.category || '',
+                            budget: demand.budget ? demand.budget.toString() : '',
+                            maxBudget: demand.maxBudget ? demand.maxBudget.toString() : '',
+                            district: demand.district || '',
+                            rooms: demand.rooms || '',
+                            isUrgent: demand.isUrgent || false
+                        };
+
+                        // Open modal
+                        this.showAddDemandModal = true;
+                    },
+
+                    async deleteDemand(id) {
+                        if (!confirm('Bu talebi silmek istediğinize emin misiniz?')) {
+                            return;
+                        }
+
+                        try {
+                            console.log('Attempting to delete demand:', id);
+
+                            const { data, error } = await supabase
+                                .from('demands')
+                                .delete()
+                                .eq('id', id)
+                                .select();
+
+                            if (error) throw error;
+
+                            if (!data || data.length === 0) {
+                                throw new Error('Talep silinemedi. Supabase RLS politikası silmeye izin vermiyor olabilir.');
+                            }
+
+                            // Update local state immediately
+                            this.demands = this.demands.filter(d => d.id !== id);
+                            alert('Talep başarıyla silindi.');
+                        } catch (e) {
+                            console.error('Delete error:', e);
+                            alert('Silme işlemi başarısız: ' + e.message);
+                        }
+                    },
+
+                    async approveMatch(id) {
+                        if (!confirm('Bu eşleşmeyi onaylamak istediğinize emin misiniz?')) {
+                            return;
+                        }
+
+                        try {
+                            console.log('Approving match:', id);
+
+                            const { data, error } = await supabase
+                                .from('matches')
+                                .update({ status: 'approved' })
+                                .eq('id', id)
+                                .select();
+
+                            if (error) throw error;
+
+                            if (!data || data.length === 0) {
+                                throw new Error('Eşleşme güncellenemedi.');
+                            }
+
+                            // Update local state
+                            const matchIndex = this.matches.findIndex(m => m.id === id);
+                            if (matchIndex !== -1) {
+                                this.matches[matchIndex].status = 'approved';
+                            }
+
+                            alert('Eşleşme başarıyla onaylandı!');
+                        } catch (e) {
+                            console.error('Approve error:', e);
+                            alert('Onaylama başarısız: ' + e.message);
+                        }
+                    },
+                    async rejectMatch(id) {
+                        if (!confirm('Bu eşleşmeyi reddetmek istediğinize emin misiniz?')) {
+                            return;
+                        }
+
+                        try {
+                            console.log('Rejecting match:', id);
+
+                            const { data, error } = await supabase
+                                .from('matches')
+                                .update({ status: 'rejected' })
+                                .eq('id', id)
+                                .select();
+
+                            if (error) throw error;
+
+                            if (!data || data.length === 0) {
+                                throw new Error('Eşleşme güncellenemedi.');
+                            }
+
+                            // Update local state
+                            const matchIndex = this.matches.findIndex(m => m.id === id);
+                            if (matchIndex !== -1) {
+                                this.matches[matchIndex].status = 'rejected';
+                            }
+
+                            alert('Eşleşme reddedildi.');
+                        } catch (e) {
+                            console.error('Reject error:', e);
+                            alert('Reddetme başarısız: ' + e.message);
+                        }
+                    },
+
                     toggleFavorite(id) {
                         const match = this.matches.find(m => m.id === id);
                         if (match) {
                             match.isFavorite = !match.isFavorite;
                         }
                     },
-                    sendMessage(name) {
-                        alert(name + ' kişisine mesaj gönderiliyor...');
+                    async sendMessage(brokerName) {
+                        console.log('Starting conversation with:', brokerName);
+
+                        try {
+                            // 1. Find existing conversation
+                            let conversation = this.conversations.find(c => c.userName === brokerName);
+
+                            // 2. If no conversation exists, create in Supabase
+                            if (!conversation) {
+                                const broker = this.network.find(b => b.name === brokerName);
+
+                                const { data, error } = await supabase
+                                    .from('conversations')
+                                    .insert({
+                                        user_id: this.user.id,
+                                        participant_name: brokerName,
+                                        participant_avatar: broker?.avatar || 'https://i.pravatar.cc/150?u=' + encodeURIComponent(brokerName),
+                                        receiver_id: null, // Will be set when we have broker user IDs
+                                        last_message: 'Yeni konuşma',
+                                        last_message_time: new Date().toISOString()
+                                    })
+                                    .select()
+                                    .single();
+
+                                if (error) throw error;
+
+                                const newConv = {
+                                    id: data.id,
+                                    userName: brokerName,
+                                    lastMessage: 'Yeni konuşma',
+                                    time: 'Şimdi',
+                                    unread: 0,
+                                    userImage: broker?.avatar || 'https://i.pravatar.cc/150?u=' + encodeURIComponent(brokerName),
+                                    receiverId: data.receiver_id
+                                };
+
+                                this.conversations.unshift(newConv);
+                                conversation = newConv;
+
+                                console.log('Created new conversation in Supabase:', conversation);
+                            } else {
+                                console.log('Found existing conversation:', conversation);
+                            }
+
+                            // 3. Set as active conversation
+                            this.activeConversation = conversation;
+
+                            // 4. Load messages for this conversation
+                            await this.loadMessages(conversation.id);
+
+                            // 5. Switch to messages tab
+                            this.currentTab = 'messages';
+
+                            console.log('Active conversation set to:', this.activeConversation);
+
+                        } catch (error) {
+                            console.error('Error creating conversation:', error);
+                            alert('Konuşma başlatılamadı: ' + error.message);
+                        }
+                    },
+
+                    async sendNewMessage() {
+                        // Validation
+                        if (!this.newMessageText.trim()) {
+                            console.log('Empty message, not sending');
+                            return;
+                        }
+
+                        if (!this.activeConversation) {
+                            alert('Lütfen bir konuşma seçin');
+                            return;
+                        }
+
+                        const convId = this.activeConversation.id;
+                        const messageContent = this.newMessageText.trim();
+
+                        try {
+                            // 1. Insert message to Supabase
+                            const { data: messageData, error: messageError } = await supabase
+                                .from('messages')
+                                .insert({
+                                    conversation_id: convId,
+                                    sender_id: this.user.id,
+                                    receiver_id: this.activeConversation.receiverId || null,
+                                    content: messageContent,
+                                    read: true
+                                })
+                                .select()
+                                .single();
+
+                            if (messageError) throw messageError;
+
+                            // 2. Update conversation last_message
+                            const { error: convError } = await supabase
+                                .from('conversations')
+                                .update({
+                                    last_message: messageContent,
+                                    last_message_time: new Date().toISOString(),
+                                    updated_at: new Date().toISOString()
+                                })
+                                .eq('id', convId);
+
+                            if (convError) throw convError;
+
+                            // 3. Update local state
+                            if (!this.messages[convId]) {
+                                this.messages[convId] = [];
+                            }
+
+                            const newMessage = {
+                                id: messageData.id,
+                                sender: 'sent',
+                                content: messageContent,
+                                time: new Date().toLocaleTimeString('tr-TR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }),
+                                read: true
+                            };
+
+                            this.messages[convId].push(newMessage);
+
+                            // 4. Update conversation in list
+                            const conversation = this.conversations.find(c => c.id === convId);
+                            if (conversation) {
+                                conversation.lastMessage = messageContent;
+                                conversation.time = 'Şimdi';
+                            }
+
+                            // 5. Clear input
+                            this.newMessageText = '';
+
+                            // 6. Auto-scroll
+                            this.$nextTick(() => {
+                                const chatArea = document.querySelector('.overflow-y-auto.flex-1.p-4');
+                                if (chatArea) {
+                                    chatArea.scrollTop = chatArea.scrollHeight;
+                                }
+                            });
+
+                            console.log('Message sent to Supabase successfully');
+
+                        } catch (error) {
+                            console.error('Error sending message:', error);
+                            alert('Mesaj gönderilemedi: ' + error.message);
+                        }
                     },
                     viewAll(section) {
                         alert(section + ' tümü görüntüleniyor...');
@@ -2191,7 +2797,8 @@
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
         <!-- Dark Overlay -->
-        <div class="fixed inset-0 bg-black/50 transition-opacity" @click="showAddModal = false"></div>
+        <div class="fixed inset-0 bg-black/50 transition-opacity"
+            @click="showAddModal = false; editingPortfolioId = null"></div>
 
         <!-- Modal Container -->
         <div class="flex min-h-full items-center justify-center p-4">
@@ -2199,8 +2806,10 @@
 
                 <!-- Modal Header -->
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-900">Yeni Portföy Ekle</h2>
-                    <button @click="showAddModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <h2 class="text-xl font-bold text-gray-900"
+                        x-text="editingPortfolioId ? 'Portföy Düzenle' : 'Yeni Portföy Ekle'"></h2>
+                    <button @click="showAddModal = false; editingPortfolioId = null"
+                        class="text-gray-400 hover:text-gray-600 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12"></path>
@@ -2329,13 +2938,134 @@
 
                 <!-- Modal Footer -->
                 <div class="flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                    <button @click="showAddModal = false"
-                        class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">
+                    <button @click="showAddModal = false; editingPortfolioId = null"
+                        class="flex-1 px-6 py-2.5 border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
                         İptal
                     </button>
                     <button @click="saveNewPortfolio()"
                         class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                         Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD/EDIT DEMAND MODAL -->
+    <div x-show="showAddDemandModal" x-cloak class="fixed inset-0 z-[9999] overflow-y-auto"
+        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+        <!-- Dark Overlay -->
+        <div class="fixed inset-0 bg-black/50 transition-opacity"
+            @click="showAddDemandModal = false; editingDemandId = null"></div>
+
+        <!-- Modal Container -->
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg transform transition-all" @click.stop>
+
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-900"
+                        x-text="editingDemandId ? 'Talep Düzenle' : 'Yeni Talep Ekle'"></h2>
+                    <button @click="showAddDemandModal = false; editingDemandId = null"
+                        class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body (Form) -->
+                <div class="px-6 py-4 max-h-[70vh] overflow-y-auto">
+                    <div class="space-y-4">
+                        <!-- Title -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Başlık <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" x-model="newDemand.title"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                placeholder="Örn: Bebek Sahil Lüks Daire">
+                        </div>
+
+                        <!-- Type & Category -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Tip <span
+                                        class="text-red-500">*</span></label>
+                                <select x-model="newDemand.type"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                                    <option value="Satılık">Satılık</option>
+                                    <option value="Kiralık">Kiralık</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori <span
+                                        class="text-red-500">*</span></label>
+                                <select x-model="newDemand.category"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                                    <option value="">Seçiniz</option>
+                                    <option value="Daire">Daire</option>
+                                    <option value="Villa">Villa</option>
+                                    <option value="Arsa">Arsa</option>
+                                    <option value="İşyeri">İşyeri</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Budget Range -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Min Bütçe (TL) <span
+                                        class="text-red-500">*</span></label>
+                                <input type="number" x-model="newDemand.budget"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                    placeholder="45000000">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Max Bütçe (TL)</label>
+                                <input type="number" x-model="newDemand.maxBudget"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                    placeholder="55000000">
+                            </div>
+                        </div>
+
+                        <!-- Location & Rooms -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Bölge</label>
+                                <input type="text" x-model="newDemand.district"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                    placeholder="Bebek, Beşiktaş">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Oda</label>
+                                <input type="text" x-model="newDemand.rooms"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                    placeholder="3+1">
+                            </div>
+                        </div>
+
+                        <!-- Urgent Toggle -->
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" x-model="newDemand.isUrgent" id="urgentToggle"
+                                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="urgentToggle" class="text-sm font-semibold text-gray-700">Acil Talep</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                    <button @click="showAddDemandModal = false; editingDemandId = null"
+                        class="flex-1 px-6 py-2.5 border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                        İptal
+                    </button>
+                    <button @click="saveDemand()"
+                        class="flex-1 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors">
+                        <span x-text="editingDemandId ? 'Güncelle' : 'Kaydet'"></span>
                     </button>
                 </div>
             </div>
