@@ -969,49 +969,245 @@
         </div>
         <!-- NETWORK/AĞ VIEW -->
         <div x-show="currentTab === 'network'" class="pb-24 w-full" x-cloak>
-            <!-- Header -->
-            <div class="px-5 py-4 border-b border-gray-100">
-                <h2 class="text-xl font-bold text-gray-900">Ağ</h2>
-                <p class="text-sm text-gray-500 mt-1">Broker ağınızı yönetin</p>
-            </div>
-
-            <!-- Search & Filter -->
-            <div class="px-5 py-4 border-b border-gray-50">
-                <div class="relative">
-                    <input type="text" placeholder="İsim veya şehir ara..."
-                        class="w-full bg-white border border-gray-200 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+            <!-- Header with Tabs -->
+            <div class="px-5 py-4 border-b border-gray-100 bg-white sticky top-0 z-10">
+                <h2 class="text-xl font-bold text-gray-900">Ağım</h2>
+                <div class="flex gap-4 mt-4 overflow-x-auto no-scrollbar">
+                    <button @click="networkTab = 'discover'"
+                        class="pb-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors"
+                        :class="networkTab === 'discover' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                        Keşfet
+                    </button>
+                    <button @click="networkTab = 'my_connections'"
+                        class="pb-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors"
+                        :class="networkTab === 'my_connections' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                        Bağlantılarım (<span x-text="connections.length"></span>)
+                    </button>
+                    <button @click="networkTab = 'requests'"
+                        class="pb-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors relative"
+                        :class="networkTab === 'requests' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                        İstekler
+                        <span x-show="connectionRequests.length > 0"
+                            class="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full"
+                            x-text="connectionRequests.length"></span>
+                    </button>
+                    <button @click="networkTab = 'network_demands'"
+                        class="pb-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors"
+                        :class="networkTab === 'network_demands' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                        Ağdan Talepler
+                    </button>
                 </div>
             </div>
 
-            <!-- Network List -->
-            <div class="px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                <template x-for="broker in network" :key="broker.id">
-                    <div
-                        class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                            <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0"
-                                :class="broker.color" x-text="broker.initials"></div>
-                            <div class="flex-1 min-w-0 w-full sm:w-auto">
-                                <h3 class="font-bold text-gray-900" x-text="broker.name"></h3>
-                                <p class="text-sm text-gray-500" x-text="broker.location"></p>
-                                <div class="flex flex-wrap gap-2 mt-1">
-                                    <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full"
-                                        x-text="(broker.listings || 0) + ' İlan'"></span>
-                                    <span class="text-xs px-2 py-0.5 rounded-full"
-                                        :class="broker.status === 'Aktif' ? 'bg-green-50 text-green-700' : (broker.status === 'Meşgul' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600')"
-                                        x-text="broker.status"></span>
+            <!-- DISCOVER TAB -->
+            <div x-show="networkTab === 'discover'" class="p-5">
+                <div class="mb-4">
+                    <input type="text" placeholder="Yeni brokerlar keşfedin..."
+                        class="w-full bg-gray-50 border-gray-200 rounded-xl px-4 py-2.5 text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 gap-3">
+                    <template x-for="broker in suggestedBrokers" :key="broker.id">
+                        <div x-show="broker.id !== user.id && broker.connectionStatus === 'none'"
+                            @click="viewBrokerProfile(broker.id)"
+                            class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden relative">
+                                <img x-show="broker.avatar_url" :src="broker.avatar_url"
+                                    class="w-full h-full object-cover">
+                                <div x-show="!broker.avatar_url"
+                                    class="w-full h-full flex items-center justify-center bg-purple-600 text-white font-bold text-lg"
+                                    x-text="broker.name?.charAt(0).toUpperCase()"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-gray-900 truncate" x-text="broker.name"></h4>
+                                <p class="text-xs text-gray-500 truncate" x-text="broker.title || 'Broker'"></p>
+                                <span
+                                    class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full mt-1 inline-block"
+                                    x-text="broker.company || 'Şirket Yok'"></span>
+                            </div>
+                            <button
+                                class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-100">
+                                Profil
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="suggestedBrokers.filter(b => b.id !== user.id && b.connectionStatus === 'none').length === 0"
+                    class="text-center py-10 text-gray-500">
+                    <p>Önerilen yeni broker bulunamadı.</p>
+                </div>
+            </div>
+
+            <!-- MY CONNECTIONS TAB -->
+            <div x-show="networkTab === 'my_connections'" class="p-5">
+                <!-- Search -->
+                <div class="mb-4">
+                    <input type="text" placeholder="Bağlantılarınızda arayın..."
+                        class="w-full bg-gray-50 border-gray-200 rounded-xl px-4 py-2.5 text-sm">
+                </div>
+
+                <div x-show="connections.length === 0"
+                    class="text-center py-10 text-gray-500 bg-white rounded-xl border border-dashed border-gray-200">
+                    <div class="text-4xl mb-3">🤝</div>
+                    <p class="font-medium text-gray-900">Henüz bağlantınız yok</p>
+                    <p class="text-sm">Diğer brokerları bulun ve ağınıza ekleyin.</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3">
+                    <template x-for="conn in connections" :key="conn.id">
+                        <div @click="viewBrokerProfile(conn.broker_id)"
+                            class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden relative">
+                                <img x-show="conn.broker?.avatar_url" :src="conn.broker?.avatar_url"
+                                    class="w-full h-full object-cover">
+                                <div x-show="!conn.broker?.avatar_url"
+                                    class="w-full h-full flex items-center justify-center bg-blue-600 text-white font-bold text-lg"
+                                    x-text="conn.broker?.name?.charAt(0).toUpperCase()"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-gray-900 truncate" x-text="conn.broker?.name"></h4>
+                                <p class="text-xs text-gray-500 truncate" x-text="conn.broker?.title || 'Broker'"></p>
+                                <p class="text-xs text-gray-400 truncate" x-text="conn.broker?.company"></p>
+                            </div>
+                            <button class="p-2 text-gray-400 hover:text-blue-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- REQUESTS TAB -->
+            <div x-show="networkTab === 'requests'" class="p-5">
+
+                <!-- RECEIVED REQUESTS -->
+                <h3 class="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Gelen İstekler</h3>
+                <div x-show="connectionRequests.length === 0"
+                    class="text-gray-500 text-sm mb-6 italic bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200 text-center">
+                    Bekleyen istek yok.
+                </div>
+                <div class="space-y-3 mb-8">
+                    <template x-for="req in connectionRequests" :key="req.id">
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm animate-fade-in">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden relative">
+                                    <img x-show="req.requester?.avatar_url" :src="req.requester?.avatar_url"
+                                        class="w-full h-full object-cover">
+                                    <div x-show="!req.requester?.avatar_url"
+                                        class="w-full h-full flex items-center justify-center bg-blue-600 text-white font-bold"
+                                        x-text="req.requester?.name?.charAt(0).toUpperCase()"></div>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm" x-text="req.requester?.name"></p>
+                                    <p class="text-xs text-gray-500" x-text="req.requester?.title || 'Broker'"></p>
                                 </div>
                             </div>
-                            <button @click="sendMessage(broker.name)"
-                                class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Mesaj</button>
+                            <div class="flex gap-2">
+                                <button @click="acceptConnectionRequest(req.id)"
+                                    class="flex-1 bg-blue-600 text-white py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Kabul
+                                    Et</button>
+                                <button @click="rejectConnectionRequest(req.id)"
+                                    class="flex-1 bg-gray-100 text-gray-700 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors">Reddet</button>
+                                <button @click="viewBrokerProfile(req.requester_id)"
+                                    class="px-3 bg-gray-50 text-gray-600 rounded-lg text-sm font-semibold hover:bg-gray-100 transition-colors">Profil</button>
+                            </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
+
+                <!-- SENT REQUESTS -->
+                <h3 class="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Gönderilen İstekler</h3>
+                <div x-show="sentRequests.length === 0"
+                    class="text-gray-500 text-sm italic bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200 text-center">
+                    Bekleyen gönderilmiş istek yok.
+                </div>
+                <div class="space-y-3">
+                    <template x-for="req in sentRequests" :key="req.id">
+                        <div
+                            class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden relative">
+                                    <img x-show="req.receiver?.avatar_url" :src="req.receiver?.avatar_url"
+                                        class="w-full h-full object-cover">
+                                    <div x-show="!req.receiver?.avatar_url"
+                                        class="w-full h-10 flex items-center justify-center bg-gray-400 text-white font-bold"
+                                        x-text="req.receiver?.name?.charAt(0).toUpperCase()"></div>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm" x-text="req.receiver?.name"></p>
+                                    <span
+                                        class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Bekliyor</span>
+                                </div>
+                            </div>
+                            <button @click="viewBrokerProfile(req.receiver_id)"
+                                class="text-blue-600 text-sm font-medium hover:underline">Görüntüle</button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- NETWORK DEMANDS TAB -->
+            <div x-show="networkTab === 'network_demands'" class="p-5">
+                <!-- Boş Durum -->
+                <div x-show="networkDemands.length === 0"
+                    class="text-center py-10 bg-white rounded-xl border border-dashed border-gray-200">
+                    <div class="text-4xl mb-3">📭</div>
+                    <p class="font-medium text-gray-900">Henüz ağdan talep yok</p>
+                    <p class="text-sm text-gray-500">Bağlantılarınız talep eklediğinde burada görünecektir.</p>
+                </div>
+
+                <!-- Talepler Listesi -->
+                <div class="space-y-3">
+                    <template x-for="demand in networkDemands" :key="demand.id">
+                        <div
+                            class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-shadow">
+                            <!-- Broker Bilgisi (Üstte) -->
+                            <div class="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                                    <img x-show="demand.broker_avatar_url" :src="demand.broker_avatar_url"
+                                        class="w-full h-full object-cover">
+                                    <div x-show="!demand.broker_avatar_url"
+                                        class="w-full h-full flex items-center justify-center bg-blue-600 text-white text-xs font-bold"
+                                        x-text="demand.broker_name?.charAt(0).toUpperCase()"></div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-gray-900 truncate" x-text="demand.broker_name"></p>
+                                    <p class="text-xs text-gray-500 truncate" x-text="demand.broker_title || 'Broker'">
+                                    </p>
+                                </div>
+                                <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Ağımdan</span>
+                            </div>
+
+                            <!-- Talep Detayları -->
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span class="text-gray-500">Başlık:</span>
+                                    <span class="font-medium text-gray-900"
+                                        x-text="demand.title || 'Belirtilmemiş'"></span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Bölge:</span>
+                                    <span class="font-medium text-gray-900"
+                                        x-text="`${demand.district}, ${demand.city}`"></span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Bütçe:</span>
+                                    <span class="font-medium text-green-700"
+                                        x-text="`${demand.budget?.toLocaleString('tr-TR')} - ${demand.max_budget?.toLocaleString('tr-TR')} TL`"></span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Tarih:</span>
+                                    <span class="font-medium text-gray-900"
+                                        x-text="new Date(demand.created_at).toLocaleDateString('tr-TR')"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
         <!-- PORTFOLIOS/PORTFÖYLER VIEW -->
@@ -1546,6 +1742,122 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- BROKER PROFILE MODAL -->
+        <div x-show="showBrokerModal" @click.self="showBrokerModal = false"
+            class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" style="display: none;">
+            <div @click.stop class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+                    <h2 class="text-xl font-bold">Broker Profili</h2>
+                    <button @click="showBrokerModal = false" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6" x-show="selectedBroker">
+                    <!-- Cover & Avatar -->
+                    <div class="h-32 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg relative mb-16">
+                        <img x-show="selectedBroker?.cover_url" :src="selectedBroker?.cover_url"
+                            class="w-full h-full object-cover rounded-lg">
+                        <div class="absolute -bottom-12 left-6">
+                            <div
+                                class="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-gray-200 overflow-hidden">
+                                <img x-show="selectedBroker?.avatar_url" :src="selectedBroker?.avatar_url"
+                                    class="w-full h-full object-cover">
+                                <div x-show="!selectedBroker?.avatar_url"
+                                    class="w-full h-full flex items-center justify-center text-3xl font-bold text-white bg-blue-600"
+                                    x-text="selectedBroker?.name?.charAt(0).toUpperCase()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Name & Title -->
+                    <div class="mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900" x-text="selectedBroker?.name"></h3>
+                        <p class="text-gray-600" x-text="selectedBroker?.title || 'Broker'"></p>
+                        <p class="text-sm text-gray-500" x-text="selectedBroker?.company"></p>
+                        <span x-show="selectedBroker?.ttyb_verified"
+                            class="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium mt-2">
+                            ✓ Doğrulanmış Broker
+                        </span>
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="mb-4" x-show="selectedBroker?.bio">
+                        <h4 class="font-semibold text-gray-900 mb-2">Hakkında</h4>
+                        <p class="text-gray-700 whitespace-pre-wrap" x-text="selectedBroker?.bio"></p>
+                    </div>
+
+                    <!-- Service Areas -->
+                    <div class="mb-4" x-show="selectedBroker?.service_areas && selectedBroker.service_areas.length > 0">
+                        <h4 class="font-semibold text-gray-900 mb-2">Hizmet Bölgeleri</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="area in selectedBroker?.service_areas" :key="area">
+                                <span
+                                    class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-sm border border-blue-200">
+                                    📍 <span x-text="`${area.district}, ${area.city}`"></span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Specialties -->
+                    <div class="mb-4" x-show="selectedBroker?.specialties && selectedBroker.specialties.length > 0">
+                        <h4 class="font-semibold text-gray-900 mb-2">Uzmanlık Alanları</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="specialty in selectedBroker?.specialties" :key="specialty">
+                                <span
+                                    class="bg-purple-50 text-purple-700 px-2 py-1 rounded-full text-sm border border-purple-200 font-medium">
+                                    #<span x-text="specialty"></span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Connection Action Button -->
+                    <div class="mt-6 pt-4 border-t">
+                        <!-- No Connection -->
+                        <button x-show="selectedBroker?.connectionStatus === 'none'"
+                            @click="sendConnectionRequest(selectedBroker.id)"
+                            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                            🤝 Ağına Ekle
+                        </button>
+
+                        <!-- Pending Sent -->
+                        <button x-show="selectedBroker?.connectionStatus === 'pending_sent'" disabled
+                            class="w-full bg-gray-200 text-gray-600 py-3 rounded-lg font-semibold cursor-not-allowed">
+                            ⏳ İstek Gönderildi
+                        </button>
+
+                        <!-- Pending Received -->
+                        <div x-show="selectedBroker?.connectionStatus === 'pending_received'" class="flex gap-2">
+                            <button
+                                @click="acceptConnectionRequest(connectionRequests.find(r => r.requester_id === selectedBroker.id)?.id)"
+                                class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+                                ✓ Kabul Et
+                            </button>
+                            <button
+                                @click="rejectConnectionRequest(connectionRequests.find(r => r.requester_id === selectedBroker.id)?.id)"
+                                class="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700">
+                                ✗ Reddet
+                            </button>
+                        </div>
+
+                        <!-- Connected -->
+                        <button x-show="selectedBroker?.connectionStatus === 'connected'" disabled
+                            class="w-full bg-green-100 text-green-800 py-3 rounded-lg font-semibold cursor-not-allowed">
+                            ✓ Bağlantıdasınız
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2160,6 +2472,15 @@
 
                     // Specialties (Uzmanlık Alanları)
                     tempSpecialty: '', // Geçici hashtag input
+
+                    // Networking (Bağlantı Sistemi)
+                    connectionRequests: [], // Gelen bağlantı istekleri
+                    sentRequests: [], // Gönderilen istekler
+                    connections: [], // Kabul edilmiş bağlantılar
+                    selectedBroker: null, // Modal için seçili broker
+                    showBrokerModal: false, // Broker profil modal'ı
+                    suggestedBrokers: [], // Önerilen brokerlar (Keşfet)
+                    networkTab: 'discover', // Ağ sekmesi alt-menüsü
                     authMode: 'login', // login, register
                     authEmail: '',
                     authPassword: '',
@@ -2491,6 +2812,11 @@
                             if (this.user) {
                                 await this.fetchData();
                                 await this.fetchProfile(); // Load user profile
+                                await this.fetchConnectionRequests(); // Load networking data
+                                await this.fetchSentRequests();
+                                await this.fetchConnections();
+                                await this.fetchSuggestedBrokers(); // Load suggested brokers
+                                await this.fetchNetworkDemands(); // Load network demands
                             }
                         } catch (error) {
                             console.error('Init error:', error);
@@ -2900,6 +3226,242 @@
                             this.userProfile.cover_url = url;
                             await this.saveProfile();
                             await this.fetchProfile(); // Refresh to show new image
+                        }
+                    },
+
+                    // NETWORKING DATA FETCH
+                    async fetchConnectionRequests() {
+                        if (!this.user) return;
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('network_connections')
+                                .select(`
+                                    *,
+                                    requester:profiles!network_connections_requester_id_fkey(*)
+                                `)
+                                .eq('receiver_id', this.user.id)
+                                .eq('status', 'pending');
+
+                            if (error) throw error;
+                            this.connectionRequests = data || [];
+                            console.log('Connection requests loaded:', this.connectionRequests.length);
+                        } catch (error) {
+                            console.error('Error fetching connection requests:', error);
+                        }
+                    },
+
+                    async fetchSentRequests() {
+                        if (!this.user) return;
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('network_connections')
+                                .select(`
+                                    *,
+                                    receiver:profiles!network_connections_receiver_id_fkey(*)
+                                `)
+                                .eq('requester_id', this.user.id)
+                                .eq('status', 'pending');
+
+                            if (error) throw error;
+                            this.sentRequests = data || [];
+                            console.log('Sent requests loaded:', this.sentRequests.length);
+                        } catch (error) {
+                            console.error('Error fetching sent requests:', error);
+                        }
+                    },
+
+                    async fetchConnections() {
+                        if (!this.user) return;
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('network_connections')
+                                .select(`
+                                    *,
+                                    requester:profiles!network_connections_requester_id_fkey(*),
+                                    receiver:profiles!network_connections_receiver_id_fkey(*)
+                                `)
+                                .eq('status', 'accepted')
+                                .or(`requester_id.eq.${this.user.id},receiver_id.eq.${this.user.id}`);
+
+                            if (error) throw error;
+
+                            // Map to get the "other" person's profile
+                            this.connections = (data || []).map(conn => {
+                                const otherPerson = conn.requester_id === this.user.id
+                                    ? conn.receiver
+                                    : conn.requester;
+                                return {
+                                    ...conn,
+                                    broker: otherPerson,
+                                    broker_id: otherPerson.id
+                                };
+                            });
+
+                            console.log('Connections loaded:', this.connections.length);
+                        } catch (error) {
+                            console.error('Error fetching connections:', error);
+                        }
+                    },
+
+                    // NETWORKING ACTIONS
+                    async getConnectionStatus(brokerId) {
+                        if (!this.user || !brokerId) return 'none';
+
+                        // Check if already connected
+                        const connected = this.connections.some(c => c.broker_id === brokerId);
+                        if (connected) return 'connected';
+
+                        // Check if pending request sent
+                        const sentPending = this.sentRequests.some(r => r.receiver_id === brokerId);
+                        if (sentPending) return 'pending_sent';
+
+                        // Check if pending request received
+                        const receivedPending = this.connectionRequests.some(r => r.requester_id === brokerId);
+                        if (receivedPending) return 'pending_received';
+
+                        return 'none';
+                    },
+
+                    async sendConnectionRequest(receiverId) {
+                        if (!this.user) return;
+
+                        // Validation 1: Cannot send to self
+                        if (receiverId === this.user.id) {
+                            alert('Kendinize bağlantı isteği gönderemezsiniz!');
+                            return;
+                        }
+
+                        // Validation 2: Check if connection already exists
+                        const status = await this.getConnectionStatus(receiverId);
+                        if (status !== 'none') {
+                            if (status === 'connected') alert('Zaten bağlantıdasınız!');
+                            else if (status === 'pending_sent') alert('Zaten bir istek gönderdiniz!');
+                            else if (status === 'pending_received') alert('Bu kişiden zaten bir istek aldınız!');
+                            return;
+                        }
+
+                        try {
+                            const { error } = await supabase
+                                .from('network_connections')
+                                .insert({
+                                    requester_id: this.user.id,
+                                    receiver_id: receiverId,
+                                    status: 'pending'
+                                });
+
+                            if (error) throw error;
+
+                            await this.fetchSentRequests();
+                            this.showBrokerModal = false;
+                            alert('Bağlantı isteği gönderildi!');
+                        } catch (error) {
+                            console.error('Error sending connection request:', error);
+                            alert('İstek gönderilemedi!');
+                        }
+                    },
+
+                    async acceptConnectionRequest(requestId) {
+                        if (!this.user) return;
+
+                        try {
+                            const { error } = await supabase
+                                .from('network_connections')
+                                .update({ status: 'accepted', updated_at: new Date().toISOString() })
+                                .eq('id', requestId);
+
+                            if (error) throw error;
+
+                            await this.fetchConnectionRequests();
+                            await this.fetchConnections();
+                            alert('Bağlantı kabul edildi!');
+                        } catch (error) {
+                            console.error('Error accepting connection:', error);
+                            alert('Kabul edilemedi!');
+                        }
+                    },
+
+                    async rejectConnectionRequest(requestId) {
+                        if (!this.user) return;
+
+                        try {
+                            const { error } = await supabase
+                                .from('network_connections')
+                                .delete()
+                                .eq('id', requestId);
+
+                            if (error) throw error;
+
+                            await this.fetchConnectionRequests();
+                            alert('Bağlantı isteği reddedildi.');
+                        } catch (error) {
+                            console.error('Error rejecting connection:', error);
+                            alert('Reddedilemedi!');
+                        }
+                    },
+
+                    async viewBrokerProfile(brokerId) {
+                        if (!brokerId) return;
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('profiles')
+                                .select('*')
+                                .eq('id', brokerId)
+                                .single();
+
+                            if (error) throw error;
+
+                            this.selectedBroker = data;
+                            this.selectedBroker.connectionStatus = await this.getConnectionStatus(brokerId);
+                            this.showBrokerModal = true;
+                        } catch (error) {
+                            console.error('Error viewing broker profile:', error);
+                            alert('Profil yüklenemedi!');
+                        }
+                    },
+
+                    async fetchSuggestedBrokers() {
+                        if (!this.user) return;
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('profiles')
+                                .select('*')
+                                .neq('id', this.user.id)
+                                .limit(20);
+
+                            if (error) throw error;
+
+                            // Calculate connection status for each broker
+                            this.suggestedBrokers = await Promise.all((data || []).map(async b => {
+                                const status = await this.getConnectionStatus(b.id);
+                                return { ...b, connectionStatus: status };
+                            }));
+                            console.log('Suggested brokers loaded:', this.suggestedBrokers.length);
+                        } catch (error) {
+                            console.error('Error fetching suggested brokers:', error);
+                        }
+                    },
+
+                    async fetchNetworkDemands() {
+                        if (!this.user) return;
+
+                        try {
+                            const { data, error } = await supabase.rpc('get_network_demands');
+
+                            if (error) {
+                                console.error('Error fetching network demands:', error);
+                                return;
+                            }
+
+                            console.log('Raw network demands data:', data);
+                            this.networkDemands = data || [];
+                            console.log('Network demands loaded:', this.networkDemands.length);
+                        } catch (error) {
+                            console.error('Error in fetchNetworkDemands:', error);
                         }
                     },
 
