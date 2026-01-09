@@ -255,16 +255,31 @@
                     </svg>
                     Ağ
                 </button>
+                <button @click="currentTab = 'profile'"
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors"
+                    :class="currentTab === 'profile' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                    Profil
+                </button>
             </nav>
 
             <div class="p-4 border-t border-gray-100">
                 <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer mb-2">
                     <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                        <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="w-full h-full object-cover">
+                        <img x-show="userProfile?.avatar_url" :src="userProfile?.avatar_url" alt="Profile"
+                            class="w-full h-full object-cover">
+                        <div x-show="!userProfile?.avatar_url"
+                            class="w-full h-full flex items-center justify-center text-lg font-bold text-white bg-blue-600"
+                            x-text="user?.email?.charAt(0).toUpperCase()">
+                        </div>
                     </div>
                     <div>
-                        <p class="text-sm font-bold text-gray-900">Ahmet Yılmaz</p>
-                        <p class="text-xs text-gray-500">Broker</p>
+                        <p class="text-sm font-bold text-gray-900"
+                            x-text="userProfile?.name || user?.email || 'Kullanıcı'"></p>
+                        <p class="text-xs text-gray-500" x-text="userProfile?.title || 'Broker'"></p>
                     </div>
                 </div>
                 <button @click="seedData()"
@@ -709,8 +724,13 @@
 
         <!-- MATCHES VIEW -->
         <div x-show="currentTab === 'matches'" class="pb-24 w-full" x-cloak>
-            <div class="px-5 py-4 border-b border-gray-100">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h2 class="text-xl font-bold text-gray-900">Eşleşmeler</h2>
+                <select x-model="matchSortOrder"
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                    <option value="newest">Yeniden Eskiye</option>
+                    <option value="oldest">Eskiden Yeniye</option>
+                </select>
             </div>
 
             <!-- Tabs -->
@@ -843,7 +863,7 @@
                                         x-text="match.name.charAt(0)"></div>
                                     <h4 class="font-bold text-gray-900 text-sm mb-1" x-text="match.name"></h4>
                                     <p class="text-emerald-600 font-semibold text-sm mb-1">Bütçe Uygun</p>
-                                    <p class="text-gray-500 text-xs" x-text="match.location"></p>
+                                    <p class="text-gray-500 text-xs" x-text="match.clientLocation"></p>
                                     <p class="text-gray-400 text-xs" x-text="match.specs"></p>
                                 </div>
                             </div>
@@ -1249,6 +1269,287 @@
                 </svg>
             </button>
         </div>
+
+        <!-- PROFILE VIEW -->
+        <div x-show="currentTab === 'profile'" class="pb-24 w-full" x-cloak>
+            <!-- Header -->
+            <div class="px-5 py-4 border-b border-gray-100">
+                <h2 class="text-xl font-bold text-gray-900">Profilim</h2>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="max-w-4xl mx-auto p-5">
+                <!-- Cover Photo -->
+                <div
+                    class="h-48 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-2xl relative overflow-hidden group">
+                    <img x-show="userProfile?.cover_url" :src="userProfile?.cover_url"
+                        class="w-full h-full object-cover">
+                    <!-- Cover Upload Button (appears on hover) -->
+                    <div
+                        class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <label
+                            class="cursor-pointer bg-white text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                            📷 Kapak Fotoğrafı Değiştir
+                            <input type="file" accept="image/*" @change="handleCoverUpload" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Profile Card -->
+                <div class="bg-white rounded-b-2xl shadow-lg p-6 -mt-16 relative">
+                    <!-- Avatar & Basic Info -->
+                    <div class="flex items-end gap-4 mb-6">
+                        <div
+                            class="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gray-200 overflow-hidden flex-shrink-0 relative group">
+                            <img x-show="userProfile?.avatar_url" :src="userProfile?.avatar_url"
+                                class="w-full h-full object-cover">
+                            <div x-show="!userProfile?.avatar_url"
+                                class="w-full h-full flex items-center justify-center text-4xl font-bold text-white bg-blue-600"
+                                x-text="user?.email?.charAt(0).toUpperCase()">
+                            </div>
+                            <!-- Avatar Upload Button (appears on hover) -->
+                            <div
+                                class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <label
+                                    class="cursor-pointer bg-white text-gray-800 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-100 transition-colors">
+                                    📷 Değiştir
+                                    <input type="file" accept="image/*" @change="handleAvatarUpload" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 mb-2">
+                            <h1 class="text-2xl font-bold text-gray-900"
+                                x-text="userProfile?.name || user?.email || 'İsim Belirtilmemiş'"></h1>
+                            <p class="text-gray-600" x-text="userProfile?.title || 'Unvan Belirtilmemiş'"></p>
+                            <p class="text-sm text-gray-500" x-show="userProfile?.company"
+                                x-text="userProfile?.company"></p>
+
+                            <!-- Verified Badge -->
+                            <div x-show="userProfile?.ttyb_verified" class="mt-2">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">
+                                    ✓ Doğrulanmış Broker
+                                </span>
+                            </div>
+                        </div>
+
+                        <button @click="editMode = true"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Düzenle
+                        </button>
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="border-t pt-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Hakkımda</h3>
+                        <p class="text-gray-700 whitespace-pre-wrap"
+                            x-text="userProfile?.bio || 'Henüz biyografi eklenmemiş.'"></p>
+                    </div>
+
+                    <!-- Service Areas -->
+                    <div class="border-t pt-4 mt-4"
+                        x-show="userProfile?.service_areas && userProfile.service_areas.length > 0">
+                        <h3 class="font-semibold text-gray-900 mb-3">Hizmet Bölgeleri</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="area in userProfile.service_areas" :key="area">
+                                <span
+                                    class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm border border-blue-200">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <span x-text="`${area.district}, ${area.city}`"></span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Specialties -->
+                    <div class="border-t pt-4 mt-4"
+                        x-show="userProfile?.specialties && userProfile.specialties.length > 0">
+                        <h3 class="font-semibold text-gray-900 mb-3">Uzmanlık Alanları</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="specialty in userProfile.specialties" :key="specialty">
+                                <span
+                                    class="inline-flex items-center gap-1 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full text-sm border border-purple-200 font-medium">
+                                    <span x-text="`#${specialty}`"></span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="border-t pt-4 mt-4" x-show="userProfile?.phone">
+                        <h3 class="font-semibold text-gray-900 mb-2">İletişim</h3>
+                        <p class="text-gray-700">
+                            <span class="font-medium">Telefon:</span>
+                            <span x-text="userProfile?.phone"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Mode Modal -->
+            <div x-show="editMode"
+                class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
+                <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+                    <h2 class="text-2xl font-bold mb-4">Profili Düzenle</h2>
+
+                    <form @submit.prevent="saveProfile()">
+                        <!-- Name -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-1">İsim Soyisim *</label>
+                            <input x-model="userProfile.name" type="text" required
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <!-- Title -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-1">Unvan</label>
+                            <input x-model="userProfile.title" type="text" placeholder="Örn: Gayrimenkul Danışmanı"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <!-- Company -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-1">Şirket / Marka</label>
+                            <input x-model="userProfile.company" type="text" placeholder="Örn: Remax Hills"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-1">Telefon</label>
+                            <input x-model="userProfile.phone" type="tel" placeholder="05XX XXX XX XX"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <!-- Bio -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-1">Hakkımda</label>
+                            <textarea x-model="userProfile.bio" rows="4"
+                                placeholder="Kendinizi tanıtın, deneyimlerinizi paylaşın..."
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"></textarea>
+                        </div>
+
+                        <!-- Service Areas (Hizmet Bölgeleri) -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-2">Hizmet Bölgeleri</label>
+                            <p class="text-xs text-gray-500 mb-3">Hangi bölgelerde aktif olarak çalışıyorsunuz?</p>
+
+                            <!-- Add New Area -->
+                            <div class="flex gap-2 mb-3">
+                                <select x-model="tempServiceCity" @change="tempServiceDistrict = ''"
+                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <option value="">Şehir Seçin</option>
+                                    <template x-for="city in Object.keys(locationData)" :key="city">
+                                        <option :value="city" x-text="city"></option>
+                                    </template>
+                                </select>
+
+                                <select x-model="tempServiceDistrict" :disabled="!tempServiceCity"
+                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 disabled:bg-gray-100">
+                                    <option value="">İlçe Seçin</option>
+                                    <template x-if="tempServiceCity && locationData[tempServiceCity]">
+                                        <template x-for="district in Object.keys(locationData[tempServiceCity])"
+                                            :key="district">
+                                            <option :value="district" x-text="district"></option>
+                                        </template>
+                                    </template>
+                                </select>
+
+                                <button type="button" @click="addServiceArea()"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                                    + Ekle
+                                </button>
+                            </div>
+
+                            <!-- Display Added Areas -->
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="(area, index) in userProfile.service_areas" :key="index">
+                                    <span
+                                        class="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <span x-text="`${area.district}, ${area.city}`"></span>
+                                        <button type="button" @click="removeServiceArea(index)"
+                                            class="hover:text-blue-900">
+                                            ×
+                                        </button>
+                                    </span>
+                                </template>
+                                <span x-show="userProfile.service_areas.length === 0" class="text-sm text-gray-400">
+                                    Henüz bölge eklenmemiş
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Specialties (Uzmanlık Alanları) -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-2">Uzmanlık Alanları</label>
+                            <p class="text-xs text-gray-500 mb-3">Hangi alanlarda uzmansınız? (Örn: Lüks Konut, Ticari,
+                                Arsa)</p>
+
+                            <!-- Add New Specialty -->
+                            <div class="flex gap-2 mb-3">
+                                <input x-model="tempSpecialty" @keydown.enter.prevent="addSpecialty()" type="text"
+                                    placeholder="Uzmanlık alanı yazın ve Enter'a basın"
+                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                <button type="button" @click="addSpecialty()"
+                                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm">
+                                    + Ekle
+                                </button>
+                            </div>
+
+                            <!-- Display Added Specialties -->
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="(specialty, index) in userProfile.specialties" :key="index">
+                                    <span
+                                        class="inline-flex items-center gap-2 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        <span x-text="`#${specialty}`"></span>
+                                        <button type="button" @click="removeSpecialty(index)"
+                                            class="hover:text-purple-900 font-bold">
+                                            ×
+                                        </button>
+                                    </span>
+                                </template>
+                                <span x-show="userProfile.specialties.length === 0" class="text-sm text-gray-400">
+                                    Henüz uzmanlık alanı eklenmemiş
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- TTYB Privacy Note -->
+                        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <label class="block text-sm font-semibold mb-1">TTYB No (Opsiyonel)</label>
+                            <input x-model="userProfile.ttyb_number" type="text" placeholder="12345"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 mb-2">
+                            <p class="text-xs text-blue-700">
+                                🔒 Bu bilgi profilinizde <strong>gösterilmez</strong>, sadece doğrulama için kullanılır.
+                                TTYB numarası girerseniz "Doğrulanmış Broker" rozeti alırsınız.
+                            </p>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex gap-3 mt-6">
+                            <button type="submit"
+                                class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Kaydet
+                            </button>
+                            <button type="button" @click="editMode = false"
+                                class="px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                                İptal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- DEMANDS VIEW -->
         <div x-show="currentTab === 'demands'" class="pb-24 animate-fade-in w-full" x-cloak>
             <!-- Header -->
@@ -1296,9 +1597,18 @@
 
             <!-- Demands Header & Stats -->
             <div class="px-5 mb-6" x-show="currentDemandTab === 'active'">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Talepler</h2>
-                    <p class="text-gray-500 text-sm">Müşteri taleplerini takip edin</p>
+                <div class="mb-6 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Talepler</h2>
+                        <p class="text-gray-500 text-sm">Müşteri taleplerini takip edin</p>
+                    </div>
+                    <div>
+                        <select x-model="demandSortOrder"
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                            <option value="newest">Yeniden Eskiye</option>
+                            <option value="oldest">Eskiden Yeniye</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Stats Cards -->
@@ -1371,7 +1681,7 @@
 
             <!-- MY DEMANDS LIST (Grid) -->
             <div x-show="currentDemandTab === 'active'" class="px-5 pb-20 grid grid-cols-1 md:grid-cols-3 gap-5">
-                <template x-for="demand in demands" :key="demand.id">
+                <template x-for="demand in filteredDemands" :key="demand.id">
                     <div
                         class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <!-- Header -->
@@ -1502,7 +1812,17 @@
             </div>
             <!-- Network Demands List -->
             <div class="px-5 space-y-4" x-show="currentDemandTab === 'network'">
-                <template x-for="demand in networkDemands" :key="demand.id">
+                <!-- Filter Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Ağdan Gelen Talepler</h3>
+                    <select x-model="demandSortOrder"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                        <option value="newest">Yeniden Eskiye</option>
+                        <option value="oldest">Eskiden Yeniye</option>
+                    </select>
+                </div>
+
+                <template x-for="demand in sortedNetworkDemands" :key="demand.id">
                     <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
                         <!-- Header -->
                         <div class="bg-red-50 p-4 flex justify-between items-center">
@@ -1523,12 +1843,6 @@
                                             👤 <span x-text="demand.category"></span>
                                         </span>
                                     </div>
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6
-                                    0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-                                    </path>
-                                    </svg>
-                                    <span x-text="demand.category"></span>
-                                    </span>
                                 </div>
 
                                 <button
@@ -1825,6 +2139,27 @@
                 return {
                     // STATE
                     user: null,
+                    userProfile: {
+                        name: '',
+                        title: '',
+                        company: '',
+                        phone: '',
+                        bio: '',
+                        ttyb_number: '',
+                        ttyb_verified: false,
+                        avatar_url: '',
+                        cover_url: '',
+                        service_areas: [], // Hizmet bölgeleri
+                        specialties: [] // Uzmanlık alanları
+                    }, // Profil bilgileri
+                    editMode: false, // Profil düzenleme modu
+
+                    // Service Areas (Hizmet Bölgeleri)
+                    tempServiceCity: '', // Geçici seçim
+                    tempServiceDistrict: '', // Geçici seçim
+
+                    // Specialties (Uzmanlık Alanları)
+                    tempSpecialty: '', // Geçici hashtag input
                     authMode: 'login', // login, register
                     authEmail: '',
                     authPassword: '',
@@ -1835,6 +2170,8 @@
                     currentTab: 'dashboard',
                     currentDemandTab: 'active', // active, pending, completed, archived, network
                     currentDemandFilter: 'all', // all, urgent, match
+                    demandSortOrder: 'newest', // newest, oldest
+                    matchSortOrder: 'newest', // newest, oldest
                     currentListingType: 'satilik', // satilik, kiralik
                     currentCategory: 'all', // all, Villa, Daire, Arsa, İş yeri
                     currentCity: 'all',
@@ -1859,10 +2196,11 @@
                         category: '',
                         budget: '',
                         maxBudget: '',
-                        city: 'İstanbul',
-                        district: '',
-                        district2: '', // 2. lokasyon tercihi
-                        district3: '', // 3. lokasyon tercihi
+                        city: 'İSTANBUL',
+                        location: '', // İlçe
+                        district: '', // 1. Semt/Mahalle tercihi
+                        district2: '', // 2. Semt/Mahalle tercihi
+                        district3: '', // 3. Semt/Mahalle tercihi
                         rooms: '',
                         isUrgent: false
                     },
@@ -1873,7 +2211,7 @@
                         type: 'Satılık',
                         category: '',
                         price: '',
-                        city: 'İstanbul',
+                        city: '',
                         location: '',
                         district: '',
                         district2: '', // Not used for portfolios, but for consistency
@@ -1900,19 +2238,31 @@
                     // Error state
                     errorMessage: '',
 
-                    // Location Data for Dropdowns
+                    // Location Data for Dropdowns (3-level: City > District > Neighborhood)
                     locationData: null,
                     cities: [],
 
                     // Get districts for selected city
                     getDistricts(city) {
                         if (!this.locationData || !city) return [];
-                        return this.locationData.districts[city] || [];
+                        const cityData = this.locationData[city];
+                        return cityData ? Object.keys(cityData).sort() : [];
+                    },
+
+                    // Get neighborhoods for selected district
+                    getNeighborhoods(city, district) {
+                        if (!this.locationData || !city || !district) return [];
+                        const cityData = this.locationData[city];
+                        return cityData && cityData[district] ? cityData[district].sort() : [];
                     },
 
                     // For Portfolio form
                     get portfolioDistricts() {
                         return this.getDistricts(this.newPortfolio.city);
+                    },
+
+                    get portfolioNeighborhoods() {
+                        return this.getNeighborhoods(this.newPortfolio.city, this.newPortfolio.location);
                     },
 
                     // For Demand form
@@ -1949,7 +2299,27 @@
                         } else if (this.currentDemandFilter === 'match') {
                             filtered = filtered.filter(d => d.matchCount > 0);
                         }
+
+                        // Sort by date (Safe handling for missing dates)
+                        filtered.sort((a, b) => {
+                            const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                            const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                            return this.demandSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+                        });
+
                         return filtered;
+                    },
+
+                    // Sorted Network Demands
+                    get sortedNetworkDemands() {
+                        const demands = [...this.networkDemands];
+                        demands.sort((a, b) => {
+                            // Use created_at or fallback to current time logic if missing
+                            const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                            const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                            return this.demandSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+                        });
+                        return demands;
                     },
 
                     get filteredMyPortfolios() {
@@ -2010,14 +2380,25 @@
 
                     // Filtered Matches (Urgency Toggle)
                     get filteredMatches() {
+                        let filtered;
                         if (this.showOnlyUrgent) {
-                            return this.matches.filter(m => {
+                            filtered = this.matches.filter(m => {
                                 // Find the demand for this match
                                 const demand = this.demands.find(d => d.id === m.demand_id);
                                 return demand && (demand.is_urgent || demand.isUrgent);
                             });
+                        } else {
+                            filtered = [...this.matches];
                         }
-                        return this.matches;
+
+                        // Sort by date (Safe handling)
+                        filtered.sort((a, b) => {
+                            const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                            const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                            return this.matchSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+                        });
+
+                        return filtered;
                     },
 
                     get networkActivities() {
@@ -2085,11 +2466,11 @@
                         this.isLoading = true;
 
                         try {
-                            // Load location data for dropdowns
+                            // Load location data for dropdowns (3-level hierarchy)
                             try {
-                                const response = await fetch('assets/locations.json');
+                                const response = await fetch('assets/locations_full.json');
                                 this.locationData = await response.json();
-                                this.cities = this.locationData.cities;
+                                this.cities = Object.keys(this.locationData).sort();
                                 console.log('Location data loaded:', this.cities.length, 'cities');
                             } catch (e) {
                                 console.error('Failed to load location data:', e);
@@ -2109,6 +2490,7 @@
 
                             if (this.user) {
                                 await this.fetchData();
+                                await this.fetchProfile(); // Load user profile
                             }
                         } catch (error) {
                             console.error('Init error:', error);
@@ -2185,19 +2567,66 @@
                             }
                             console.log('Fetched Matches for user:', this.user.id, matches);
                             if (matches && matches.length > 0) {
-                                this.matches = matches.map(m => ({
-                                    ...m,
-                                    title: m.portfolio?.title,
-                                    name: 'Ahmet Yılmaz', // Client name
-                                    price: this.formatPrice(m.portfolio?.price),
-                                    location: m.portfolio?.district,
-                                    specs: `${m.portfolio?.rooms} • ${m.portfolio?.category}`,
-                                    type: m.demand?.type || m.portfolio?.type, // Get type from demand or portfolio
-                                    score: m.score || 95,
-                                    isFavorite: false,
-                                    // Add fallback image
-                                    image: m.portfolio?.image_url || m.portfolio?.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80'
-                                }));
+                                this.matches = matches.map(m => {
+                                    // 1. Format Portfolio Location 
+                                    // New Data: City=MUĞLA, Loc=BODRUM, Dist=YALIKAVAK -> YALIKAVAK, BODRUM, MUĞLA
+                                    // Old Data: Dist="Bebek, İstanbul" -> check duplicates
+                                    const p = m.portfolio || {};
+                                    let pLoc = '';
+                                    const dist = p.district || '';
+                                    const loc = p.location || '';
+                                    const city = p.city || '';
+
+                                    // Robust Deduplication Logic
+                                    // 1. Combine all parts into a single string first
+                                    const rawLoc = `${dist}, ${loc}, ${city}`;
+
+                                    // 2. Split by comma, trim whitespace, remove empty values
+                                    const parts = rawLoc.split(',')
+                                        .map(s => s.trim())
+                                        .filter(s => s.length > 0);
+
+                                    // 3. Use Set to remove exact duplicates (case-insensitive check handled by display logic if needed, but here usually standard)
+                                    // To be safe, we keep the first occurrence of each unique string
+                                    const uniqueParts = [...new Set(parts)];
+
+                                    pLoc = uniqueParts.join(', ');
+
+                                    // 2. Format Client Demand Location
+                                    const d = m.demand || {};
+                                    let dLoc = '';
+
+                                    // Similar logic for client location if needed, but preferred logic is different:
+                                    if (d.district && d.location && d.city) {
+                                        // For demands we want: "Yalıkavak, Gümüşlük (Bodrum, Muğla)"
+                                        // But fallback to simple join if needed
+                                        const hoods = [d.district, d.district2, d.district3].filter(x => x).join(', ');
+                                        // Deduplicate the parent location part too
+                                        const parentLocParts = [d.location, d.city].filter(x => x);
+                                        const uniqueParent = [...new Set(parentLocParts)].join(', ');
+
+                                        dLoc = `${hoods} (${uniqueParent})`;
+                                    } else {
+                                        // Legacy fallback with dedup
+                                        const rawD = `${d.district || ''}, ${d.location || ''}, ${d.city || ''}`;
+                                        const dParts = rawD.split(',').map(s => s.trim()).filter(s => s);
+                                        dLoc = [...new Set(dParts)].join(', ');
+                                    }
+
+                                    return {
+                                        ...m,
+                                        title: p.title,
+                                        name: 'Ahmet Yılmaz', // Client name placeholder
+                                        price: this.formatPrice(p.price),
+                                        location: pLoc,        // Portfolio Location
+                                        clientLocation: dLoc,  // Client Demand Location
+                                        specs: `${p.rooms} • ${p.category}`,
+                                        type: d.type || p.type,
+                                        score: m.score || 95,
+                                        isFavorite: false,
+                                        image: p.image_url || p.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80'
+                                    };
+                                });
                             }
 
                             // MOCK DATA RESTORATION (For Demo Purposes)
@@ -2301,6 +2730,212 @@
                         } catch (error) {
                             console.error('Error loading messages:', error);
                             return [];
+                        }
+                    },
+
+                    // PROFILE MANAGEMENT
+                    async fetchProfile() {
+                        if (!this.user) return;
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('profiles')
+                                .select('*')
+                                .eq('id', this.user.id)
+                                .single();
+
+                            if (error) {
+                                console.error('Profile fetch error:', error);
+                                return;
+                            }
+
+                            // Merge fetched data with existing userProfile to preserve structure
+                            if (data) {
+                                this.userProfile = {
+                                    ...this.userProfile,
+                                    ...data
+                                };
+                            }
+                            console.log('User profile loaded:', this.userProfile);
+                        } catch (error) {
+                            console.error('Error fetching profile:', error);
+                        }
+                    },
+
+                    // SERVICE AREA MANAGEMENT
+                    addServiceArea() {
+                        if (!this.tempServiceCity || !this.tempServiceDistrict) {
+                            alert('Lütfen şehir ve ilçe seçin!');
+                            return;
+                        }
+
+                        // Check if already exists
+                        const exists = this.userProfile.service_areas.some(area =>
+                            area.city === this.tempServiceCity && area.district === this.tempServiceDistrict
+                        );
+
+                        if (exists) {
+                            alert('Bu bölge zaten ekli!');
+                            return;
+                        }
+
+                        this.userProfile.service_areas.push({
+                            city: this.tempServiceCity,
+                            district: this.tempServiceDistrict
+                        });
+
+                        // Reset temp selections
+                        this.tempServiceCity = '';
+                        this.tempServiceDistrict = '';
+                    },
+
+                    removeServiceArea(index) {
+                        this.userProfile.service_areas.splice(index, 1);
+                    },
+
+                    // SPECIALTY HASHTAG MANAGEMENT
+                    normalizeTag(tag) {
+                        // Türkçe karakterleri İngilizce'ye çevir, küçük harfe dönüştür ve boşlukları kaldır
+                        return tag.toLowerCase()
+                            .replace(/ğ/g, 'g')
+                            .replace(/ü/g, 'u')
+                            .replace(/ş/g, 's')
+                            .replace(/ı/g, 'i')
+                            .replace(/ö/g, 'o')
+                            .replace(/ç/g, 'c')
+                            .replace(/\s+/g, '') // Tüm boşlukları kaldır
+                            .trim();
+                    },
+
+                    addSpecialty() {
+                        if (!this.tempSpecialty || this.tempSpecialty.trim() === '') {
+                            return;
+                        }
+
+                        const specialty = this.tempSpecialty.trim();
+
+                        // Check if already exists (normalized comparison)
+                        const normalized = this.normalizeTag(specialty);
+                        const exists = this.userProfile.specialties.some(s =>
+                            this.normalizeTag(s) === normalized
+                        );
+
+                        if (exists) {
+                            alert('Bu uzmanlık alanı zaten ekli!');
+                            return;
+                        }
+
+                        this.userProfile.specialties.push(specialty);
+                        this.tempSpecialty = '';
+                    },
+
+                    removeSpecialty(index) {
+                        this.userProfile.specialties.splice(index, 1);
+                    },
+
+                    // IMAGE UPLOAD
+                    async uploadImage(file, type) {
+                        if (!file || !this.user) return null;
+
+                        try {
+                            // Validate file type
+                            if (!file.type.startsWith('image/')) {
+                                alert('Lütfen sadece resim dosyası yükleyin!');
+                                return null;
+                            }
+
+                            // Validate file size (max 5MB)
+                            if (file.size > 5 * 1024 * 1024) {
+                                alert('Resim boyutu 5MB\'dan küçük olmalı!');
+                                return null;
+                            }
+
+                            const fileName = `${this.user.id}/${type}_${Date.now()}.jpg`;
+
+                            // Upload to Supabase Storage
+                            const { data, error } = await supabase.storage
+                                .from('profile-images')
+                                .upload(fileName, file, {
+                                    cacheControl: '3600',
+                                    upsert: false
+                                });
+
+                            if (error) {
+                                console.error('Upload error:', error);
+                                alert('Resim yüklenemedi!');
+                                return null;
+                            }
+
+                            // Get public URL
+                            const { data: { publicUrl } } = supabase.storage
+                                .from('profile-images')
+                                .getPublicUrl(fileName);
+
+                            return publicUrl;
+                        } catch (error) {
+                            console.error('Image upload error:', error);
+                            alert('Bir hata oluştu!');
+                            return null;
+                        }
+                    },
+
+                    async handleAvatarUpload(event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        const url = await this.uploadImage(file, 'avatar');
+                        if (url) {
+                            this.userProfile.avatar_url = url;
+                            await this.saveProfile();
+                            await this.fetchProfile(); // Refresh to show new image
+                        }
+                    },
+
+                    async handleCoverUpload(event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        const url = await this.uploadImage(file, 'cover');
+                        if (url) {
+                            this.userProfile.cover_url = url;
+                            await this.saveProfile();
+                            await this.fetchProfile(); // Refresh to show new image
+                        }
+                    },
+
+                    async saveProfile() {
+                        if (!this.user) return;
+
+                        try {
+                            const { error } = await supabase
+                                .from('profiles')
+                                .update({
+                                    name: this.userProfile.name,
+                                    title: this.userProfile.title,
+                                    bio: this.userProfile.bio,
+                                    company: this.userProfile.company,
+                                    phone: this.userProfile.phone,
+                                    avatar_url: this.userProfile.avatar_url,
+                                    cover_url: this.userProfile.cover_url,
+                                    ttyb_number: this.userProfile.ttyb_number,
+                                    ttyb_verified: !!this.userProfile.ttyb_number, // Auto-verify if TTYB exists
+                                    service_areas: this.userProfile.service_areas, // Hizmet bölgeleri
+                                    specialties: this.userProfile.specialties // Uzmanlık alanları
+                                })
+                                .eq('id', this.user.id);
+
+                            if (error) {
+                                console.error('Profile update error:', error);
+                                alert('Profil güncellenemedi!');
+                                return;
+                            }
+
+                            this.editMode = false;
+                            await this.fetchProfile(); // Refresh
+                            alert('Profil başarıyla güncellendi!');
+                        } catch (error) {
+                            console.error('Error saving profile:', error);
+                            alert('Bir hata oluştu!');
                         }
                     },
 
@@ -3568,7 +4203,8 @@
                         <div class="grid grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Şehir</label>
-                                <select x-model="newPortfolio.city" @change="newPortfolio.location = ''"
+                                <select x-model="newPortfolio.city"
+                                    @change="newPortfolio.location = ''; newPortfolio.district = '';"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Seçiniz</option>
                                     <template x-for="city in cities" :key="city">
@@ -3578,7 +4214,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">İlçe</label>
-                                <select x-model="newPortfolio.location"
+                                <select x-model="newPortfolio.location" @change="newPortfolio.district = '';"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     :disabled="!newPortfolio.city">
                                     <option value="">Seçiniz</option>
@@ -3588,10 +4224,16 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Semt</label>
-                                <input type="text" x-model="newPortfolio.district"
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Semt/Mahalle</label>
+                                <select x-model="newPortfolio.district"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Moda">
+                                    :disabled="!newPortfolio.location">
+                                    <option value="">Seçiniz</option>
+                                    <template x-for="hood in getNeighborhoods(newPortfolio.city, newPortfolio.location)"
+                                        :key="hood">
+                                        <option :value="hood" x-text="hood"></option>
+                                    </template>
+                                </select>
                             </div>
                         </div>
 
@@ -3716,44 +4358,61 @@
                         </div>
 
 
-                        <!-- Location Preferences -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Şehir</label>
-                            <select x-model="newDemand.city"
-                                @change="newDemand.district = ''; newDemand.district2 = ''; newDemand.district3 = '';"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-                                <option value="">Seçiniz</option>
-                                <template x-for="city in cities" :key="city">
-                                    <option :value="city" x-text="city"></option>
-                                </template>
-                            </select>
+                        <!-- Location Preferences: City > District > 3x Neighborhood -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Şehir</label>
+                                <select x-model="newDemand.city"
+                                    @change="newDemand.location = ''; newDemand.district = ''; newDemand.district2 = ''; newDemand.district3 = '';"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                                    <option value="">Seçiniz</option>
+                                    <template x-for="city in cities" :key="city">
+                                        <option :value="city" x-text="city"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">İlçe</label>
+                                <select x-model="newDemand.location"
+                                    @change="newDemand.district = ''; newDemand.district2 = ''; newDemand.district3 = '';"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                    :disabled="!newDemand.city">
+                                    <option value="">Seçiniz</option>
+                                    <template x-for="district in getDistricts(newDemand.city)" :key="district">
+                                        <option :value="district" x-text="district"></option>
+                                    </template>
+                                </select>
+                            </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">İlçe Tercihleri (En fazla
-                                3)</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Semt/Mahalle Tercihleri (En
+                                fazla 3)</label>
                             <div class="space-y-2">
                                 <select x-model="newDemand.district"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                                    :disabled="!newDemand.city">
+                                    :disabled="!newDemand.location">
                                     <option value="">1. Tercih Seçiniz</option>
-                                    <template x-for="district in demandDistricts" :key="district">
-                                        <option :value="district" x-text="district"></option>
+                                    <template x-for="hood in getNeighborhoods(newDemand.city, newDemand.location)"
+                                        :key="hood">
+                                        <option :value="hood" x-text="hood"></option>
                                     </template>
                                 </select>
                                 <select x-model="newDemand.district2"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                                    :disabled="!newDemand.city">
+                                    :disabled="!newDemand.location">
                                     <option value="">2. Tercih (Opsiyonel)</option>
-                                    <template x-for="district in demandDistricts" :key="district">
-                                        <option :value="district" x-text="district"></option>
+                                    <template x-for="hood in getNeighborhoods(newDemand.city, newDemand.location)"
+                                        :key="hood">
+                                        <option :value="hood" x-text="hood"></option>
                                     </template>
                                 </select>
                                 <select x-model="newDemand.district3"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                                    :disabled="!newDemand.city">
+                                    :disabled="!newDemand.location">
                                     <option value="">3. Tercih (Opsiyonel)</option>
-                                    <template x-for="district in demandDistricts" :key="district">
-                                        <option :value="district" x-text="district"></option>
+                                    <template x-for="hood in getNeighborhoods(newDemand.city, newDemand.location)"
+                                        :key="hood">
+                                        <option :value="hood" x-text="hood"></option>
                                     </template>
                                 </select>
                             </div>
