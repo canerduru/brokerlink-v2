@@ -996,6 +996,11 @@
                         :class="networkTab === 'network_demands' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
                         Ağdan Talepler
                     </button>
+                    <button @click="networkTab = 'network_portfolios'"
+                        class="pb-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors"
+                        :class="networkTab === 'network_portfolios' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                        Ağdan Portföyler
+                    </button>
                 </div>
             </div>
 
@@ -1182,27 +1187,92 @@
                                 <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Ağımdan</span>
                             </div>
 
+
                             <!-- Talep Detayları -->
                             <div class="grid grid-cols-2 gap-2 text-sm">
-                                <div>
+                                <div x-show="demand.title">
                                     <span class="text-gray-500">Başlık:</span>
-                                    <span class="font-medium text-gray-900"
-                                        x-text="demand.title || 'Belirtilmemiş'"></span>
+                                    <span class="font-medium text-gray-900" x-text="demand.title"></span>
                                 </div>
                                 <div>
                                     <span class="text-gray-500">Bölge:</span>
                                     <span class="font-medium text-gray-900"
-                                        x-text="`${demand.district}, ${demand.city}`"></span>
+                                        x-text="formatLocation(demand.district, demand.city)"></span>
                                 </div>
-                                <div>
+                                <div x-show="demand.budget && demand.budget > 0">
                                     <span class="text-gray-500">Bütçe:</span>
                                     <span class="font-medium text-green-700"
-                                        x-text="`${demand.budget?.toLocaleString('tr-TR')} - ${demand.max_budget?.toLocaleString('tr-TR')} TL`"></span>
+                                        x-text="formatBudget(demand.budget, demand.max_budget)"></span>
                                 </div>
                                 <div>
                                     <span class="text-gray-500">Tarih:</span>
                                     <span class="font-medium text-gray-900"
-                                        x-text="new Date(demand.created_at).toLocaleDateString('tr-TR')"></span>
+                                        x-text="formatDate(demand.created_at)"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- NETWORK PORTFOLIOS TAB -->
+            <div x-show="networkTab === 'network_portfolios'" class="p-5">
+                <!-- Boş Durum -->
+                <div x-show="networkPortfolios.length === 0" class="text-center py-10">
+                    <div class="text-4xl mb-3">🏢</div>
+                    <p class="font-medium text-gray-900">Henüz ağdan portföy yok</p>
+                    <p class="text-sm text-gray-500 mt-1">Bağlantılarınız portföy eklediğinde burada görünecektir.</p>
+                </div>
+
+                <!-- Portföyler Listesi -->
+                <div class="space-y-3">
+                    <template x-for="portfolio in networkPortfolios" :key="portfolio.id">
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                            <!-- Broker Bilgisi -->
+                            <div class="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                                    <template x-if="portfolio.broker_avatar_url">
+                                        <img :src="portfolio.broker_avatar_url" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!portfolio.broker_avatar_url">
+                                        <div class="w-full h-full flex items-center justify-center bg-blue-600 text-white text-xs font-bold"
+                                            x-text="portfolio.broker_name?.charAt(0).toUpperCase()"></div>
+                                    </template>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-gray-900 truncate" x-text="portfolio.broker_name">
+                                    </p>
+                                    <p class="text-xs text-gray-500 truncate"
+                                        x-text="portfolio.broker_title || 'Broker'"></p>
+                                </div>
+                                <span
+                                    class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full flex-shrink-0">Ağımdan</span>
+                            </div>
+
+                            <!-- Portföy Detayları -->
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div x-show="portfolio.title" class="col-span-2">
+                                    <span class="text-gray-500">Başlık:</span>
+                                    <span class="font-medium text-gray-900" x-text="portfolio.title"></span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Bölge:</span>
+                                    <span class="font-medium text-gray-900"
+                                        x-text="formatLocation(portfolio.district, portfolio.city)"></span>
+                                </div>
+                                <div x-show="portfolio.rooms">
+                                    <span class="text-gray-500">Oda:</span>
+                                    <span class="font-medium text-gray-900" x-text="portfolio.rooms"></span>
+                                </div>
+                                <div x-show="portfolio.price && portfolio.price > 0">
+                                    <span class="text-gray-500">Fiyat:</span>
+                                    <span class="font-medium text-green-700"
+                                        x-text="formatBudget(portfolio.price, null)"></span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Tarih:</span>
+                                    <span class="font-medium text-gray-900"
+                                        x-text="formatDate(portfolio.created_at)"></span>
                                 </div>
                             </div>
                         </div>
@@ -2783,6 +2853,42 @@
                             .slice(0, 5);
                     },
 
+                    // Helper: Format date safely
+                    formatDate(dateString) {
+                        if (!dateString) return '-';
+
+                        try {
+                            const date = new Date(dateString);
+                            if (isNaN(date.getTime())) return '-';
+
+                            return date.toLocaleDateString('tr-TR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                        } catch (e) {
+                            return '-';
+                        }
+                    },
+
+                    // Helper: Format location (district, city)
+                    formatLocation(district, city) {
+                        const parts = [district, city].filter(Boolean);
+                        return parts.length > 0 ? parts.join(', ') : 'Belirtilmemiş';
+                    },
+
+                    // Helper: Format budget range
+                    formatBudget(min, max, currency = 'TL') {
+                        if (!min || min === 0) return '-';
+
+                        const minStr = min.toLocaleString('tr-TR');
+                        if (!max || max === 0 || max === min) {
+                            return `${minStr} ${currency}`;
+                        }
+
+                        return `${minStr} - ${max.toLocaleString('tr-TR')} ${currency}`;
+                    },
+
                     async init() {
                         this.isLoading = true;
 
@@ -2817,6 +2923,7 @@
                                 await this.fetchConnections();
                                 await this.fetchSuggestedBrokers(); // Load suggested brokers
                                 await this.fetchNetworkDemands(); // Load network demands
+                                await this.fetchNetworkPortfolios(); // Load network portfolios
                             }
                         } catch (error) {
                             console.error('Init error:', error);
@@ -3462,6 +3569,24 @@
                             console.log('Network demands loaded:', this.networkDemands.length);
                         } catch (error) {
                             console.error('Error in fetchNetworkDemands:', error);
+                        }
+                    },
+
+                    async fetchNetworkPortfolios() {
+                        if (!this.user) return;
+
+                        try {
+                            const { data, error } = await supabase.rpc('get_network_portfolios');
+
+                            if (error) {
+                                console.error('Error fetching network portfolios:', error);
+                                return;
+                            }
+
+                            this.networkPortfolios = data || [];
+                            console.log('Network portfolios loaded:', this.networkPortfolios.length);
+                        } catch (error) {
+                            console.error('Error in fetchNetworkPortfolios:', error);
                         }
                     },
 
