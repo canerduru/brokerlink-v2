@@ -567,7 +567,7 @@
                         <div class="md:col-span-2 space-y-6">
                             <!-- Stats Cards -->
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <template x-for="i in 4">
+                                <template x-for="(_, idx) in 4" :key="'skeleton-stat-' + idx">
                                     <div class="h-24 bg-gray-100 rounded-2xl border border-gray-200"></div>
                                 </template>
                             </div>
@@ -588,7 +588,7 @@
                             <div class="bg-white border border-gray-100 h-[500px] rounded-3xl p-6">
                                 <div class="h-6 bg-gray-100 rounded w-1/2 mb-6"></div>
                                 <div class="space-y-4">
-                                    <template x-for="i in 5">
+                                    <template x-for="(_, idx) in 5" :key="'skeleton-activity-' + idx">
                                         <div class="flex gap-3">
                                             <div class="w-10 h-10 rounded-full bg-gray-100"></div>
                                             <div class="flex-1 space-y-2">
@@ -2027,7 +2027,8 @@
                             <!-- Features -->
                             <div class="flex flex-wrap gap-1 mb-2"
                                 x-show="portfolio.features && portfolio.features.length > 0">
-                                <template x-for="feature in (portfolio.features || []).slice(0, 2)" :key="feature">
+                                <template x-for="(feature, fIdx) in (portfolio.features || []).slice(0, 2)"
+                                    :key="'feature-' + fIdx">
                                     <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
                                         x-text="feature"></span>
                                 </template>
@@ -2168,7 +2169,7 @@
                         x-show="userProfile?.service_areas && userProfile.service_areas.length > 0">
                         <h3 class="font-semibold text-gray-900 mb-3">Hizmet Bölgeleri</h3>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="area in userProfile.service_areas" :key="area">
+                            <template x-for="(area, aIdx) in userProfile.service_areas" :key="'user-area-' + aIdx">
                                 <span
                                     class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm border border-blue-200">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -2187,7 +2188,8 @@
                         x-show="userProfile?.specialties && userProfile.specialties.length > 0">
                         <h3 class="font-semibold text-gray-900 mb-3">Uzmanlık Alanları</h3>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="specialty in userProfile.specialties" :key="specialty">
+                            <template x-for="(specialty, sIdx) in userProfile.specialties"
+                                :key="'user-specialty-' + sIdx">
                                 <span
                                     class="inline-flex items-center gap-1 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full text-sm border border-purple-200 font-medium">
                                     <span x-text="`#${specialty}`"></span>
@@ -2424,7 +2426,8 @@
                     <div class="mb-4" x-show="selectedBroker?.service_areas && selectedBroker.service_areas.length > 0">
                         <h4 class="font-semibold text-gray-900 mb-2">Hizmet Bölgeleri</h4>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="area in selectedBroker?.service_areas" :key="area">
+                            <template x-for="(area, aIdx) in selectedBroker?.service_areas"
+                                :key="'broker-area-' + aIdx">
                                 <span
                                     class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-sm border border-blue-200">
                                     📍 <span x-text="`${area.district}, ${area.city}`"></span>
@@ -2437,7 +2440,8 @@
                     <div class="mb-4" x-show="selectedBroker?.specialties && selectedBroker.specialties.length > 0">
                         <h4 class="font-semibold text-gray-900 mb-2">Uzmanlık Alanları</h4>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="specialty in selectedBroker?.specialties" :key="specialty">
+                            <template x-for="(specialty, sIdx) in selectedBroker?.specialties"
+                                :key="'broker-specialty-' + sIdx">
                                 <span
                                     class="bg-purple-50 text-purple-700 px-2 py-1 rounded-full text-sm border border-purple-200 font-medium">
                                     #<span x-text="specialty"></span>
