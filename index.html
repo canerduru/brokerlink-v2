@@ -665,7 +665,7 @@
                         <!-- Son Eşleşmeler -->
                         <div>
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-bold text-gray-900">Son Eşleşmeler</h3>
+                                <h3 class="text-lg font-bold text-gray-900">Onay Bekleyen Eşleşmeler</h3>
                                 <button class="text-sm text-blue-600 font-semibold" @click="generateMatches()">
                                     <span x-show="!isMatching">🔄 Eşleştirmeleri Yenile</span>
                                     <span x-show="isMatching">⏳ Aranıyor...</span>
@@ -865,7 +865,7 @@
                         <div>
                             <div class="text-xs text-purple-600 font-bold uppercase tracking-wide">Ortalama Skor
                             </div>
-                            <div class="text-2xl font-bold text-gray-900">97%</div>
+                            <div class="text-2xl font-bold text-gray-900" x-text="averageMatchScore + '%'">0%</div>
                         </div>
                     </div>
                     <div class="text-right">
@@ -3517,12 +3517,16 @@
                             .length;
                     },
 
-                    // Average Match Score
+                    // Average Match Score (exclude rejected matches for consistency)
                     get averageMatchScore() {
                         const allMatches = [...(this.demandMatches || []), ...(this.portfolioMatches || [])];
-                        if (allMatches.length === 0) return 0;
-                        const total = allMatches.reduce((sum, m) => sum + (m.score || 0), 0);
-                        return Math.round(total / allMatches.length);
+
+                        // Filter out rejected matches
+                        const activeMatches = allMatches.filter(m => m.status !== 'rejected');
+
+                        if (activeMatches.length === 0) return 0;
+                        const total = activeMatches.reduce((sum, m) => sum + (m.score || 0), 0);
+                        return Math.round(total / activeMatches.length);
                     },
 
                     // Count of pending demand matches (deduplicated)
@@ -4084,6 +4088,36 @@
                         }
                     },
 
+                    async generateMatches() {
+                        if (!this.user) return;
+                        this.isMatching = true;
+
+                        try {
+                            const { data, error } = await supabase.rpc('generate_matches', { p_user_id: this.user.id });
+
+                            if (error) throw error;
+
+                            const newMatchesCount = data || 0;
+                            console.log(`✅ Match generation complete: ${newMatchesCount} new matches created`);
+
+                            // Refresh data to show new matches
+                            await this.fetchData();
+
+                            // ✅ User Feedback
+                            if (newMatchesCount > 0) {
+                                this.showSuccess(`Eşleştirmeler güncellendi! ${newMatchesCount} yeni eşleşme bulundu.`);
+                            } else {
+                                this.showSuccess('Eşleştirmeler kontrol edildi. Yeni eşleşme bulunamadı.');
+                            }
+
+                        } catch (error) {
+                            console.error('Match generation error:', error);
+                            this.showError('Eşleştirme sırasında hata oluştu. Lütfen tekrar deneyin.');
+                        } finally {
+                            this.isMatching = false;
+                        }
+                    },
+
                     // PROFILE MANAGEMENT
                     async fetchProfile() {
                         if (!this.user) return;
@@ -4201,7 +4235,7 @@
                                 return null;
                             }
 
-                            const fileName = `${this.user.id}/${type}_${Date.now()}.jpg`;
+                            const fileName = `${this.user.id} / ${type}_${Date.now()}.jpg`;
 
                             // Upload to Supabase Storage
                             const { data, error } = await supabase.storage
@@ -4262,9 +4296,9 @@
                             const { data, error } = await supabase
                                 .from('network_connections')
                                 .select(`
-                                    *,
-                                    requester:profiles!network_connections_requester_id_fkey(*)
-                                `)
+                            *,
+                                requester: profiles!network_connections_requester_id_fkey(*)
+                                    `)
                                 .eq('receiver_id', this.user.id)
                                 .eq('status', 'pending');
 
@@ -4283,9 +4317,9 @@
                             const { data, error } = await supabase
                                 .from('network_connections')
                                 .select(`
-                                    *,
-                                    receiver:profiles!network_connections_receiver_id_fkey(*)
-                                `)
+                            *,
+                                receiver: profiles!network_connections_receiver_id_fkey(*)
+                                    `)
                                 .eq('requester_id', this.user.id)
                                 .eq('status', 'pending');
 
@@ -4304,12 +4338,12 @@
                             const { data, error } = await supabase
                                 .from('network_connections')
                                 .select(`
-                                    *,
-                                    requester:profiles!network_connections_requester_id_fkey(*),
-                                    receiver:profiles!network_connections_receiver_id_fkey(*)
+                            *,
+                                requester: profiles!network_connections_requester_id_fkey(*),
+                                receiver: profiles!network_connections_receiver_id_fkey(*)
                                 `)
                                 .eq('status', 'accepted')
-                                .or(`requester_id.eq.${this.user.id},receiver_id.eq.${this.user.id}`);
+                                .or(`requester_id.eq.${this.user.id}, receiver_id.eq.${this.user.id}`);
 
                             if (error) throw error;
 
@@ -5191,18 +5225,35 @@
 
                                 console.log('✅ Match approved successfully:', data);
 
-                                // Update local state
-                                const matchIndex = this.matches.findIndex(m => m.id === id);
-                                if (matchIndex !== -1) {
-                                    this.matches[matchIndex].status = 'approved';
-                                    console.log('✅ Local state updated');
+                                // Update local state with REACTIVE reassignment (Alpine.js requirement)
+                                // Mutating objects in arrays doesn't trigger reactivity, we need new references
+
+                                // Update matches array
+                                this.matches = this.matches.map(m =>
+                                    m.id === id ? { ...m, status: 'approved' } : m
+                                );
+
+                                // Update demandMatches array
+                                if (this.demandMatches && this.demandMatches.length > 0) {
+                                    this.demandMatches = this.demandMatches.map(m =>
+                                        m.id === id ? { ...m, status: 'approved' } : m
+                                    );
                                 }
+
+                                // Update portfolioMatches array
+                                if (this.portfolioMatches && this.portfolioMatches.length > 0) {
+                                    this.portfolioMatches = this.portfolioMatches.map(m =>
+                                        m.id === id ? { ...m, status: 'approved' } : m
+                                    );
+                                }
+
+                                console.log('✅ Local state updated reactively in all arrays');
 
                                 // Reset confirmation state
                                 this.confirmingMatchId = null;
                                 this.confirmingAction = null;
 
-                                alert('Eşleşme başarıyla onaylandı!');
+                                this.showSuccess('Eşleşme başarıyla onaylandı!');
                             } catch (e) {
                                 console.error('❌ Approve error:', e);
                                 alert('Onaylama başarısız: ' + e.message);
@@ -5250,18 +5301,34 @@
 
                                 console.log('✅ Match rejected successfully:', data);
 
-                                // Update local state
-                                const matchIndex = this.matches.findIndex(m => m.id === id);
-                                if (matchIndex !== -1) {
-                                    this.matches[matchIndex].status = 'rejected';
-                                    console.log('✅ Local state updated');
+                                // Update local state with REACTIVE reassignment (Alpine.js requirement)
+
+                                // Update matches array
+                                this.matches = this.matches.map(m =>
+                                    m.id === id ? { ...m, status: 'rejected' } : m
+                                );
+
+                                // Update demandMatches array
+                                if (this.demandMatches && this.demandMatches.length > 0) {
+                                    this.demandMatches = this.demandMatches.map(m =>
+                                        m.id === id ? { ...m, status: 'rejected' } : m
+                                    );
                                 }
+
+                                // Update portfolioMatches array
+                                if (this.portfolioMatches && this.portfolioMatches.length > 0) {
+                                    this.portfolioMatches = this.portfolioMatches.map(m =>
+                                        m.id === id ? { ...m, status: 'rejected' } : m
+                                    );
+                                }
+
+                                console.log('✅ Local state updated reactively in all arrays');
 
                                 // Reset confirmation state
                                 this.confirmingMatchId = null;
                                 this.confirmingAction = null;
 
-                                alert('Eşleşme reddedildi.');
+                                this.showSuccess('Eşleşme reddedildi.');
                             } catch (e) {
                                 console.error('❌ Reject error:', e);
                                 alert('Reddetme başarısız: ' + e.message);
@@ -5710,7 +5777,7 @@
 
                             if (newMatchesCount > 0) {
                                 console.log(`${newMatchesCount} new matches found`);
-                                // alert(`${newMatchesCount} yeni eşleşme bulundu!`);
+                                // alert(`${ newMatchesCount } yeni eşleşme bulundu!`);
                             } else {
                                 console.log('No new matches found');
                             }
