@@ -535,6 +535,28 @@
                 </div>
             </div>
 
+            <!-- Success Toast -->
+            <div x-show="successMessage" x-transition
+                class="fixed top-4 right-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg z-50 max-w-md">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="flex-1">
+                        <p class="font-medium text-sm" x-text="successMessage"></p>
+                    </div>
+                    <button @click="successMessage = ''" class="text-green-600 hover:text-green-800">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
             <!-- DASHBOARD VIEW -->
             <div x-show="currentTab === 'dashboard'" class="pb-24 w-full" x-cloak>
                 <!-- Loading State -->
@@ -695,8 +717,22 @@
                                             </div>
                                         </div>
                                         <div class="p-3">
+                                            <!-- Contextual Badge -->
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <template x-if="match.clientBudget">
+                                                    <span
+                                                        class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">📋
+                                                        Talebiniz</span>
+                                                </template>
+                                                <template x-if="!match.clientBudget && match.demandBudget">
+                                                    <span
+                                                        class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">🏢
+                                                        Portföyünüze Eşleşen Talep</span>
+                                                </template>
+                                            </div>
                                             <h3 class="font-bold text-gray-900 text-sm mb-1" x-text="match.name"></h3>
-                                            <p class="text-blue-600 font-bold text-xs mb-1" x-text="match.price"></p>
+                                            <p class="text-blue-600 font-bold text-xs mb-1"
+                                                x-text="match.clientBudget || match.price"></p>
                                             <p class="text-gray-500 text-xs mb-2 flex items-center gap-1">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd"
@@ -1014,7 +1050,8 @@
                                                     class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Talebiniz</span>
                                             </div>
                                             <h4 class="font-bold text-gray-900 text-sm mb-1" x-text="match.name"></h4>
-                                            <p class="text-emerald-600 font-semibold text-sm mb-1">Bütçe Uygun</p>
+                                            <p class="text-emerald-600 font-semibold text-sm mb-1"
+                                                x-text="match.clientBudget || 'Bütçe Uygun'"></p>
                                             <p class="text-gray-500 text-xs" x-text="match.clientLocation"></p>
                                             <p class="text-gray-400 text-xs" x-text="match.specs"></p>
                                         </div>
@@ -3226,6 +3263,7 @@
 
                     // Error state
                     errorMessage: '',
+                    successMessage: '',
 
                     // Location Data for Dropdowns (3-level: City > District > Neighborhood)
                     locationData: null,
@@ -3447,14 +3485,18 @@
                         (this.portfolioMatches || []).forEach(m => {
                             allMatches.push({
                                 ...m,
-                                // Portfolio matches'i normalize et
+                                // Portfolio matches'i normalize et - KARŞI TARAFIN TALEBİNİ GÖSTER
                                 name: m.demandTitle || 'Talep', // Karşı tarafın talebi
-                                price: m.portfolioPrice || m.demandBudget, // Benim portföyümün fiyatı
-                                location: m.portfolioLocation || m.demandLocation,
-                                specs: m.portfolioSpecs || m.demandSpecs,
-                                image: m.portfolioImage,
+                                title: m.demandTitle || 'Talep',
+                                price: m.demandBudget || m.portfolioPrice, // Talep bütçesi
+                                location: m.demandLocation || m.portfolioLocation,
+                                specs: m.demandSpecs || m.portfolioSpecs,
+                                image: m.portfolioImage, // Portföy resmi göster
+                                type: m.portfolioType || 'Satılık', // Portföy tipi
                                 brokerName: m.clientName, // Karşı tarafın adı
-                                brokerAvatar: m.clientAvatar
+                                brokerAvatar: m.clientAvatar,
+                                brokerCompany: m.clientCompany,
+                                brokerTitle: m.clientTitle
                             });
                         });
 
@@ -3878,6 +3920,7 @@
                                         title: p.title,
                                         name: d.title || 'Müşteri Talebi', // Client demand title
                                         price: this.formatPrice(p.price),
+                                        clientBudget: this.formatBudget(d.budget, d.max_budget), // Client demand budget range
                                         location: pLoc,        // Portfolio Location
                                         clientLocation: dLoc,  // Client Demand Location
                                         specs: `${p.rooms} • ${p.category}`,
@@ -4960,6 +5003,12 @@
                         this.errorMessage = message;
                         setTimeout(() => {
                             this.errorMessage = '';
+                        }, 5000); // Auto-hide after 5 seconds
+                    },
+                    showSuccess(message) {
+                        this.successMessage = message;
+                        setTimeout(() => {
+                            this.successMessage = '';
                         }, 5000); // Auto-hide after 5 seconds
                     },
                     async deletePortfolio(id) {
