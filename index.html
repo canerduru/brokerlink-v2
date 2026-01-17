@@ -282,14 +282,14 @@
                         <p class="text-xs text-gray-500" x-text="userProfile?.title || 'Broker'"></p>
                     </div>
                 </div>
-                <button @click="seedData()"
-                    class="w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
+                <button @click="signOut()"
+                    class="w-full px-4 py-3 text-sm bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-medium transition-colors border border-red-200 flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
                         </path>
                     </svg>
-                    Verileri Yükle
+                    Çıkış Yap
                 </button>
             </div>
         </div>
@@ -663,24 +663,29 @@
                                 <div class="text-3xl font-bold text-gray-900" x-text="totalMatchCount">
                                     0</div>
                             </div>
-                            <!-- Ortalama Skor -->
-                            <div
-                                class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <!-- Trust Score (Güven Puanı) -->
+                            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+                                @click="currentTab = 'profile'">
                                 <div class="flex items-center gap-2 mb-1">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
-                                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                                            </path>
-                                        </svg>
+                                        class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center group-hover:from-amber-200 group-hover:to-orange-200 transition-colors">
+                                        <span class="text-lg"
+                                            x-text="userProfile.trustScore?.levelEmoji || '🔰'"></span>
                                     </div>
                                     <span
-                                        class="text-xs text-gray-500 font-medium group-hover:text-purple-600 transition-colors">Ortalama
-                                        Skor</span>
+                                        class="text-xs text-gray-500 font-medium group-hover:text-amber-600 transition-colors">Güven
+                                        Puanı</span>
                                 </div>
-                                <div class="text-3xl font-bold text-gray-900" x-text="averageMatchScore + '%'">0%</div>
+                                <div class="text-3xl font-bold text-gray-900"
+                                    x-text="userProfile.trustScore?.total || 0"></div>
+                                <div class="mt-1 flex items-center gap-2">
+                                    <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-500"
+                                            :style="`width: ${userProfile.trustScore?.total || 0}%`"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-amber-600"
+                                        x-text="userProfile.trustScore?.levelName || 'Hesaplanıyor...'"></span>
+                                </div>
                             </div>
                         </div>
 
@@ -760,6 +765,14 @@
                                                         x-text="match.brokerName"></p>
                                                     <p class="text-xs text-gray-500 truncate"
                                                         x-text="match.brokerCompany || match.brokerTitle"></p>
+                                                </div>
+                                                <!-- ✅ Trust Score Badge -->
+                                                <div x-show="match.brokerTrustScore"
+                                                    class="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-lg border border-amber-200">
+                                                    <span x-text="match.brokerTrustEmoji || '🔰'"
+                                                        class="text-xs"></span>
+                                                    <span x-text="match.brokerTrustScore || '0'"
+                                                        class="text-xs font-bold text-amber-700"></span>
                                                 </div>
                                                 <button @click.stop="showBrokerContact(match)"
                                                     class="text-blue-600 hover:text-blue-700 p-1 transition-colors">
@@ -868,6 +881,23 @@
                                 </div>
                             </div>
                         </template>
+
+                        <!-- Empty State -->
+                        <div x-show="!networkActivities || networkActivities.length === 0"
+                            class="bg-white p-8 rounded-2xl shadow-soft border border-gray-50 text-center">
+                            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
+                            </svg>
+                            <p class="text-gray-600 font-medium">Henüz ağ aktivitesi yok</p>
+                            <p class="text-sm text-gray-400 mt-2">Brokerlarla bağlantı kurmaya başlayın!</p>
+                            <button @click="currentTab = 'network'"
+                                class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                                Ağıma Git
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1008,6 +1038,14 @@
                                                         x-text="match.brokerName"></p>
                                                     <p class="text-xs text-gray-500 truncate"
                                                         x-text="match.brokerCompany || match.brokerTitle"></p>
+                                                </div>
+                                                <!-- ✅ Trust Score Badge -->
+                                                <div x-show="match.brokerTrustScore"
+                                                    class="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-lg border border-amber-200">
+                                                    <span x-text="match.brokerTrustEmoji || '🔰'"
+                                                        class="text-xs"></span>
+                                                    <span x-text="match.brokerTrustScore || '0'"
+                                                        class="text-xs font-bold text-amber-700"></span>
                                                 </div>
                                                 <button @click.stop="showBrokerContact(match)"
                                                     class="text-blue-600 hover:text-blue-700 p-1 transition-colors"
@@ -1265,6 +1303,14 @@
                                                     <p class="text-xs text-gray-500 truncate"
                                                         x-text="match.clientCompany || match.clientTitle"></p>
                                                 </div>
+                                                <!-- ✅ Trust Score Badge -->
+                                                <div x-show="match.brokerTrustScore"
+                                                    class="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-lg border border-amber-200">
+                                                    <span x-text="match.brokerTrustEmoji || '🔰'"
+                                                        class="text-xs"></span>
+                                                    <span x-text="match.brokerTrustScore || '0'"
+                                                        class="text-xs font-bold text-amber-700"></span>
+                                                </div>
                                                 <button @click.stop="showClientContact(match)"
                                                     class="text-purple-600 hover:text-purple-700 p-1 transition-colors"
                                                     title="İletişime Geç">
@@ -1415,19 +1461,33 @@
                                 <!-- Header -->
                                 <div
                                     class="p-4 flex justify-between items-start border-b border-emerald-50 bg-emerald-50/50">
-                                    <div>
-                                        <h3 class="font-bold text-gray-900 mb-1">
-                                            <span
-                                                x-text="(match.title || match.portfolioTitle || 'Portföy') + ' ↔ ' + (match.name || match.demandTitle || 'Talep')"></span>
-                                        </h3>
-                                        <div class="flex items-center gap-2">
-                                            <p class="text-emerald-600 text-xs font-medium"
-                                                x-text="match.score + '% Eşleşme'"></p>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <!-- Match Type Badge -->
+                                            <template x-if="match.portfolioTitle">
+                                                <span
+                                                    class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                                                    📦 Portföyünüze Eşleşen Talep
+                                                </span>
+                                            </template>
+                                            <template
+                                                x-if="!match.portfolioTitle && (match.brokerName || match.demandBrokerName)">
+                                                <span
+                                                    class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                                                    🔍 Talebinize Eşleşen Portföy
+                                                </span>
+                                            </template>
                                             <span
                                                 class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
                                                 ✓ Onaylandı
                                             </span>
                                         </div>
+                                        <h3 class="font-bold text-gray-900 mb-1">
+                                            <span
+                                                x-text="(match.title || match.portfolioTitle || 'Portföy') + ' ↔ ' + (match.name || match.demandTitle || 'Talep')"></span>
+                                        </h3>
+                                        <p class="text-emerald-600 text-xs font-medium"
+                                            x-text="match.score + '% Eşleşme'"></p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span
@@ -1437,37 +1497,63 @@
                                 </div>
                                 <!-- Content -->
                                 <div class="p-4">
-                                    <div class="flex gap-4">
-                                        <!-- Broker Info -->
+                                    <div class="flex gap-4 items-start">
+                                        <!-- Broker Info (Always show OTHER party) -->
                                         <div class="flex-1">
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <template x-if="match.brokerAvatar || match.demandBrokerAvatar">
-                                                    <img :src="match.brokerAvatar || match.demandBrokerAvatar"
-                                                        class="w-10 h-10 rounded-full object-cover">
+                                            <div class="flex items-center gap-3 mb-3">
+                                                <!-- Avatar -->
+                                                <template
+                                                    x-if="match.clientAvatar || match.brokerAvatar || match.demandBrokerAvatar">
+                                                    <img :src="match.clientAvatar || match.brokerAvatar || match.demandBrokerAvatar"
+                                                        class="w-12 h-12 rounded-full object-cover border-2 border-emerald-200">
                                                 </template>
-                                                <template x-if="!match.brokerAvatar && !match.demandBrokerAvatar">
-                                                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold"
-                                                        x-text="(match.brokerName || match.demandBrokerName || 'B')?.charAt(0)">
+                                                <template
+                                                    x-if="!match.clientAvatar && !match.brokerAvatar && !match.demandBrokerAvatar">
+                                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg"
+                                                        x-text="(match.clientName || match.brokerName || match.demandBrokerName || 'B')?.charAt(0)">
                                                     </div>
                                                 </template>
-                                                <div>
-                                                    <p class="font-semibold text-gray-900 text-sm"
-                                                        x-text="match.brokerName || match.demandBrokerName || 'Broker'">
-                                                    </p>
+                                                <!-- Broker Details -->
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <p class="font-bold text-gray-900 text-sm"
+                                                            x-text="match.clientName || match.brokerName || match.demandBrokerName || 'Broker'">
+                                                        </p>
+                                                        <!-- ✅ Trust Score Badge -->
+                                                        <div x-show="match.brokerTrustScore"
+                                                            class="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-lg border border-amber-200">
+                                                            <span x-text="match.brokerTrustEmoji || '🔰'"
+                                                                class="text-xs"></span>
+                                                            <span x-text="match.brokerTrustScore || '0'"
+                                                                class="text-xs font-bold text-amber-700"></span>
+                                                        </div>
+                                                    </div>
                                                     <p class="text-xs text-gray-500"
-                                                        x-text="match.brokerCompany || match.demandBrokerCompany || ''">
+                                                        x-text="match.clientCompany || match.brokerCompany || match.demandBrokerCompany || 'Emlak Danışmanı'">
+                                                    </p>
+                                                    <p class="text-xs text-emerald-600 font-medium mt-0.5"
+                                                        x-text="match.clientTitle || match.brokerTitle || ''">
                                                     </p>
                                                 </div>
                                             </div>
-                                            <p class="text-sm font-semibold text-gray-900"
-                                                x-text="match.title || match.portfolioTitle || ''"></p>
-                                            <p class="text-sm text-emerald-600 font-medium"
-                                                x-text="match.price || match.portfolioPrice || ''"></p>
+                                            <!-- Property/Demand Details -->
+                                            <div class="bg-gray-50 rounded-lg p-3">
+                                                <p class="text-sm font-semibold text-gray-900 mb-1"
+                                                    x-text="match.title || match.portfolioTitle || match.demandTitle || ''">
+                                                </p>
+                                                <p class="text-sm text-emerald-600 font-medium mb-1"
+                                                    x-text="match.price || match.portfolioPrice || match.clientBudget || ''">
+                                                </p>
+                                                <p class="text-xs text-gray-500"
+                                                    x-text="match.location || match.portfolioLocation || match.clientLocation || ''">
+                                                </p>
+                                            </div>
                                         </div>
                                         <!-- Contact Button -->
                                         <div class="flex items-center">
-                                            <button @click="sendMessage(match.brokerName || match.demandBrokerName)"
-                                                class="px-4 py-2 bg-emerald-500 text-white rounded-lg font-semibold text-sm hover:bg-emerald-600 transition-colors flex items-center gap-2">
+                                            <button
+                                                @click="sendMessage(match.clientName || match.brokerName || match.demandBrokerName, match.clientId || match.brokerId || match.demandBrokerId)"
+                                                class="px-4 py-2.5 bg-emerald-500 text-white rounded-xl font-semibold text-sm hover:bg-emerald-600 transition-colors flex items-center gap-2 shadow-sm">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -1604,7 +1690,17 @@
                                     x-text="conn.broker?.name?.charAt(0).toUpperCase()"></div>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h4 class="font-bold text-gray-900 truncate" x-text="conn.broker?.name"></h4>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-gray-900 truncate" x-text="conn.broker?.name"></h4>
+                                    <!-- ✅ Trust Score Badge -->
+                                    <div x-show="conn.broker?.trust_scores?.total_score"
+                                        class="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-lg border border-amber-200">
+                                        <span x-text="conn.broker?.trust_scores?.level_emoji || '🔰'"
+                                            class="text-xs"></span>
+                                        <span x-text="conn.broker?.trust_scores?.total_score || '0'"
+                                            class="text-xs font-bold text-amber-700"></span>
+                                    </div>
+                                </div>
                                 <p class="text-xs text-gray-500 truncate" x-text="conn.broker?.title || 'Broker'">
                                 </p>
                                 <p class="text-xs text-gray-400 truncate" x-text="conn.broker?.company"></p>
@@ -2162,6 +2258,98 @@
                         <h3 class="font-semibold text-gray-900 mb-2">Hakkımda</h3>
                         <p class="text-gray-700 whitespace-pre-wrap"
                             x-text="userProfile?.bio || 'Henüz biyografi eklenmemiş.'"></p>
+                    </div>
+
+                    <!-- Trust Score Breakdown -->
+                    <div class="border-t pt-4 mt-4">
+                        <div
+                            class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-5">
+                            <h3 class="font-bold text-gray-900 text-lg mb-4 flex items-center gap-2">
+                                🏆 Güven Puanınız
+                            </h3>
+
+                            <!-- Main Score -->
+                            <div class="flex items-center gap-4 mb-5">
+                                <div class="text-5xl font-bold text-amber-600"
+                                    x-text="userProfile.trustScore?.total || 0"></div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-2xl"
+                                            x-text="userProfile.trustScore?.levelEmoji || '🔰'"></span>
+                                        <span class="font-semibold text-gray-900"
+                                            x-text="userProfile.trustScore?.levelName || 'Hesaplanıyor...'"></span>
+                                    </div>
+                                    <p class="text-sm text-gray-500">100 üzerinden</p>
+                                </div>
+                            </div>
+
+                            <!-- Breakdown Progress Bars -->
+                            <div class="space-y-3">
+                                <!-- Profile Score -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">📋 Profil Tamamlama</span>
+                                        <span class="font-medium"
+                                            x-text="(userProfile.trustScore?.profile || 0) + '/40'"></span>
+                                    </div>
+                                    <div class="h-2 bg-white rounded-full border border-gray-200">
+                                        <div class="h-full bg-blue-500 rounded-full transition-all duration-500"
+                                            :style="`width: ${((userProfile.trustScore?.profile || 0) / 40) * 100}%`">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Login Score -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">🔑 Giriş Aktifliği</span>
+                                        <span class="font-medium"
+                                            x-text="(userProfile.trustScore?.login || 0) + '/20'"></span>
+                                    </div>
+                                    <div class="h-2 bg-white rounded-full border border-gray-200">
+                                        <div class="h-full bg-green-500 rounded-full transition-all duration-500"
+                                            :style="`width: ${((userProfile.trustScore?.login || 0) / 20) * 100}%`">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Data Score -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">📊 Veri Güncelliği</span>
+                                        <span class="font-medium"
+                                            x-text="(userProfile.trustScore?.data || 0) + '/20'"></span>
+                                    </div>
+                                    <div class="h-2 bg-white rounded-full border border-gray-200">
+                                        <div class="h-full bg-purple-500 rounded-full transition-all duration-500"
+                                            :style="`width: ${((userProfile.trustScore?.data || 0) / 20) * 100}%`">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Reaction Score -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">🤝 Reaksiyon</span>
+                                        <span class="font-medium"
+                                            x-text="(userProfile.trustScore?.reaction || 0) + '/20'"></span>
+                                    </div>
+                                    <div class="h-2 bg-white rounded-full border border-gray-200">
+                                        <div class="h-full bg-orange-500 rounded-full transition-all duration-500"
+                                            :style="`width: ${((userProfile.trustScore?.reaction || 0) / 20) * 100}%`">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tip -->
+                            <div class="mt-4 p-3 bg-white rounded-lg border border-amber-200">
+                                <p class="text-sm text-gray-600">
+                                    💡 <strong>Puanını artır:</strong> Profilini tamamla, portföy/talep ekle ve
+                                    eşleşmelere hızlı cevap ver!
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Service Areas -->
@@ -3166,7 +3354,18 @@
                         avatar_url: '',
                         cover_url: '',
                         service_areas: [], // Hizmet bölgeleri
-                        specialties: [] // Uzmanlık alanları
+                        specialties: [], // Uzmanlık alanları
+                        // Trust Score System
+                        trustScore: {
+                            total: 0,
+                            level: 'newcomer',
+                            levelName: 'Başlangıç',
+                            levelEmoji: '🔰',
+                            profile: 0,
+                            login: 0,
+                            data: 0,
+                            reaction: 0
+                        }
                     }, // Profil bilgileri
                     editMode: false, // Profil düzenleme modu
 
@@ -3575,6 +3774,76 @@
                         return Math.round(total / activeMatches.length);
                     },
 
+                    // ========================================
+                    // TRUST SCORE - FETCH FROM DATABASE
+                    // ========================================
+                    async calculateTrustScore() {
+                        if (!this.user) return;
+
+                        try {
+                            // ✅ Check login activity from localStorage
+                            const lastLoginTimestamp = localStorage.getItem('brokerlink_last_login');
+                            const now = Date.now();
+                            const daysSinceLogin = lastLoginTimestamp
+                                ? (now - parseInt(lastLoginTimestamp)) / (1000 * 60 * 60 * 24)
+                                : 0;
+
+                            // Only update last_active_at if user logged in within 5 days
+                            const shouldUpdateLastActive = daysSinceLogin <= 5;
+
+                            // 1. Call server-side function to calculate and update score
+                            const { error: rpcError } = await supabase.rpc('update_trust_score', {
+                                p_user_id: this.user.id,
+                                p_update_last_active: shouldUpdateLastActive
+                            });
+
+                            if (rpcError) {
+                                console.warn('Trust Score RPC error:', rpcError);
+                            }
+
+                            // 2. Fetch the calculated score from database
+                            const { data, error } = await supabase
+                                .from('trust_scores')
+                                .select('*')
+                                .eq('user_id', this.user.id)
+                                .single();
+
+                            if (error) {
+                                console.error('Trust Score fetch error:', error);
+                                // Fallback to default values
+                                this.userProfile.trustScore = {
+                                    total: 0,
+                                    level: 'newcomer',
+                                    levelName: 'Başlangıç',
+                                    levelEmoji: '🔰',
+                                    profile: 0,
+                                    login: 0,
+                                    data: 0,
+                                    reaction: 0
+                                };
+                                return;
+                            }
+
+                            // 3. Update state with database values
+                            if (data) {
+                                this.userProfile.trustScore = {
+                                    total: data.total_score || 0,
+                                    level: data.level || 'newcomer',
+                                    levelName: data.level_name || 'Başlangıç',
+                                    levelEmoji: data.level_emoji || '🔰',
+                                    profile: data.profile_score || 0,
+                                    login: data.login_score || 0,
+                                    data: data.data_score || 0,
+                                    reaction: data.reaction_score || 0
+                                };
+
+                                console.log('Trust Score loaded from database:', this.userProfile.trustScore);
+                            }
+                        } catch (e) {
+                            console.error('Trust Score calculation failed:', e);
+                        }
+                    },
+
                     // Count of pending demand matches (deduplicated)
                     get pendingDemandCount() {
                         const matches = (this.demandMatches || []).filter(m =>
@@ -3760,6 +4029,22 @@
                             });
 
                             if (this.user) {
+                                // ✅ Track login timestamp for Trust Score
+                                const lastLoginTimestamp = localStorage.getItem('brokerlink_last_login');
+                                const now = Date.now();
+
+                                if (!lastLoginTimestamp) {
+                                    // First login
+                                    localStorage.setItem('brokerlink_last_login', now.toString());
+                                } else {
+                                    const daysSinceLogin = (now - parseInt(lastLoginTimestamp)) / (1000 * 60 * 60 * 24);
+
+                                    // Update timestamp if more than 5 days passed
+                                    if (daysSinceLogin > 5) {
+                                        localStorage.setItem('brokerlink_last_login', now.toString());
+                                    }
+                                }
+
                                 await this.fetchData();
                                 await this.fetchProfile(); // Load user profile
                                 await this.fetchConnectionRequests(); // Load networking data
@@ -3862,7 +4147,8 @@
                                             avatar_url,
                                             company,
                                             phone,
-                                            title
+                                            title,
+                                            trust_scores(total_score, level_emoji)
                                         )
                                     )
                                 `)
@@ -3938,7 +4224,10 @@
                                         brokerCompany: p.broker?.company || null,
                                         brokerPhone: p.broker?.phone || null,
                                         brokerTitle: p.broker?.title || 'Emlak Danışmanı',
-                                        brokerId: p.broker?.id || null
+                                        brokerId: p.broker?.id || null,
+                                        // ✅ Trust Score info
+                                        brokerTrustScore: p.broker?.trust_scores?.total_score || 0,
+                                        brokerTrustEmoji: p.broker?.trust_scores?.level_emoji || '🔰'
                                     };
                                 });
                             }
@@ -3950,13 +4239,14 @@
                                     *, 
                                     demand:demands(
                                         *,
-                                        client:profiles!demands_user_id_fkey(
+                                        profiles!demands_user_id_fkey(
                                             id,
                                             name,
                                             avatar_url,
                                             company,
                                             phone,
-                                            title
+                                            title,
+                                            trust_scores(total_score, level_emoji)
                                         )
                                     ), 
                                     portfolio:portfolios!inner(*)
@@ -3977,6 +4267,9 @@
                                     const pLoc = [p.district, p.location, p.city].filter(x => x).join(', ');
                                     const dLoc = [d.district, d.location, d.city].filter(x => x).join(', ');
 
+                                    // Get demand owner's profile (the broker we need to show)
+                                    const demandOwner = d.profiles || {};
+
                                     return {
                                         ...m,
                                         // Portfolio (BENİM)
@@ -3993,13 +4286,17 @@
                                         demandLocation: dLoc,
                                         demandSpecs: `${d.rooms} • ${d.category}`,
 
-                                        // Client bilgisi
-                                        clientName: d.client?.name || 'Müşteri',
-                                        clientAvatar: d.client?.avatar_url,
-                                        clientCompany: d.client?.company,
-                                        clientPhone: d.client?.phone,
-                                        clientTitle: d.client?.title || 'Emlak Danışmanı',
-                                        clientId: d.client?.id,
+                                        // Client/Broker bilgisi (Talep sahibi - KARŞI TARAF)
+                                        // CRITICAL: Always use d.user_id for clientId since d.profiles may be null
+                                        clientId: d.user_id,
+                                        clientName: demandOwner.name || 'Broker',
+                                        clientAvatar: demandOwner.avatar_url,
+                                        clientCompany: demandOwner.company,
+                                        clientPhone: demandOwner.phone,
+                                        clientTitle: demandOwner.title || 'Emlak Danışmanı',
+                                        // ✅ Trust Score info (for portfolio matches, client is the demand owner)
+                                        brokerTrustScore: demandOwner.trust_scores?.total_score || 0,
+                                        brokerTrustEmoji: demandOwner.trust_scores?.level_emoji || '🔰',
 
                                         score: m.score || 95,
                                         isFavorite: m.is_favorite || false
@@ -4039,6 +4336,9 @@
 
                             // 5. Load conversations from Supabase
                             await this.loadConversations();
+
+                            // 6. Calculate Trust Score
+                            await this.calculateTrustScore();
                         } catch (e) {
                             console.error('CRITICAL ERROR in fetchData:', e);
                             alert('Bir hata oluştu: ' + e.message);
@@ -4386,8 +4686,14 @@
                                 .from('network_connections')
                                 .select(`
                             *,
-                                requester: profiles!network_connections_requester_id_fkey(*),
-                                receiver: profiles!network_connections_receiver_id_fkey(*)
+                                requester: profiles!network_connections_requester_id_fkey(
+                                    *,
+                                    trust_scores(total_score, level_emoji)
+                                ),
+                                receiver: profiles!network_connections_receiver_id_fkey(
+                                    *,
+                                    trust_scores(total_score, level_emoji)
+                                )
                                 `)
                                 .eq('status', 'accepted')
                                 .or(`requester_id.eq.${this.user.id}, receiver_id.eq.${this.user.id}`);
@@ -4407,8 +4713,76 @@
                             });
 
                             console.log('Connections loaded:', this.connections.length);
+
+                            // Fetch recent activities from connections
+                            await this.fetchNetworkActivities();
                         } catch (error) {
                             console.error('Error fetching connections:', error);
+                        }
+                    },
+
+                    async fetchNetworkActivities() {
+                        if (!this.connections || this.connections.length === 0) {
+                            this.networkActivities = [];
+                            return;
+                        }
+
+                        try {
+                            const connectionIds = this.connections.map(c => c.broker_id);
+
+                            // Fetch recent portfolios from connections
+                            const { data: portfolios } = await supabase
+                                .from('portfolios')
+                                .select('id, title, created_at, user_id, profiles(name, avatar_url)')
+                                .in('user_id', connectionIds)
+                                .order('created_at', { ascending: false })
+                                .limit(3);
+
+                            // Fetch recent demands from connections
+                            const { data: demands } = await supabase
+                                .from('demands')
+                                .select('id, title, created_at, user_id, profiles(name, avatar_url)')
+                                .in('user_id', connectionIds)
+                                .order('created_at', { ascending: false })
+                                .limit(3);
+
+                            // Combine and sort activities
+                            const activities = [];
+
+                            if (portfolios) {
+                                portfolios.forEach(p => {
+                                    activities.push({
+                                        id: 'portfolio_' + p.id,
+                                        user: p.profiles.name,
+                                        avatar: p.profiles.avatar_url,
+                                        action: 'Yeni portföy ekledi: ' + p.title,
+                                        time: this.formatTime(p.created_at),
+                                        timestamp: new Date(p.created_at).getTime()
+                                    });
+                                });
+                            }
+
+                            if (demands) {
+                                demands.forEach(d => {
+                                    activities.push({
+                                        id: 'demand_' + d.id,
+                                        user: d.profiles.name,
+                                        avatar: d.profiles.avatar_url,
+                                        action: 'Yeni talep ekledi: ' + d.title,
+                                        time: this.formatTime(d.created_at),
+                                        timestamp: new Date(d.created_at).getTime()
+                                    });
+                                });
+                            }
+
+                            // Sort by timestamp (newest first) and take top 5
+                            this.networkActivities = activities
+                                .sort((a, b) => b.timestamp - a.timestamp)
+                                .slice(0, 5);
+
+                        } catch (error) {
+                            console.error('Error fetching network activities:', error);
+                            this.networkActivities = [];
                         }
                     },
 
@@ -4958,7 +5332,7 @@
                         }
                     },
 
-                    async logout() {
+                    async signOut() {
                         await supabase.auth.signOut();
                         this.user = null;
                         this.demands = [];
@@ -4974,7 +5348,7 @@
                     networkPortfolios: [], // Load from Supabase only
                     // matches: computed property (see line ~2893)
                     network: [], // Load from Supabase only
-                    // networkActivities: computed property defined above
+                    networkActivities: [], // Network activities (connections, messages, etc.)
 
                     // ACTIONS
                     formatPrice(price) {
@@ -5403,8 +5777,8 @@
                             match.isFavorite = !match.isFavorite;
                         }
                     },
-                    async sendMessage(brokerName) {
-                        console.log('Starting conversation with:', brokerName);
+                    async sendMessage(brokerName, brokerId = null) {
+                        console.log('Starting conversation with:', brokerName, 'ID:', brokerId);
 
                         try {
                             // 1. Find existing conversation
@@ -5412,15 +5786,42 @@
 
                             // 2. If no conversation exists, create in Supabase
                             if (!conversation) {
-                                const broker = this.network.find(b => b.name === brokerName);
+                                let brokerProfile = null;
+
+                                // Fetch broker profile from Supabase if we have ID
+                                if (brokerId) {
+                                    const { data: profileData, error: profileError } = await supabase
+                                        .from('profiles')
+                                        .select('id, name, avatar_url, company, title')
+                                        .eq('id', brokerId)
+                                        .single();
+
+                                    if (!profileError && profileData) {
+                                        brokerProfile = profileData;
+                                        console.log('Fetched broker profile:', brokerProfile);
+                                    }
+                                }
+
+                                // Fallback: try to find in network
+                                if (!brokerProfile) {
+                                    const broker = this.network.find(b => b.name === brokerName);
+                                    if (broker) {
+                                        brokerProfile = {
+                                            id: broker.id,
+                                            name: broker.name,
+                                            avatar_url: broker.avatar,
+                                            company: broker.company,
+                                            title: broker.role
+                                        };
+                                    }
+                                }
 
                                 const { data, error } = await supabase
                                     .from('conversations')
                                     .insert({
                                         user_id: this.user.id,
                                         participant_name: brokerName,
-                                        // Don't cache avatar - will be fetched from profiles
-                                        receiver_id: null, // Will be set when we have broker user IDs
+                                        receiver_id: brokerProfile?.id || null,
                                         last_message: 'Yeni konuşma',
                                         last_message_time: new Date().toISOString()
                                     })
@@ -5435,7 +5836,7 @@
                                     lastMessage: 'Yeni konuşma',
                                     time: 'Şimdi',
                                     unread: 0,
-                                    userImage: broker?.avatar || 'https://i.pravatar.cc/150?u=' + encodeURIComponent(brokerName),
+                                    userImage: brokerProfile?.avatar_url || null,
                                     receiverId: data.receiver_id
                                 };
 
