@@ -432,7 +432,21 @@
                                                 </svg>
                                                 Konuşmayı Sil
                                             </button>
-                                            <button @click="blockUser(activeConversation.receiverId); menuOpen = false"
+                                            <!-- Engeli Kaldır butonu (sadece engelliyse görünür) -->
+                                            <button x-show="isBlocked(activeConversation?.receiverId)"
+                                                @click="unblockUser(activeConversation.receiverId); menuOpen = false"
+                                                class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                Engeli Kaldır
+                                            </button>
+                                            <!-- Kullanıcıyı Engelle butonu (engelli değilse görünür) -->
+                                            <button x-show="!isBlocked(activeConversation?.receiverId)"
+                                                @click="blockUser(activeConversation.receiverId); menuOpen = false"
                                                 class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -1685,6 +1699,11 @@
                             :class="networkTab === 'network_portfolios' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
                             Ağdan Portföyler
                         </button>
+                        <button @click="networkTab = 'blocked'"
+                            class="pb-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors"
+                            :class="networkTab === 'blocked' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                            Engellenenler (<span x-text="blockedUsers.length"></span>)
+                        </button>
                     </div>
                 </div>
 
@@ -2012,6 +2031,49 @@
                                             x-text="formatDate(portfolio.created_at)"></span>
                                     </div>
                                 </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- BLOCKED USERS TAB / ENGELLENMİŞ KULLANICILAR -->
+                <div x-show="networkTab === 'blocked'" class="p-5">
+                    <!-- Boş Durum -->
+                    <div x-show="blockedUsers.length === 0" class="text-center py-10">
+                        <div class="text-4xl mb-3">✅</div>
+                        <p class="font-medium text-gray-900">Engellenmiş kullanıcı yok</p>
+                        <p class="text-sm text-gray-500 mt-1">İstenmeyen kullanıcıları engelleyerek ağınızdan
+                            kaldırabilirsiniz.</p>
+                    </div>
+
+                    <!-- Blocked Users List -->
+                    <div x-show="blockedUsers.length > 0" class="space-y-3">
+                        <template x-for="profile in blockedUserProfiles" :key="profile.id">
+                            <div
+                                class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+                                <!-- Avatar -->
+                                <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                                    <template x-if="profile.avatar_url">
+                                        <img :src="profile.avatar_url" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!profile.avatar_url">
+                                        <div class="w-full h-full flex items-center justify-center bg-red-600 text-white text-lg font-bold"
+                                            x-text="profile.name?.charAt(0).toUpperCase()"></div>
+                                    </template>
+                                </div>
+
+                                <!-- User Info -->
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-gray-900 truncate" x-text="profile.name"></p>
+                                    <p class="text-xs text-gray-500 truncate" x-text="profile.title || 'Broker'"></p>
+                                    <p class="text-xs text-gray-400 truncate" x-text="profile.company"></p>
+                                </div>
+
+                                <!-- Unblock Button -->
+                                <button @click="unblockUser(profile.id)"
+                                    class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex-shrink-0">
+                                    Engeli Kaldır
+                                </button>
                             </div>
                         </template>
                     </div>
@@ -3489,6 +3551,8 @@
                     contactModalOpen: false, // İletişim modal'ı
                     selectedMatchContact: null, // İletişim için seçilen eşleşme
                     suggestedBrokers: [], // Önerilen brokerlar (Keşfet)
+                    blockedUsers: [], // Engellenen kullanıcılar
+                    blockedUserProfiles: [], // Engellenen kullanıcıların profil detayları
                     networkTab: 'discover', // Ağ sekmesi alt-menüsü
                     authMode: 'login', // login, register
                     authEmail: '',
@@ -4146,6 +4210,8 @@
 
                                 await this.fetchData();
                                 await this.fetchProfile(); // Load user profile
+                                await this.fetchBlockedUsers(); // Load blocked users first
+                                await this.fetchBlockedUserProfiles(); // Load blocked user details
                                 await this.fetchConnectionRequests(); // Load networking data
                                 await this.fetchSentRequests();
                                 await this.fetchConnections();
@@ -4485,7 +4551,7 @@
                                     })
                                 );
 
-                                this.conversations = conversationsWithAvatars;
+                                this.conversations = conversationsWithAvatars.filter(c => !this.isBlocked(c.receiverId));
                                 console.log('Loaded conversations from Supabase:', this.conversations.length);
                             } else {
                                 console.log('No conversations in Supabase');
@@ -4795,17 +4861,19 @@
 
                             if (error) throw error;
 
-                            // Map to get the "other" person's profile
-                            this.connections = (data || []).map(conn => {
-                                const otherPerson = conn.requester_id === this.user.id
-                                    ? conn.receiver
-                                    : conn.requester;
-                                return {
-                                    ...conn,
-                                    broker: otherPerson,
-                                    broker_id: otherPerson.id
-                                };
-                            });
+                            // Map to get the "other" person's profile and filter out blocked users
+                            this.connections = (data || [])
+                                .map(conn => {
+                                    const otherPerson = conn.requester_id === this.user.id
+                                        ? conn.receiver
+                                        : conn.requester;
+                                    return {
+                                        ...conn,
+                                        broker: otherPerson,
+                                        broker_id: otherPerson.id
+                                    };
+                                })
+                                .filter(conn => !this.isBlocked(conn.broker_id)); // Filter blocked users
 
                             console.log('Connections loaded:', this.connections.length);
 
@@ -5093,16 +5161,108 @@
                         }
                     },
 
+                    async fetchBlockedUsers() {
+                        if (!this.user) return;
+                        try {
+                            const { data, error } = await supabase
+                                .from('blocked_users')
+                                .select('blocked_id')
+                                .eq('blocker_id', this.user.id);
+                            if (error) throw error;
+                            this.blockedUsers = (data || []).map(b => b.blocked_id);
+                        } catch (error) {
+                            console.error('Error fetching blocked users:', error);
+                        }
+                    },
+
+                    isBlocked(userId) {
+                        return this.blockedUsers.includes(userId);
+                    },
+
                     async blockUser(userId) {
-                        if (!confirm('Bu kullanıcıyı engellemek istediğinizden emin misiniz?')) return;
+                        if (!userId) return;
+                        if (!confirm('Bu kullanıcıyı engellemek istediğinizden emin misiniz? Engellenen kullanıcı size mesaj gönderemez ve ağınızda görünmez.')) return;
 
                         try {
-                            // TODO: Implement blocking logic in database
-                            // For now, just remove from connections
-                            alert('Engelleme özelliği yakında eklenecek');
-                            console.log('Block user:', userId);
+                            // 1. Insert into blocked_users
+                            const { error: blockError } = await supabase
+                                .from('blocked_users')
+                                .insert({ blocker_id: this.user.id, blocked_id: userId });
+                            if (blockError) throw blockError;
+
+                            // 2. Remove from connections if exists
+                            await supabase
+                                .from('network_connections')
+                                .delete()
+                                .or(`and(requester_id.eq.${this.user.id},receiver_id.eq.${userId}),and(requester_id.eq.${userId},receiver_id.eq.${this.user.id})`);
+
+                            // 3. Update local state
+                            this.blockedUsers.push(userId);
+                            await this.fetchBlockedUserProfiles(); // Update profiles list
+                            this.connections = this.connections.filter(c => c.broker_id !== userId);
+                            this.conversations = this.conversations.filter(c => c.receiverId !== userId);
+                            this.suggestedBrokers = this.suggestedBrokers.filter(b => b.id !== userId);
+                            this.networkDemands = this.networkDemands.filter(d => d.user_id !== userId);
+                            this.networkPortfolios = this.networkPortfolios.filter(p => p.user_id !== userId);
+                            this.connectionRequests = this.connectionRequests.filter(r => r.requester_id !== userId);
+                            this.sentRequests = this.sentRequests.filter(r => r.receiver_id !== userId);
+
+                            // 4. Clear active conversation if it was with blocked user
+                            if (this.activeConversation && this.activeConversation.receiverId === userId) {
+                                this.activeConversation = null;
+                            }
+
+                            alert('Kullanıcı engellendi.');
                         } catch (error) {
                             console.error('Error blocking user:', error);
+                            alert('Engelleme başarısız: ' + error.message);
+                        }
+                    },
+
+                    async unblockUser(userId) {
+                        if (!userId) return;
+                        if (!confirm('Bu kullanıcının engelini kaldırmak istediğinizden emin misiniz?')) return;
+
+                        try {
+                            const { error } = await supabase
+                                .from('blocked_users')
+                                .delete()
+                                .eq('blocker_id', this.user.id)
+                                .eq('blocked_id', userId);
+                            if (error) throw error;
+
+                            this.blockedUsers = this.blockedUsers.filter(id => id !== userId);
+
+                            // Refresh data to show unblocked user's content again
+                            await this.fetchBlockedUserProfiles();
+                            await this.fetchConnections(); // Refresh connections
+                            await this.fetchSuggestedBrokers();
+                            await this.fetchNetworkDemands();
+                            await this.fetchNetworkPortfolios();
+
+                            alert('Engel kaldırıldı.');
+                        } catch (error) {
+                            console.error('Error unblocking user:', error);
+                            alert('Engel kaldırılamadı: ' + error.message);
+                        }
+                    },
+
+                    async fetchBlockedUserProfiles() {
+                        if (!this.user || this.blockedUsers.length === 0) {
+                            this.blockedUserProfiles = [];
+                            return;
+                        }
+
+                        try {
+                            const { data, error } = await supabase
+                                .from('profiles')
+                                .select('id, name, avatar_url, company, title')
+                                .in('id', this.blockedUsers);
+
+                            if (error) throw error;
+                            this.blockedUserProfiles = data || [];
+                        } catch (error) {
+                            console.error('Error fetching blocked user profiles:', error);
                         }
                     },
 
@@ -5118,8 +5278,9 @@
 
                             if (error) throw error;
 
-                            // Calculate connection status for each broker
-                            this.suggestedBrokers = await Promise.all((data || []).map(async b => {
+                            // Filter out blocked users and calculate connection status
+                            const filtered = (data || []).filter(b => !this.isBlocked(b.id));
+                            this.suggestedBrokers = await Promise.all(filtered.map(async b => {
                                 const status = await this.getConnectionStatus(b.id);
                                 return { ...b, connectionStatus: status };
                             }));
