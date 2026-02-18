@@ -4000,7 +4000,6 @@
                                     reaction: data.reaction_score || 0
                                 };
 
-                                console.log('Trust Score loaded from database:', this.userProfile.trustScore);
                             }
                         } catch (e) {
                             console.error('Trust Score calculation failed:', e);
@@ -4174,7 +4173,6 @@
                                 const response = await fetch('assets/locations_full.json');
                                 this.locationData = await response.json();
                                 this.cities = Object.keys(this.locationData).sort();
-                                console.log('Location data loaded:', this.cities.length, 'cities');
                             } catch (e) {
                                 console.error('Failed to load location data:', e);
                             }
@@ -4223,12 +4221,10 @@
                                 supabase
                                     .channel('auto-match')
                                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'demands' }, async () => {
-                                        console.log('⚡️ New Demand detected');
                                         await this.fetchNetworkDemands(); // Update Feed
                                         this.generateMatches(); // Run Match Algo
                                     })
                                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'portfolios' }, async () => {
-                                        console.log('⚡️ New Portfolio detected');
                                         await this.fetchNetworkPortfolios(); // Update Feed
                                         this.generateMatches(); // Run Match Algo
                                     })
@@ -4246,10 +4242,8 @@
                     async fetchData() {
                         try {
                             if (!this.user) {
-                                console.log('FetchData: No user logged in');
                                 return;
                             }
-                            console.log('FetchData: Fetching for user:', this.user.id);
 
                             // Fetch Demands (only current user's demands)
                             const { data: demands, error: demandError } = await supabase
@@ -4260,7 +4254,6 @@
                                 console.error('Error fetching demands:', demandError);
                                 this.showError('Talepler yüklenemedi. Lütfen tekrar deneyin.');
                             }
-                            console.log('Fetched Demands for user:', this.user.id, demands);
                             // Map snake_case fields from Supabase to camelCase for frontend
                             this.demands = (demands || []).map(d => ({
                                 ...d,
@@ -4279,7 +4272,6 @@
                                 console.error('Error fetching portfolios:', portfolioError);
                                 this.showError('Portfolyolar yüklenemedi. Lütfen tekrar deneyin.');
                             }
-                            console.log('Fetched Portfolios for user:', this.user.id, portfolios);
                             if (portfolios && portfolios.length > 0) {
                                 this.portfolios = portfolios.map(p => ({
                                     ...p,
@@ -4322,7 +4314,6 @@
                                 console.error('Error fetching demand matches:', matchError);
                                 this.showError('Eşleşmeler yüklenemedi. Lütfen tekrar deneyin.');
                             }
-                            console.log('Fetched Demand Matches for user:', this.user.id, matches);
                             if (matches && matches.length > 0) {
                                 this.demandMatches = matches.map(m => {
                                     // 1. Format Portfolio Location 
@@ -4421,7 +4412,6 @@
                             if (portfolioMatchError) {
                                 console.error('Error fetching portfolio matches:', portfolioMatchError);
                             }
-                            console.log('Fetched Portfolio Matches for user:', this.user.id, portfolioMatchesData);
 
                             if (portfolioMatchesData && portfolioMatchesData.length > 0) {
                                 this.portfolioMatches = portfolioMatchesData.map(m => {
@@ -4552,9 +4542,7 @@
                                 );
 
                                 this.conversations = conversationsWithAvatars.filter(c => !this.isBlocked(c.receiverId));
-                                console.log('Loaded conversations from Supabase:', this.conversations.length);
                             } else {
-                                console.log('No conversations in Supabase');
                             }
                         } catch (error) {
                             console.error('Error loading conversations:', error);
@@ -4588,7 +4576,6 @@
                             }));
 
                             this.messages[conversationId] = messages;
-                            console.log(`Loaded ${messages.length} messages for conversation ${conversationId}`);
                             return messages;
                         } catch (error) {
                             console.error('Error loading messages:', error);
@@ -4606,7 +4593,6 @@
                             if (error) throw error;
 
                             const newMatchesCount = data || 0;
-                            console.log(`✅ Match generation complete: ${newMatchesCount} new matches created`);
 
                             // Refresh data to show new matches
                             await this.fetchData();
@@ -4649,7 +4635,6 @@
                                     ...data
                                 };
                             }
-                            console.log('User profile loaded:', this.userProfile);
                         } catch (error) {
                             console.error('Error fetching profile:', error);
                         }
@@ -4812,7 +4797,6 @@
 
                             if (error) throw error;
                             this.connectionRequests = data || [];
-                            console.log('Connection requests loaded:', this.connectionRequests.length);
                         } catch (error) {
                             console.error('Error fetching connection requests:', error);
                         }
@@ -4833,7 +4817,6 @@
 
                             if (error) throw error;
                             this.sentRequests = data || [];
-                            console.log('Sent requests loaded:', this.sentRequests.length);
                         } catch (error) {
                             console.error('Error fetching sent requests:', error);
                         }
@@ -4875,7 +4858,6 @@
                                 })
                                 .filter(conn => !this.isBlocked(conn.broker_id)); // Filter blocked users
 
-                            console.log('Connections loaded:', this.connections.length);
 
                             // Fetch recent activities from connections
                             await this.fetchNetworkActivities();
@@ -5154,7 +5136,6 @@
                             this.activeConversation = null;
                             delete this.messages[conversationId];
 
-                            console.log('Conversation deleted');
                         } catch (error) {
                             console.error('Error deleting conversation:', error);
                             alert('Konuşma silinemedi');
@@ -5284,7 +5265,6 @@
                                 const status = await this.getConnectionStatus(b.id);
                                 return { ...b, connectionStatus: status };
                             }));
-                            console.log('Suggested brokers loaded:', this.suggestedBrokers.length);
                         } catch (error) {
                             console.error('Error fetching suggested brokers:', error);
                         }
@@ -5301,9 +5281,7 @@
                                 return;
                             }
 
-                            console.log('Raw network demands data:', data);
                             this.networkDemands = data || [];
-                            console.log('Network demands loaded:', this.networkDemands.length);
                         } catch (error) {
                             console.error('Error in fetchNetworkDemands:', error);
                         }
@@ -5321,7 +5299,6 @@
                             }
 
                             this.networkPortfolios = data || [];
-                            console.log('Network portfolios loaded:', this.networkPortfolios.length);
                         } catch (error) {
                             console.error('Error in fetchNetworkPortfolios:', error);
                         }
@@ -5331,12 +5308,6 @@
                         if (!this.user) return;
 
                         try {
-                            console.log('🔵 Saving profile for user:', this.user.id);
-                            console.log('🔵 Profile data:', {
-                                name: this.userProfile.name,
-                                title: this.userProfile.title,
-                                company: this.userProfile.company
-                            });
 
                             const { data, error } = await supabase
                                 .from('profiles')
@@ -5356,7 +5327,6 @@
                                 })
                                 .select();
 
-                            console.log('🔵 Supabase response:', { data, error });
 
                             if (error) {
                                 console.error('❌ Profile update error:', error);
@@ -5370,7 +5340,6 @@
                                 return;
                             }
 
-                            console.log('✅ Profile saved successfully:', data);
                             this.editMode = false;
                             await this.fetchProfile(); // Refresh
                             alert('Profil başarıyla güncellendi!');
@@ -5384,12 +5353,10 @@
                         if (!this.user) return;
                         if (!confirm('Veritabanına örnek veriler eklenecek. Onaylıyor musunuz?')) return;
 
-                        console.log('SeedData: Starting seed for user:', this.user.id);
 
                         // 1. Create/Update Profile
                         const { error: profileError } = await supabase.from('profiles').update({ name: 'Ahmet Yılmaz', role: 'broker' }).eq('id', this.user.id);
                         if (profileError) console.error('SeedData: Profile update error:', profileError);
-                        else console.log('SeedData: Profile updated');
 
                         // 2. Insert Demands
                         const mockDemands = [
@@ -5399,7 +5366,6 @@
                         ];
                         const { data: demandData, error: demandError } = await supabase.from('demands').insert(mockDemands).select();
                         if (demandError) console.error('SeedData: Demand insert error:', demandError);
-                        else console.log('SeedData: Demands inserted:', demandData);
 
                         // 3. Insert Portfolios - 24 total (12 Satılık, 12 Kiralık)
                         const mockPortfolios = [
@@ -5438,7 +5404,6 @@
                         ];
                         const { data: portfolioData, error: portfolioError } = await supabase.from('portfolios').insert(mockPortfolios).select();
                         if (portfolioError) console.error('SeedData: Portfolio insert error:', portfolioError);
-                        else console.log('SeedData: Portfolios inserted:', portfolioData);
 
                         // 4. Insert Matches (using inserted demand and portfolio IDs)
                         if (demandData && demandData.length > 0 && portfolioData && portfolioData.length > 0) {
@@ -5449,7 +5414,6 @@
                             ];
                             const { data: matchData, error: matchError } = await supabase.from('matches').insert(mockMatches).select();
                             if (matchError) console.error('SeedData: Match insert error:', matchError);
-                            else console.log('SeedData: Matches inserted:', matchData);
                         }
 
                         alert('Veriler başarıyla eklendi! Sayfa yenileniyor...');
@@ -5543,7 +5507,6 @@
                                 return;
                             }
 
-                            console.log('Portfolio saved:', data);
 
                             // Refresh data
                             await this.fetchData();
@@ -5686,8 +5649,6 @@
                         }
 
                         try {
-                            console.log('Attempting to delete portfolio:', id);
-                            console.log('Current user:', this.user?.id);
 
                             // First, check if portfolio exists and belongs to user
                             const { data: checkData, error: checkError } = await supabase
@@ -5695,7 +5656,6 @@
                                 .select('*')
                                 .eq('id', id);
 
-                            console.log('Portfolio check result:', checkData);
 
                             if (checkError) {
                                 console.error('Check error:', checkError);
@@ -5713,7 +5673,6 @@
                                 .eq('id', id)
                                 .select();
 
-                            console.log('Delete result:', { data, error });
 
                             if (error) throw error;
 
@@ -5820,7 +5779,6 @@
                                 return;
                             }
 
-                            console.log('Demand saved:', data);
 
                             // Refresh data
                             await this.fetchData();
@@ -5883,7 +5841,6 @@
                         }
 
                         try {
-                            console.log('Attempting to delete demand:', id);
 
                             const { data, error } = await supabase
                                 .from('demands')
@@ -5903,7 +5860,6 @@
                             // Update local state immediately
                             this.demands = this.demands.filter(d => d.id !== id);
                             this.showError('Talep başarıyla silindi.'); // Using showError for consistency (will show as error toast)
-                            console.log('Demand deleted successfully:', id);
                         } catch (e) {
                             console.error('Delete demand error:', e);
                             this.showError('Silme işlemi başarısız: ' + e.message);
@@ -5911,7 +5867,6 @@
                     },
 
                     async approveMatch(id) {
-                        console.log('🔵 approveMatch called with ID:', id);
 
                         if (!id) {
                             console.error('❌ Match ID is undefined!');
@@ -5923,7 +5878,6 @@
                         if (this.confirmingMatchId === id && this.confirmingAction === 'approve') {
                             // User clicked "Evet" - proceed with approval
                             try {
-                                console.log('✅ Approving match:', id);
 
                                 const { data, error } = await supabase
                                     .from('matches')
@@ -5941,7 +5895,6 @@
                                     throw new Error('Eşleşme güncellenemedi.');
                                 }
 
-                                console.log('✅ Match approved successfully:', data);
 
                                 // Update local state with REACTIVE reassignment (Alpine.js requirement)
                                 // Mutating objects in arrays doesn't trigger reactivity, we need new references
@@ -5965,7 +5918,6 @@
                                     );
                                 }
 
-                                console.log('✅ Local state updated reactively in all arrays');
 
                                 // Reset confirmation state
                                 this.confirmingMatchId = null;
@@ -5983,11 +5935,9 @@
                             // First click - show confirmation
                             this.confirmingMatchId = id;
                             this.confirmingAction = 'approve';
-                            console.log('⚠️ Confirmation required - showing inline confirm');
                         }
                     },
                     async rejectMatch(id) {
-                        console.log('🔴 rejectMatch called with ID:', id);
 
                         if (!id) {
                             console.error('❌ Match ID is undefined!');
@@ -5999,7 +5949,6 @@
                         if (this.confirmingMatchId === id && this.confirmingAction === 'reject') {
                             // User clicked "Evet" - proceed with rejection
                             try {
-                                console.log('✅ Rejecting match:', id);
 
                                 const { data, error } = await supabase
                                     .from('matches')
@@ -6017,7 +5966,6 @@
                                     throw new Error('Eşleşme güncellenemedi.');
                                 }
 
-                                console.log('✅ Match rejected successfully:', data);
 
                                 // Update local state with REACTIVE reassignment (Alpine.js requirement)
 
@@ -6040,7 +5988,6 @@
                                     );
                                 }
 
-                                console.log('✅ Local state updated reactively in all arrays');
 
                                 // Reset confirmation state
                                 this.confirmingMatchId = null;
@@ -6058,7 +6005,6 @@
                             // First click - show confirmation
                             this.confirmingMatchId = id;
                             this.confirmingAction = 'reject';
-                            console.log('⚠️ Confirmation required - showing inline confirm');
                         }
                     },
 
@@ -6069,7 +6015,6 @@
                         }
                     },
                     async sendMessage(brokerName, brokerId = null) {
-                        console.log('Starting conversation with:', brokerName, 'ID:', brokerId);
 
                         try {
                             // 1. Find existing conversation
@@ -6089,7 +6034,6 @@
 
                                     if (!profileError && profileData) {
                                         brokerProfile = profileData;
-                                        console.log('Fetched broker profile:', brokerProfile);
                                     }
                                 }
 
@@ -6134,9 +6078,7 @@
                                 this.conversations.unshift(newConv);
                                 conversation = newConv;
 
-                                console.log('Created new conversation in Supabase:', conversation);
                             } else {
-                                console.log('Found existing conversation:', conversation);
                             }
 
                             // 3. Set as active conversation
@@ -6148,7 +6090,6 @@
                             // 5. Switch to messages tab
                             this.currentTab = 'messages';
 
-                            console.log('Active conversation set to:', this.activeConversation);
 
                         } catch (error) {
                             console.error('Error creating conversation:', error);
@@ -6159,7 +6100,6 @@
                     async sendNewMessage() {
                         // Validation
                         if (!this.newMessageText.trim()) {
-                            console.log('Empty message, not sending');
                             return;
                         }
 
@@ -6263,7 +6203,6 @@
                             // 4. Clear input
                             this.newMessageText = '';
 
-                            console.log('Message sent successfully');
                             this.$nextTick(() => {
                                 const chatArea = document.querySelector('.overflow-y-auto.flex-1.p-4');
                                 if (chatArea) {
@@ -6271,7 +6210,6 @@
                                 }
                             });
 
-                            console.log('Message sent to Supabase successfully');
 
                         } catch (error) {
                             console.error('Error sending message:', error);
@@ -6407,7 +6345,6 @@
                         if (this.isMatching) return;
                         this.isMatching = true;
                         this.matchingProgress = 0;
-                        console.log('🔄 Starting Match Generation (Strict Mode)...');
 
                         try {
                             // 1. Fetch Data
@@ -6432,8 +6369,6 @@
                             const potentialPortfolios = allPortfolios || [];
                             const potentialDemands = allDemands || [];
 
-                            console.log(`Matching: ${myDemands.length} Demands vs ${potentialPortfolios.length} System Portfolios`);
-                            console.log(`Matching: ${myPortfolios.length} Portfolios vs ${potentialDemands.length} System Demands`);
 
                             let newMatchesCount = 0;
 
@@ -6531,10 +6466,8 @@
                             await this.fetchData();
 
                             if (newMatchesCount > 0) {
-                                console.log(`${newMatchesCount} new matches found`);
                                 // alert(`${ newMatchesCount } yeni eşleşme bulundu!`);
                             } else {
-                                console.log('No new matches found');
                             }
 
                         } catch (error) {
@@ -6558,7 +6491,6 @@
                         }
 
                         this.isMatching = true;
-                        console.log('🧹 Starting Duplicate Cleanup...');
 
                         try {
                             // 1. Get ALL matches for this user's demands
@@ -6640,7 +6572,6 @@
                 navigator.serviceWorker.getRegistrations().then(function (registrations) {
                     for (let registration of registrations) {
                         registration.unregister();
-                        console.log('Service Worker unregistered');
                     }
                 });
             }
