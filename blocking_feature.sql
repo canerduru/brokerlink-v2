@@ -96,8 +96,7 @@ BEGIN
   AND d.user_id NOT IN (
     SELECT blocked_id FROM blocked_users WHERE blocker_id = auth.uid()
   )
-  ORDER BY d.created_at DESC
-  LIMIT 100;
+  ORDER BY d.created_at DESC;
 END;
 $$;
 
@@ -161,8 +160,7 @@ BEGIN
   AND po.user_id NOT IN (
     SELECT blocked_id FROM blocked_users WHERE blocker_id = auth.uid()
   )
-  ORDER BY po.created_at DESC
-  LIMIT 100;
+  ORDER BY po.created_at DESC;
 END;
 $$;
 
