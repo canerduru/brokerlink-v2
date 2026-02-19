@@ -4604,34 +4604,7 @@
                         }
                     },
 
-                    async generateMatches() {
-                        if (!this.user) return;
-                        this.isMatching = true;
-
-                        try {
-                            const { data, error } = await supabase.rpc('generate_matches', { p_user_id: this.user.id });
-
-                            if (error) throw error;
-
-                            const newMatchesCount = data || 0;
-
-                            // Refresh data to show new matches
-                            await this.fetchData();
-
-                            // ✅ User Feedback
-                            if (newMatchesCount > 0) {
-                                this.showSuccess(`Eşleştirmeler güncellendi! ${newMatchesCount} yeni eşleşme bulundu.`);
-                            } else {
-                                this.showSuccess('Eşleştirmeler kontrol edildi. Yeni eşleşme bulunamadı.');
-                            }
-
-                        } catch (error) {
-                            console.error('Match generation error:', error);
-                            this.showError('Eşleştirme sırasında hata oluştu. Lütfen tekrar deneyin.');
-                        } finally {
-                            this.isMatching = false;
-                        }
-                    },
+                    // generateMatches() — defined in MATCHING ALGORITHM section below
 
                     // PROFILE MANAGEMENT
                     async fetchProfile() {
@@ -5479,6 +5452,7 @@
                                 type: this.newPortfolio.type,
                                 category: this.newPortfolio.category,
                                 rooms: this.newPortfolio.rooms || '-',
+                                city: this.newPortfolio.city || null,
                                 // Format: "Semt, İlçe, Şehir" or "İlçe, Şehir" or "Şehir"
                                 district: [
                                     this.newPortfolio.district,
@@ -5761,6 +5735,8 @@
                                 category: this.newDemand.category,
                                 budget: parseInt(this.newDemand.budget),
                                 max_budget: this.newDemand.maxBudget ? parseInt(this.newDemand.maxBudget) : null,
+                                city: this.newDemand.city || null,
+                                location: this.newDemand.location || null,
                                 district: this.newDemand.district,
                                 district2: this.newDemand.district2 || null,
                                 district3: this.newDemand.district3 || null,
@@ -5845,6 +5821,8 @@
                             category: demand.category || '',
                             budget: demand.budget ? demand.budget.toString() : '',
                             maxBudget: demand.maxBudget ? demand.maxBudget.toString() : '',
+                            city: demand.city || 'İSTANBUL',
+                            location: demand.location || '',
                             district: demand.district || '',
                             district2: demand.district2 || '',
                             district3: demand.district3 || '',
@@ -6294,44 +6272,73 @@
 
                     },
 
-                    // Helper: Calculate Location Score (30 points) - SMART MODE
+                    // Helper: Calculate Location Score (30 points) - STRICT MODE
                     calculateLocationScore(demand, portfolio) {
-                        // 🔴 1. City Check (Must Match)
-                        const dCity = (demand.city || 'İstanbul').trim().toLowerCase();
-                        const pCity = (portfolio.city || 'İstanbul').trim().toLowerCase();
+                        // === STEP 1: CITY CHECK (ELIMINATOR) ===
+                        // Get city from demand
+                        const dCity = this.normalizeDistrict(demand.city || '');
+                        // Get city from portfolio — try dedicated field first, then parse from district string
+                        let pCity = this.normalizeDistrict(portfolio.city || '');
+                        if (!pCity && portfolio.district) {
+                            // Portfolio district format: "Semt, İlçe, Şehir" — city is the last part
+                            const parts = portfolio.district.split(',').map(p => p.trim());
+                            if (parts.length >= 2) pCity = this.normalizeDistrict(parts[parts.length - 1]);
+                        }
 
-                        if (dCity !== pCity) return { points: 0, reason: 'Şehir uyuşmuyor', eliminated: true };
+                        // If both have city info and they don't match → ELIMINATE
+                        if (dCity && pCity && dCity !== pCity) {
+                            return { points: 0, reason: 'Şehir uyuşmuyor', eliminated: true };
+                        }
+                        // If either city is missing, don't eliminate but no city points
 
-                        // 🟢 2. District Check (3 Separate Fields)
-                        // Check both 'district' (Semt) and 'location' (Ilçe) fields from portfolio
-                        const portDist = this.normalizeDistrict(portfolio.district);
-                        const portLoc = this.normalizeDistrict(portfolio.location);
+                        // === STEP 2: İLÇE CHECK (ELIMINATOR) ===
+                        // Get ilçe from demand (stored in location field during form, but may also be parseable)
+                        const dIlce = this.normalizeDistrict(demand.location || '');
+                        // Get ilçe from portfolio — parse from district string
+                        let pIlce = '';
+                        if (portfolio.district) {
+                            const parts = portfolio.district.split(',').map(p => p.trim());
+                            if (parts.length >= 3) pIlce = this.normalizeDistrict(parts[1]); // "Semt, İlçe, Şehir"
+                            else if (parts.length === 2) pIlce = this.normalizeDistrict(parts[0]); // "İlçe, Şehir"
+                        }
 
-                        // If both are empty, we can't match district (unless we want to match only by city? No, strict.)
-                        if (!portDist && !portLoc) return { points: 0, reason: null, eliminated: false };
+                        // If both have ilçe and they don't match → ELIMINATE
+                        if (dIlce && pIlce && dIlce !== pIlce) {
+                            return { points: 0, reason: 'İlçe uyuşmuyor', eliminated: true };
+                        }
 
-                        // Collect up to 3 district preferences from demand
-                        const districts = [
+                        // === STEP 3: SEMT CHECK (BONUS POINTS) ===
+                        // Get semt from portfolio
+                        let pSemt = '';
+                        if (portfolio.district) {
+                            const parts = portfolio.district.split(',').map(p => p.trim());
+                            if (parts.length >= 3) pSemt = this.normalizeDistrict(parts[0]); // "Semt, İlçe, Şehir"
+                        }
+
+                        // Collect up to 3 semt preferences from demand
+                        const semtPrefs = [
                             this.normalizeDistrict(demand.district),
                             this.normalizeDistrict(demand.district2),
                             this.normalizeDistrict(demand.district3)
-                        ].filter(d => d); // Remove empty/null values
+                        ].filter(d => d);
 
-                        if (districts.length === 0) return { points: 0, reason: null, eliminated: false };
+                        // Base points for city+ilçe match
+                        let points = 15;
 
-                        // Check if ANY portfolio location field matches ANY of the demand preferences
-                        const isMatch = districts.some(d =>
-                            (portDist && (d === portDist || portDist.includes(d) || d.includes(portDist))) ||
-                            (portLoc && (d === portLoc || portLoc.includes(d) || d.includes(portLoc)))
-                        );
-
-                        if (isMatch) {
-                            return { points: 30, reason: 'Bölge eşleşmesi', eliminated: false };
+                        // Semt bonus
+                        if (pSemt && semtPrefs.length > 0) {
+                            const semtMatch = semtPrefs.some(s =>
+                                s === pSemt || pSemt.includes(s) || s.includes(pSemt)
+                            );
+                            if (semtMatch) {
+                                points = 30; // Full location score
+                            }
+                        } else if (semtPrefs.length === 0) {
+                            // Demand didn't specify semt preference → give partial points
+                            points = 20;
                         }
 
-                        return { points: 0, reason: null, eliminated: false };
-
-
+                        return { points: points, reason: 'Konum eşleşmesi', eliminated: false };
                     },
 
                     // Helper: Calculate Room Score (15 points)
