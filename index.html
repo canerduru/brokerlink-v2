@@ -6529,20 +6529,23 @@
                                 for (const portfolio of potentialPortfolios) {
                                     const match = await processMatch(demand, portfolio);
                                     if (match) {
+                                        // Check if an approved/rejected match already exists (don't overwrite)
                                         const { data: existing } = await supabase
                                             .from('matches')
                                             .select('id, status')
                                             .eq('demand_id', match.demand_id)
                                             .eq('portfolio_id', match.portfolio_id)
-                                            .single();
+                                            .maybeSingle();
 
-                                        // Skip if match exists AND has been approved or rejected
                                         if (existing && (existing.status === 'approved' || existing.status === 'rejected')) {
-                                            continue; // Don't recreate approved/rejected matches
+                                            continue;
                                         }
 
                                         if (!existing) {
-                                            const { error } = await supabase.from('matches').insert(match);
+                                            // upsert: DB UNIQUE constraint prevents any duplicate
+                                            const { error } = await supabase
+                                                .from('matches')
+                                                .upsert(match, { onConflict: 'demand_id,portfolio_id', ignoreDuplicates: true });
                                             if (!error) newMatchesCount++;
                                         }
                                     }
@@ -6554,20 +6557,23 @@
                                 for (const demand of potentialDemands) {
                                     const match = await processMatch(demand, portfolio);
                                     if (match) {
+                                        // Check if an approved/rejected match already exists (don't overwrite)
                                         const { data: existing } = await supabase
                                             .from('matches')
                                             .select('id, status')
                                             .eq('demand_id', match.demand_id)
                                             .eq('portfolio_id', match.portfolio_id)
-                                            .single();
+                                            .maybeSingle();
 
-                                        // Skip if match exists AND has been approved or rejected
                                         if (existing && (existing.status === 'approved' || existing.status === 'rejected')) {
-                                            continue; // Don't recreate approved/rejected matches
+                                            continue;
                                         }
 
                                         if (!existing) {
-                                            const { error } = await supabase.from('matches').insert(match);
+                                            // upsert: DB UNIQUE constraint prevents any duplicate
+                                            const { error } = await supabase
+                                                .from('matches')
+                                                .upsert(match, { onConflict: 'demand_id,portfolio_id', ignoreDuplicates: true });
                                             if (!error) newMatchesCount++;
                                         }
                                     }
