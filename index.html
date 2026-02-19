@@ -4250,6 +4250,17 @@
                                         this.generateMatches(); // Run Match Algo
                                     })
                                     .subscribe();
+
+                                // Realtime Subscription for Network Connection Changes
+                                supabase
+                                    .channel('network-connections')
+                                    .on('postgres_changes', { event: '*', schema: 'public', table: 'network_connections' }, async () => {
+                                        await this.fetchConnectionRequests();
+                                        await this.fetchSentRequests();
+                                        await this.fetchConnections();
+                                        await this.fetchSuggestedBrokers();
+                                    })
+                                    .subscribe();
                             }
                         } catch (error) {
                             console.error('Init error:', error);
@@ -4994,7 +5005,15 @@
                             if (error) throw error;
 
                             await this.fetchConnectionRequests();
+                            await this.fetchSentRequests();
                             await this.fetchConnections();
+                            await this.fetchSuggestedBrokers();
+
+                            // Update broker modal if open
+                            if (this.showBrokerModal && this.selectedBroker) {
+                                this.selectedBroker.connectionStatus = 'connected';
+                            }
+
                             alert('Bağlantı kabul edildi!');
                         } catch (error) {
                             console.error('Error accepting connection:', error);
@@ -5014,6 +5033,14 @@
                             if (error) throw error;
 
                             await this.fetchConnectionRequests();
+                            await this.fetchSentRequests();
+                            await this.fetchSuggestedBrokers();
+
+                            // Update broker modal if open
+                            if (this.showBrokerModal && this.selectedBroker) {
+                                this.selectedBroker.connectionStatus = 'none';
+                            }
+
                             alert('Bağlantı isteği reddedildi.');
                         } catch (error) {
                             console.error('Error rejecting connection:', error);
