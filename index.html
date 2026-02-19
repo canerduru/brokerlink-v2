@@ -1762,9 +1762,21 @@
                         </template>
                     </div>
 
-                    <div x-show="suggestedBrokers.filter(b => b.id !== user.id && b.connectionStatus === 'none').length === 0"
+                    <!-- Boş durum -->
+                    <div x-show="!brokersLoading && suggestedBrokers.filter(b => b.connectionStatus === 'none').length === 0"
                         class="text-center py-10 text-gray-500">
                         <p>Önerilen yeni broker bulunamadı.</p>
+                    </div>
+
+                    <!-- Daha Fazla Yükle -->
+                    <div class="mt-4 text-center">
+                        <button x-show="brokersHasMore" @click="loadMoreBrokers()" :disabled="brokersLoading"
+                            class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50">
+                            <span x-show="!brokersLoading">Daha Fazla Yükle</span>
+                            <span x-show="brokersLoading">Yükleniyor...</span>
+                        </button>
+                        <p x-show="!brokersHasMore && suggestedBrokers.length > 0" class="text-xs text-gray-400 py-2">
+                            Tüm brokerlar yüklendi.</p>
                     </div>
                 </div>
 
@@ -3572,6 +3584,9 @@
                     contactModalOpen: false, // İletişim modal'ı
                     selectedMatchContact: null, // İletişim için seçilen eşleşme
                     suggestedBrokers: [], // Önerilen brokerlar (Keşfet)
+                    brokersOffset: 0, // Pagination offset
+                    brokersHasMore: true, // Daha fazla broker var mı?
+                    brokersLoading: false, // Yükleniyor durumu
                     blockedUsers: [], // Engellenen kullanıcılar
                     blockedUserProfiles: [], // Engellenen kullanıcıların profil detayları
                     networkTab: 'discover', // Ağ sekmesi alt-menüsü
@@ -5271,23 +5286,48 @@
                     async fetchSuggestedBrokers() {
                         if (!this.user) return;
 
+                        // Reset pagination
+                        this.brokersOffset = 0;
+                        this.brokersHasMore = true;
+                        this.suggestedBrokers = [];
+
+                        await this.loadMoreBrokers();
+                    },
+
+                    async loadMoreBrokers() {
+                        if (!this.user || this.brokersLoading || !this.brokersHasMore) return;
+
+                        const PAGE_SIZE = 20;
+                        this.brokersLoading = true;
+
                         try {
                             const { data, error } = await supabase
                                 .from('profiles')
                                 .select('*')
                                 .neq('id', this.user.id)
-                                .limit(20);
+                                .order('name', { ascending: true })
+                                .range(this.brokersOffset, this.brokersOffset + PAGE_SIZE - 1);
 
                             if (error) throw error;
 
                             // Filter out blocked users and calculate connection status
                             const filtered = (data || []).filter(b => !this.isBlocked(b.id));
-                            this.suggestedBrokers = await Promise.all(filtered.map(async b => {
+                            const withStatus = await Promise.all(filtered.map(async b => {
                                 const status = await this.getConnectionStatus(b.id);
                                 return { ...b, connectionStatus: status };
                             }));
+
+                            this.suggestedBrokers = [...this.suggestedBrokers, ...withStatus];
+                            this.brokersOffset += PAGE_SIZE;
+
+                            // Eğer gelen kayıt sayısı PAGE_SIZE'dan azsa daha fazla yoktur
+                            if ((data || []).length < PAGE_SIZE) {
+                                this.brokersHasMore = false;
+                            }
                         } catch (error) {
-                            console.error('Error fetching suggested brokers:', error);
+                            console.error('Error loading more brokers:', error);
+                        } finally {
+                            this.brokersLoading = false;
                         }
                     },
 
