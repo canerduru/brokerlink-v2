@@ -4276,6 +4276,30 @@
                                         await this.fetchSuggestedBrokers();
                                     })
                                     .subscribe();
+
+                                // Realtime Subscription for Messages (incoming messages)
+                                supabase
+                                    .channel('messages-realtime')
+                                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+                                        const newMsg = payload.new;
+                                        // If message belongs to active conversation, add it instantly
+                                        if (this.activeConversation && newMsg.conversation_id === this.activeConversation.id && newMsg.sender_id !== this.user.id) {
+                                            const msg = {
+                                                id: newMsg.id,
+                                                sender: 'received',
+                                                content: newMsg.content,
+                                                time: new Date(newMsg.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+                                                read: newMsg.read
+                                            };
+                                            if (!this.messages[this.activeConversation.id]) {
+                                                this.messages[this.activeConversation.id] = [];
+                                            }
+                                            this.messages[this.activeConversation.id].push(msg);
+                                        }
+                                        // Refresh conversation list to update last_message
+                                        await this.loadConversations();
+                                    })
+                                    .subscribe();
                             }
                         } catch (error) {
                             console.error('Init error:', error);
@@ -4562,12 +4586,14 @@
                                         let avatar = null;
                                         let name = c.participant_name;
 
-                                        // If we have receiver_id, fetch from profiles
-                                        if (c.receiver_id) {
+                                        // Determine the "other person" from current user's perspective
+                                        const otherUserId = c.user_id === this.user.id ? c.receiver_id : c.user_id;
+
+                                        if (otherUserId) {
                                             const { data: profile } = await supabase
                                                 .from('profiles')
                                                 .select('avatar_url, name')
-                                                .eq('id', c.receiver_id)
+                                                .eq('id', otherUserId)
                                                 .single();
 
                                             if (profile) {
@@ -4583,7 +4609,7 @@
                                             time: this.formatTime(c.last_message_time),
                                             unread: c.unread_count || 0,
                                             userImage: avatar,
-                                            receiverId: c.receiver_id
+                                            receiverId: otherUserId
                                         };
                                     })
                                 );
