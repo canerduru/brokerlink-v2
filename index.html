@@ -4117,7 +4117,7 @@
                         // 1. Ağımdaki brokerların YENİ portföyleri
                         (this.networkPortfolios || [])
                             .filter(p => p.created_at)
-                            .slice(0, 5) // Performance optimization
+                            .slice(0, 10) // Performance optimization
                             .forEach(p => {
                                 activities.push({
                                     id: `network-portfolio-${p.id}`,
@@ -4132,7 +4132,7 @@
                         // 2. Ağımdaki brokerların YENİ talepleri
                         (this.networkDemands || [])
                             .filter(d => d.created_at)
-                            .slice(0, 5)
+                            .slice(0, 10)
                             .forEach(d => {
                                 activities.push({
                                     id: `network-demand-${d.id}`,
