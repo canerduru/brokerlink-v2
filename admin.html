@@ -630,6 +630,17 @@
         let isLoggedIn = false;
         let autoRefreshTimer = null;
 
+        // Security Helper
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         window.addEventListener('load', function () {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             checkAuth();
@@ -736,13 +747,13 @@
             <div class="table-row">
                 <div class="avatar">
                     ${b.avatar_url
-                    ? `<img src="${b.avatar_url}" alt="">`
-                    : (b.name?.charAt(0) || '?').toUpperCase()
+                    ? `<img src="${escapeHTML(b.avatar_url)}" alt="">`
+                    : escapeHTML((b.name?.charAt(0) || '?').toUpperCase())
                 }
                 </div>
                 <div class="row-info">
-                    <div class="row-name">${b.name || 'İsimsiz'}</div>
-                    <div class="row-sub">${b.company || b.title || 'Broker'}</div>
+                    <div class="row-name">${escapeHTML(b.name || 'İsimsiz')}</div>
+                    <div class="row-sub">${escapeHTML(b.company || b.title || 'Broker')}</div>
                 </div>
                 <span class="row-badge badge-blue">${formatDate(b.created_at)}</span>
             </div>
@@ -768,10 +779,10 @@
             <div class="table-row">
                 <div class="avatar" style="background: linear-gradient(135deg, #059669, #10b981); border-radius: 10px;">🏢</div>
                 <div class="row-info">
-                    <div class="row-name">${p.title || 'Başlıksız'}</div>
-                    <div class="row-sub">${p.profiles?.name || '—'} · ${p.district || ''} ${p.city || ''}</div>
+                    <div class="row-name">${escapeHTML(p.title || 'Başlıksız')}</div>
+                    <div class="row-sub">${escapeHTML(p.profiles?.name || '—')} · ${escapeHTML(p.district || '')} ${escapeHTML(p.city || '')}</div>
                 </div>
-                <span class="row-badge badge-green">${p.type || '—'}</span>
+                <span class="row-badge badge-green">${escapeHTML(p.type || '—')}</span>
             </div>
         `).join('');
         }
@@ -795,8 +806,8 @@
             <div class="table-row">
                 <div class="avatar" style="background: linear-gradient(135deg, #7c3aed, #8b5cf6); border-radius: 10px;">📋</div>
                 <div class="row-info">
-                    <div class="row-name">${d.title || 'Başlıksız'}</div>
-                    <div class="row-sub">${d.profiles?.name || '—'} · ${d.district || ''} ${d.city || ''}</div>
+                    <div class="row-name">${escapeHTML(d.title || 'Başlıksız')}</div>
+                    <div class="row-sub">${escapeHTML(d.profiles?.name || '—')} · ${escapeHTML(d.district || '')} ${escapeHTML(d.city || '')}</div>
                 </div>
                 <span class="row-badge badge-purple">${formatBudget(d.budget)}</span>
             </div>
@@ -830,10 +841,10 @@
             <div class="table-row">
                 <div class="avatar" style="background: linear-gradient(135deg, #0891b2, #06b6d4); border-radius: 10px;">🔗</div>
                 <div class="row-info">
-                    <div class="row-name">${m.demands?.title || 'Talep'}</div>
-                    <div class="row-sub">${m.demands?.profiles?.name || '—'} · ${m.portfolios?.title || 'Portföy'}</div>
+                    <div class="row-name">${escapeHTML(m.demands?.title || 'Talep')}</div>
+                    <div class="row-sub">${escapeHTML(m.demands?.profiles?.name || '—')} · ${escapeHTML(m.portfolios?.title || 'Portföy')}</div>
                 </div>
-                <span class="row-badge ${s.cls}">${s.label}</span>
+                <span class="row-badge ${s.cls}">${escapeHTML(s.label)}</span>
             </div>`;
             }).join('');
         }
