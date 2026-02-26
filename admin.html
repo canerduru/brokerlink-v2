@@ -729,19 +729,33 @@
         }
 
         async function loadBrokers() {
-            const { data, count } = await supabase
+            // 1. Kullanıcı profillerini çek
+            const { data: profiles, count } = await supabase
                 .from('profiles')
-                .select('id, name, company, title, avatar_url, created_at, user_subscriptions(tier, demands_used, portfolios_used)', { count: 'exact' })
+                .select('id, name, company, title, avatar_url, created_at', { count: 'exact' })
                 .order('created_at', { ascending: false })
                 .limit(20);
 
             document.getElementById('brokersCount').textContent = count ?? 0;
             const el = document.getElementById('brokersList');
 
-            if (!data || data.length === 0) {
+            if (!profiles || profiles.length === 0) {
                 el.innerHTML = '<div class="empty-state">Henüz broker yok</div>';
                 return;
             }
+
+            // 2. Bu kullanıcıların aboneliklerini çek
+            const userIds = profiles.map(p => p.id);
+            const { data: subs } = await supabase
+                .from('user_subscriptions')
+                .select('user_id, tier, demands_used, portfolios_used')
+                .in('user_id', userIds);
+
+            // 3. Verileri birleştir
+            const data = profiles.map(p => {
+                const sub = subs?.find(s => s.user_id === p.id) || { tier: 'free', demands_used: 0, portfolios_used: 0 };
+                return { ...p, sub };
+            });
 
             const tierLabels = { free: 'Ücretsiz', pro: 'Pro', enterprise: 'Enterprise' };
             const tierColors = {
@@ -751,7 +765,7 @@
             };
 
             el.innerHTML = data.map(b => {
-                const sub = b.user_subscriptions?.[0] || { tier: 'free', demands_used: 0, portfolios_used: 0 };
+                const sub = b.sub;
                 const tierLimit = sub.tier === 'free' ? 2 : sub.tier === 'pro' ? 10 : 50;
                 return `
             <div class="table-row" style="flex-wrap:wrap;gap:6px;">
