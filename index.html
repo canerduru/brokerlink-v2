@@ -5581,6 +5581,16 @@
 
                     // ─── QUOTA-AWARE ADD PORTFOLIO / DEMAND BUTTONS ───────────────────────────
                     openAddPortfolio() {
+                        fetch('http://localhost:8001/debug', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                sub: this.subscription,
+                                used: this.subscription ? this.subscription.portfolios_used : null,
+                                limit: this.subscription ? this.subscription.portfolios_limit : null,
+                                geq: this.subscription ? (this.subscription.portfolios_used >= this.subscription.portfolios_limit) : null
+                            })
+                        });
+
                         if (this.subscription && this.subscription.portfolios_used >= this.subscription.portfolios_limit) {
                             this.limitModalType = 'portfolio';
                             this.showLimitModal = true;
