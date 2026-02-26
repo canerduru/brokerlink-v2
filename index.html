@@ -2456,7 +2456,7 @@
                                 <span x-text="currentPortfolioListingType === 'kiralik' ? 'Kiralık' : 'Satılık'"></span>
                                 portföyünüz yok.
                             </p>
-                            <button
+                            <button @click.prevent="openAddPortfolio()"
                                 class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
                                 + Yeni Portföy Ekle
                             </button>
@@ -2464,13 +2464,6 @@
                     </template>
                 </div>
 
-                <!-- FAB Button -->
-                <button
-                    class="fixed bottom-24 right-5 md:bottom-8 md:right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-300 flex items-center justify-center hover:bg-blue-700 transition-colors z-40">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                </button>
             </div>
 
             <!-- PROFILE VIEW -->
