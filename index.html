@@ -5636,6 +5636,14 @@
                                 data = result.data;
                                 error = result.error;
                             } else {
+                                // ADD MODE: Proactive quota check first
+                                if (this.subscription && this.subscription.portfolios_used >= this.subscription.portfolios_limit) {
+                                    this.limitModalType = 'portfolio';
+                                    this.showLimitModal = true;
+                                    this.showAddModal = false;
+                                    return;
+                                }
+
                                 // ADD MODE: Insert new portfolio via quota-checked RPC
                                 const payload = {
                                     title: portfolioData.title,
@@ -5655,6 +5663,7 @@
 
                                 // Quota exceeded - close form and show upgrade modal
                                 if (error && error.message && error.message.includes('QUOTA_EXCEEDED')) {
+                                    console.log('[Quota] Portfolio limit exceeded:', error.message);
                                     this.limitModalType = 'portfolio';
                                     this.showLimitModal = true;
                                     this.showAddModal = false; // Close the portfolio form
@@ -5934,6 +5943,14 @@
                                 data = result.data;
                                 error = result.error;
                             } else {
+                                // ADD MODE: Proactive quota check first
+                                if (this.subscription && this.subscription.demands_used >= this.subscription.demands_limit) {
+                                    this.limitModalType = 'demand';
+                                    this.showLimitModal = true;
+                                    this.showAddDemandModal = false;
+                                    return;
+                                }
+
                                 // ADD MODE: Insert new demand via quota-checked RPC
                                 const payload = {
                                     title: demandData.title,
@@ -5955,6 +5972,7 @@
 
                                 // Quota exceeded - close form and show upgrade modal
                                 if (error && error.message && error.message.includes('QUOTA_EXCEEDED')) {
+                                    console.log('[Quota] Demand limit exceeded:', error.message);
                                     this.limitModalType = 'demand';
                                     this.showLimitModal = true;
                                     this.showAddDemandModal = false; // Close the demand form
@@ -7182,7 +7200,7 @@
         </div>
         <!-- ===== QUOTA LIMIT EXCEEDED MODAL ===== -->
         <div x-show="showLimitModal" x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            class="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
             @click.self="showLimitModal = false">
             <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm mx-4 text-center">
                 <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
