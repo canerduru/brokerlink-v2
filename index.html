@@ -5653,10 +5653,11 @@
                                 data = result.data ? [result.data] : null;
                                 error = result.error;
 
-                                // Quota exceeded - show upgrade modal instead of generic error
+                                // Quota exceeded - close form and show upgrade modal
                                 if (error && error.message && error.message.includes('QUOTA_EXCEEDED')) {
                                     this.limitModalType = 'portfolio';
                                     this.showLimitModal = true;
+                                    this.showAddModal = false; // Close the portfolio form
                                     this.isSavingPortfolio = false;
                                     return;
                                 }
@@ -5952,10 +5953,11 @@
                                 data = result.data ? [result.data] : null;
                                 error = result.error;
 
-                                // Quota exceeded - show upgrade modal instead of generic error
+                                // Quota exceeded - close form and show upgrade modal
                                 if (error && error.message && error.message.includes('QUOTA_EXCEEDED')) {
                                     this.limitModalType = 'demand';
                                     this.showLimitModal = true;
+                                    this.showAddDemandModal = false; // Close the demand form
                                     this.isSavingDemand = false;
                                     return;
                                 }
@@ -7219,7 +7221,8 @@
                         </a>
                     </div>
                 </div>
-                <button @click="showLimitModal = false"
+                <button
+                    @click="showLimitModal = false; (limitModalType === 'portfolio' ? showAddModal = false : showAddDemandModal = false)"
                     class="w-full py-2.5 border-2 border-gray-200 rounded-xl text-gray-600 font-semibold hover:bg-gray-50 transition-colors text-sm">
                     Kapat
                 </button>
