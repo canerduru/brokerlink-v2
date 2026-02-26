@@ -609,7 +609,7 @@
                 <div class="table-body" id="brokersList">
                     <div class="empty-state">Yükleniyor...</div>
                 </div>
-                <div style="padding:10px 0 0;text-align:center;" id="brokersLoadMore" style="display:none;">
+                <div id="brokersLoadMore" style="padding:10px 0 0;text-align:center;display:none;">
                     <button onclick="loadMoreBrokers()"
                         style="font-size:12px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#818cf8;padding:6px 18px;border-radius:8px;cursor:pointer;">⬇
                         Daha Fazla Göster</button>
@@ -865,12 +865,11 @@
                 el.insertAdjacentHTML('beforeend', html);
             }
 
-            // Show or hide Load More button
-            const loaded = from + profiles.length;
-            if (loaded < (count ?? 0)) {
-                loadMoreEl.style.display = 'block';
-            } else {
+            // Show or hide Load More button (if we got less than requested, no more)
+            if (profiles.length < brokersPerPage) {
                 loadMoreEl.style.display = 'none';
+            } else {
+                loadMoreEl.style.display = 'block';
             }
         }
 
