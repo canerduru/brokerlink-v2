@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrokerLink - AgentConnect Style</title>
+    <title>Evliyo - AgentConnect Style</title>
     <!-- Tailwind CSS (CDN for GitHub Pages) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -176,7 +176,7 @@
                             <div class="font-bold text-blue-700 text-sm">Pro</div>
                             <div class="text-xs text-blue-500">Ayda 10 talep + 10 portföy</div>
                         </div>
-                        <a href="mailto:destek@brokerlink.com?subject=Pro Paket"
+                        <a href="mailto:destek@evliyo.com?subject=Pro Paket"
                             class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
                             Geç →
                         </a>
@@ -186,7 +186,7 @@
                             <div class="font-bold text-amber-700 text-sm">Enterprise</div>
                             <div class="text-xs text-amber-500">Ayda 50 talep + 50 portföy</div>
                         </div>
-                        <a href="mailto:destek@brokerlink.com?subject=Enterprise Paket"
+                        <a href="mailto:destek@evliyo.com?subject=Enterprise Paket"
                             class="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors">
                             İletişim →
                         </a>
@@ -214,7 +214,7 @@
                                 </path>
                             </svg>
                         </div>
-                        <h1 class="text-2xl font-bold text-gray-900">BrokerLink'e Hoşgeldiniz</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">Evliyo'e Hoşgeldiniz</h1>
                         <p class="text-gray-500 mt-2">Profesyonel Emlak Ağı</p>
                     </div>
 
@@ -276,7 +276,7 @@
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
                         </path>
                     </svg>
-                    BrokerLink
+                    Evliyo
                 </h1>
             </div>
 
@@ -607,7 +607,7 @@
             <!-- MOBILE HEADER -->
             <div class="mobile-header sticky top-0 z-30 bg-white px-5 py-4 border-b border-gray-100 md:hidden">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-blue-600">BrokerLink</h1>
+                    <h1 class="text-2xl font-bold text-blue-600">Evliyo</h1>
                     <div class="flex items-center gap-2">
                         <!-- Messages Button -->
                         <button @click="currentTab = 'messages'"
@@ -4076,7 +4076,7 @@
 
                         try {
                             // ✅ Check login activity from localStorage
-                            const lastLoginTimestamp = localStorage.getItem('brokerlink_last_login');
+                            const lastLoginTimestamp = localStorage.getItem('evliyo_last_login');
                             const now = Date.now();
                             const daysSinceLogin = lastLoginTimestamp
                                 ? (now - parseInt(lastLoginTimestamp)) / (1000 * 60 * 60 * 24)
@@ -4322,18 +4322,18 @@
 
                             if (this.user) {
                                 // ✅ Track login timestamp for Trust Score
-                                const lastLoginTimestamp = localStorage.getItem('brokerlink_last_login');
+                                const lastLoginTimestamp = localStorage.getItem('evliyo_last_login');
                                 const now = Date.now();
 
                                 if (!lastLoginTimestamp) {
                                     // First login
-                                    localStorage.setItem('brokerlink_last_login', now.toString());
+                                    localStorage.setItem('evliyo_last_login', now.toString());
                                 } else {
                                     const daysSinceLogin = (now - parseInt(lastLoginTimestamp)) / (1000 * 60 * 60 * 24);
 
                                     // Update timestamp if more than 5 days passed
                                     if (daysSinceLogin > 5) {
-                                        localStorage.setItem('brokerlink_last_login', now.toString());
+                                        localStorage.setItem('evliyo_last_login', now.toString());
                                     }
                                 }
 
