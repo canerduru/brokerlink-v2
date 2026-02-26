@@ -778,7 +778,7 @@
 
         async function fetchBrokersPage(reset) {
             const from = brokersPage * brokersPerPage;
-            const to   = from + brokersPerPage - 1;
+            const to = from + brokersPerPage - 1;
 
             const { data: profiles, count } = await supabase
                 .from('profiles')
@@ -861,17 +861,11 @@
         }
 
         async function loadTierStats() {
-            const { data } = await supabase
-                .from('user_subscriptions')
-                .select('tier');
-
-            if (!data) return;
-            const counts = { free: 0, pro: 0, enterprise: 0 };
-            data.forEach(s => { if (counts[s.tier] !== undefined) counts[s.tier]++; });
-
-            document.getElementById('tierFreeCount').textContent = counts.free;
-            document.getElementById('tierProCount').textContent = counts.pro;
-            document.getElementById('tierEnterpriseCount').textContent = counts.enterprise;
+            const { data, error } = await supabase.rpc('admin_get_tier_stats');
+            if (error || !data) return;
+            document.getElementById('tierFreeCount').textContent = data.free ?? 0;
+            document.getElementById('tierProCount').textContent = data.pro ?? 0;
+            document.getElementById('tierEnterpriseCount').textContent = data.enterprise ?? 0;
         }
 
         async function loadPortfolios() {
