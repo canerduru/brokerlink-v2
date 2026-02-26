@@ -90,8 +90,14 @@ BEGIN
         sub.demands_used := 0;
     END IF;
 
-    -- Limit kontrolü
+    -- Limit kontrolü: sayac VE gerçek sayının büyüğünü kullan
     tier_limit := get_tier_limit(sub.tier);
+    SELECT GREATEST(
+        sub.demands_used,
+        COUNT(*)::INTEGER
+    ) INTO sub.demands_used
+    FROM demands WHERE user_id = auth.uid();
+
     IF sub.demands_used >= tier_limit THEN
         RAISE EXCEPTION 'QUOTA_EXCEEDED Aylik talep limitinize ulastiniz (%/%). Paketi yukseltmek icin bize ulasin.',
             sub.demands_used, tier_limit
@@ -154,8 +160,14 @@ BEGIN
         sub.portfolios_used := 0;
     END IF;
 
-    -- Limit kontrolü
+    -- Limit kontrolü: sayac VE gerçek sayının büyüğünü kullan
     tier_limit := get_tier_limit(sub.tier);
+    SELECT GREATEST(
+        sub.portfolios_used,
+        COUNT(*)::INTEGER
+    ) INTO sub.portfolios_used
+    FROM portfolios WHERE user_id = auth.uid();
+
     IF sub.portfolios_used >= tier_limit THEN
         RAISE EXCEPTION 'QUOTA_EXCEEDED Aylik portfoy limitinize ulastiniz (%/%). Paketi yukseltmek icin bize ulasin.',
             sub.portfolios_used, tier_limit
