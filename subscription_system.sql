@@ -93,7 +93,7 @@ BEGIN
     -- Limit kontrolü
     tier_limit := get_tier_limit(sub.tier);
     IF sub.demands_used >= tier_limit THEN
-        RAISE EXCEPTION 'QUOTA_EXCEEDED Ayl%k talep limitinize ula%t%n%z (%%/%%). Paketi y%kseltmek i%in bize ula%%n.',
+        RAISE EXCEPTION 'QUOTA_EXCEEDED Aylik talep limitinize ulastiniz (%/%). Paketi yukseltmek icin bize ulasin.',
             sub.demands_used, tier_limit
             USING ERRCODE = 'P0001';
     END IF;
@@ -157,7 +157,7 @@ BEGIN
     -- Limit kontrolü
     tier_limit := get_tier_limit(sub.tier);
     IF sub.portfolios_used >= tier_limit THEN
-        RAISE EXCEPTION 'QUOTA_EXCEEDED Ayl%k portf%y limitinize ula%t%n%z (%%/%%). Paketi y%kseltmek i%in bize ula%%n.',
+        RAISE EXCEPTION 'QUOTA_EXCEEDED Aylik portfoy limitinize ulastiniz (%/%). Paketi yukseltmek icin bize ulasin.',
             sub.portfolios_used, tier_limit
             USING ERRCODE = 'P0001';
     END IF;
