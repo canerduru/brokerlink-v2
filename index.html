@@ -2171,7 +2171,7 @@
                             <h2 class="text-xl font-bold text-gray-900">Portföylerim</h2>
                             <p class="text-sm text-gray-500 mt-1">Tüm gayrimenkullerinizi yönetin</p>
                         </div>
-                        <button @click.prevent="showAddModal = true; editingPortfolioId = null"
+                        <button @click.prevent="openAddPortfolio()"
                             class="hidden md:flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -2928,7 +2928,7 @@
                             <h2 class="text-xl font-bold text-gray-900">Talepler</h2>
                             <p class="text-sm text-gray-500 mt-1">Müşteri talepleri</p>
                         </div>
-                        <button @click.prevent="showAddDemandModal = true; editingDemandId = null"
+                        <button @click.prevent="openAddDemand()"
                             class="px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -3454,7 +3454,7 @@
     <!-- FAB Button Wrapper (Mobile Only) - Portfolio -->
     <div class="fixed bottom-0 left-0 w-full h-0 z-50 pointer-events-none md:hidden"
         x-show="currentTab === 'portfolios'">
-        <button @click.prevent="showAddModal = true; editingPortfolioId = null" x-data
+        <button @click.prevent="openAddPortfolio()" x-data
             class="fixed bottom-24 right-5 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg pointer-events-auto hover:scale-105 transition-transform">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
@@ -3465,7 +3465,7 @@
 
     <!-- FAB Button Wrapper (Mobile Only) - Demands -->
     <div class="fixed bottom-0 left-0 w-full h-0 z-50 pointer-events-none md:hidden" x-show="currentTab === 'demands'">
-        <button @click.prevent="showAddDemandModal = true; editingDemandId = null" x-data
+        <button @click.prevent="openAddDemand()" x-data
             class="fixed bottom-24 right-5 w-14 h-14 bg-emerald-600 rounded-full flex items-center justify-center text-white shadow-lg pointer-events-auto hover:scale-105 transition-transform">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
@@ -5577,6 +5577,27 @@
                             this.newListingImages = [e.target.result];
                         };
                         reader.readAsDataURL(file);
+                    },
+
+                    // ─── QUOTA-AWARE ADD PORTFOLIO / DEMAND BUTTONS ───────────────────────────
+                    openAddPortfolio() {
+                        if (this.subscription && this.subscription.portfolios_used >= this.subscription.portfolios_limit) {
+                            this.limitModalType = 'portfolio';
+                            this.showLimitModal = true;
+                            return;
+                        }
+                        this.showAddModal = true;
+                        this.editingPortfolioId = null;
+                    },
+
+                    openAddDemand() {
+                        if (this.subscription && this.subscription.demands_used >= this.subscription.demands_limit) {
+                            this.limitModalType = 'demand';
+                            this.showLimitModal = true;
+                            return;
+                        }
+                        this.showAddDemandModal = true;
+                        this.editingDemandId = null;
                     },
 
                     async saveNewPortfolio() {
