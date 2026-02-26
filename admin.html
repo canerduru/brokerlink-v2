@@ -576,14 +576,43 @@
         <!-- TABLES -->
         <div class="tables-grid">
 
-            <!-- Son Brokerlar -->
+            <!-- Tier Özeti -->
+            <div class="table-card" style="margin-bottom:0;padding:16px 20px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <span style="font-size:14px;font-weight:700;color:#94a3b8;">📊 Paket Dağılımı</span>
+                </div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                    <div
+                        style="flex:1;min-width:80px;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.2);border-radius:10px;padding:10px 14px;text-align:center;">
+                        <div style="font-size:22px;font-weight:800;color:#e2e8f0;" id="tierFreeCount">—</div>
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">Ücretsiz</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:80px;background:rgba(37,99,235,0.12);border:1px solid rgba(37,99,235,0.25);border-radius:10px;padding:10px 14px;text-align:center;">
+                        <div style="font-size:22px;font-weight:800;color:#60a5fa;" id="tierProCount">—</div>
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">Pro</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:80px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 14px;text-align:center;">
+                        <div style="font-size:22px;font-weight:800;color:#fbbf24;" id="tierEnterpriseCount">—</div>
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">Enterprise</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tüm Brokerlar -->
             <div class="table-card">
                 <div class="table-header">
-                    <h3>👥 Son Kayıt Olan Brokerlar</h3>
+                    <h3>👥 Tüm Brokerlar</h3>
                     <span class="count" id="brokersCount">—</span>
                 </div>
                 <div class="table-body" id="brokersList">
                     <div class="empty-state">Yükleniyor...</div>
+                </div>
+                <div style="padding:10px 0 0;text-align:center;" id="brokersLoadMore" style="display:none;">
+                    <button onclick="loadMoreBrokers()"
+                        style="font-size:12px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#818cf8;padding:6px 18px;border-radius:8px;cursor:pointer;">⬇
+                        Daha Fazla Göster</button>
                 </div>
             </div>
 
@@ -728,30 +757,52 @@
             document.getElementById('statMessages').textContent = messages.count ?? '—';
         }
 
+        // Broker pagination state
+        let brokersPage = 0;
+        const brokersPerPage = 15;
+        let allBrokersLoaded = false;
+        let cachedSubs = [];
+
         async function loadBrokers() {
-            // 1. Kullanıcı profillerini çek
+            brokersPage = 0;
+            allBrokersLoaded = false;
+            document.getElementById('brokersList').innerHTML = '<div class="empty-state">Yükleniyor...</div>';
+            await fetchBrokersPage(true);
+            await loadTierStats();
+        }
+
+        async function loadMoreBrokers() {
+            brokersPage++;
+            await fetchBrokersPage(false);
+        }
+
+        async function fetchBrokersPage(reset) {
+            const from = brokersPage * brokersPerPage;
+            const to   = from + brokersPerPage - 1;
+
             const { data: profiles, count } = await supabase
                 .from('profiles')
                 .select('id, name, company, title, avatar_url, created_at', { count: 'exact' })
                 .order('created_at', { ascending: false })
-                .limit(20);
+                .range(from, to);
 
             document.getElementById('brokersCount').textContent = count ?? 0;
             const el = document.getElementById('brokersList');
+            const loadMoreEl = document.getElementById('brokersLoadMore');
 
             if (!profiles || profiles.length === 0) {
-                el.innerHTML = '<div class="empty-state">Henüz broker yok</div>';
+                if (reset) el.innerHTML = '<div class="empty-state">Henüz broker yok</div>';
+                loadMoreEl.style.display = 'none';
                 return;
             }
 
-            // 2. Bu kullanıcıların aboneliklerini çek
+            // Fetch subscriptions for this page
             const userIds = profiles.map(p => p.id);
             const { data: subs } = await supabase
                 .from('user_subscriptions')
                 .select('user_id, tier, demands_used, portfolios_used')
                 .in('user_id', userIds);
 
-            // 3. Verileri birleştir
             const data = profiles.map(p => {
                 const sub = subs?.find(s => s.user_id === p.id) || { tier: 'free', demands_used: 0, portfolios_used: 0 };
                 return { ...p, sub };
@@ -764,7 +815,7 @@
                 enterprise: 'background:#f59e0b;color:#fff'
             };
 
-            el.innerHTML = data.map(b => {
+            const html = data.map(b => {
                 const sub = b.sub;
                 const tierLimit = sub.tier === 'free' ? 2 : sub.tier === 'pro' ? 10 : 50;
                 return `
@@ -793,6 +844,34 @@
                 <button onclick="resetQuota('${b.id}')" style="font-size:10px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:3px 8px;border-radius:6px;cursor:pointer;">Kotayı Sıfırla</button>
             </div>`;
             }).join('');
+
+            if (reset) {
+                el.innerHTML = html;
+            } else {
+                el.insertAdjacentHTML('beforeend', html);
+            }
+
+            // Show or hide Load More button
+            const loaded = from + profiles.length;
+            if (loaded < (count ?? 0)) {
+                loadMoreEl.style.display = 'block';
+            } else {
+                loadMoreEl.style.display = 'none';
+            }
+        }
+
+        async function loadTierStats() {
+            const { data } = await supabase
+                .from('user_subscriptions')
+                .select('tier');
+
+            if (!data) return;
+            const counts = { free: 0, pro: 0, enterprise: 0 };
+            data.forEach(s => { if (counts[s.tier] !== undefined) counts[s.tier]++; });
+
+            document.getElementById('tierFreeCount').textContent = counts.free;
+            document.getElementById('tierProCount').textContent = counts.pro;
+            document.getElementById('tierEnterpriseCount').textContent = counts.enterprise;
         }
 
         async function loadPortfolios() {
