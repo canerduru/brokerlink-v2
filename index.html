@@ -150,6 +150,57 @@
 <body class="bg-gray-50" x-data="app()" x-init="init()">
     <div class="app-layout">
 
+        <!-- ===== QUOTA LIMIT EXCEEDED MODAL ===== -->
+        <div x-show="showLimitModal" x-cloak
+            class="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            @click.self="showLimitModal = false">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm mx-4 text-center">
+                <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                    🔒</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Aylık Limitinize Ulaştınız</h3>
+                <p class="text-gray-500 text-sm mb-1">
+                    <template x-if="limitModalType === 'demand'">
+                        <span>Bu ay ekleyebileceğiniz talep sayısı (<span
+                                x-text="subscription ? subscription.demands_limit : 2"></span>)
+                            doldu.</span>
+                    </template>
+                    <template x-if="limitModalType === 'portfolio'">
+                        <span>Bu ay ekleyebileceğiniz portföy sayısı (<span
+                                x-text="subscription ? subscription.portfolios_limit : 2"></span>) doldu.</span>
+                    </template>
+                </p>
+                <p class="text-gray-400 text-xs mb-6">Paketinizi yükselterek daha fazla ilan ekleyebilirsiniz.</p>
+                <div class="space-y-3 mb-6 text-left">
+                    <div class="flex items-center justify-between bg-blue-50 rounded-xl p-3">
+                        <div>
+                            <div class="font-bold text-blue-700 text-sm">Pro</div>
+                            <div class="text-xs text-blue-500">Ayda 10 talep + 10 portföy</div>
+                        </div>
+                        <a href="mailto:destek@brokerlink.com?subject=Pro Paket"
+                            class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
+                            Geç →
+                        </a>
+                    </div>
+                    <div class="flex items-center justify-between bg-amber-50 rounded-xl p-3">
+                        <div>
+                            <div class="font-bold text-amber-700 text-sm">Enterprise</div>
+                            <div class="text-xs text-amber-500">Ayda 50 talep + 50 portföy</div>
+                        </div>
+                        <a href="mailto:destek@brokerlink.com?subject=Enterprise Paket"
+                            class="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors">
+                            İletişim →
+                        </a>
+                    </div>
+                </div>
+                <button
+                    @click="showLimitModal = false; (limitModalType === 'portfolio' ? showAddModal = false : showAddDemandModal = false)"
+                    class="w-full py-2.5 border-2 border-gray-200 rounded-xl text-gray-600 font-semibold hover:bg-gray-50 transition-colors text-sm">
+                    Kapat
+                </button>
+            </div>
+        </div>
+
+
         <!-- AUTH MODAL (Blocks everything if not logged in) -->
         <template x-if="!user">
             <div class="fixed inset-0 z-50 bg-gray-50 flex items-center justify-center p-4">
@@ -5581,16 +5632,6 @@
 
                     // ─── QUOTA-AWARE ADD PORTFOLIO / DEMAND BUTTONS ───────────────────────────
                     openAddPortfolio() {
-                        fetch('http://localhost:8001/debug', {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                sub: this.subscription,
-                                used: this.subscription ? this.subscription.portfolios_used : null,
-                                limit: this.subscription ? this.subscription.portfolios_limit : null,
-                                geq: this.subscription ? (this.subscription.portfolios_used >= this.subscription.portfolios_limit) : null
-                            })
-                        });
-
                         if (this.subscription && this.subscription.portfolios_used >= this.subscription.portfolios_limit) {
                             this.limitModalType = 'portfolio';
                             this.showLimitModal = true;
@@ -7229,54 +7270,7 @@
                 </div>
             </div>
         </div>
-        <!-- ===== QUOTA LIMIT EXCEEDED MODAL ===== -->
-        <div x-show="showLimitModal" x-cloak
-            class="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
-            @click.self="showLimitModal = false">
-            <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm mx-4 text-center">
-                <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                    🔒</div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Aylık Limitinize Ulaştınız</h3>
-                <p class="text-gray-500 text-sm mb-1">
-                    <template x-if="limitModalType === 'demand'">
-                        <span>Bu ay ekleyebileceğiniz talep sayısı (<span x-text="subscription.demands_limit"></span>)
-                            doldu.</span>
-                    </template>
-                    <template x-if="limitModalType === 'portfolio'">
-                        <span>Bu ay ekleyebileceğiniz portföy sayısı (<span
-                                x-text="subscription.portfolios_limit"></span>) doldu.</span>
-                    </template>
-                </p>
-                <p class="text-gray-400 text-xs mb-6">Paketinizi yükselterek daha fazla ilan ekleyebilirsiniz.</p>
-                <div class="space-y-3 mb-6 text-left">
-                    <div class="flex items-center justify-between bg-blue-50 rounded-xl p-3">
-                        <div>
-                            <div class="font-bold text-blue-700 text-sm">Pro</div>
-                            <div class="text-xs text-blue-500">Ayda 10 talep + 10 portföy</div>
-                        </div>
-                        <a href="mailto:destek@brokerlink.com?subject=Pro Paket"
-                            class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
-                            Geç →
-                        </a>
-                    </div>
-                    <div class="flex items-center justify-between bg-amber-50 rounded-xl p-3">
-                        <div>
-                            <div class="font-bold text-amber-700 text-sm">Enterprise</div>
-                            <div class="text-xs text-amber-500">Ayda 50 talep + 50 portföy</div>
-                        </div>
-                        <a href="mailto:destek@brokerlink.com?subject=Enterprise Paket"
-                            class="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors">
-                            İletişim →
-                        </a>
-                    </div>
-                </div>
-                <button
-                    @click="showLimitModal = false; (limitModalType === 'portfolio' ? showAddModal = false : showAddDemandModal = false)"
-                    class="w-full py-2.5 border-2 border-gray-200 rounded-xl text-gray-600 font-semibold hover:bg-gray-50 transition-colors text-sm">
-                    Kapat
-                </button>
-            </div>
-        </div>
+
 </body>
 
 </html>
