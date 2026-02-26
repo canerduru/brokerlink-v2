@@ -680,7 +680,14 @@
         async function checkAuth() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                showDashboard();
+                // Admin kontrolü
+                const { data: isAdmin } = await supabase.rpc('is_admin');
+                if (isAdmin) {
+                    showDashboard();
+                } else {
+                    await supabase.auth.signOut();
+                    document.getElementById('loginError').textContent = 'Bu panele erişim yetkiniz yok. Sadece adminler girebilir.';
+                }
             }
         }
 
@@ -706,7 +713,14 @@
             if (error) {
                 errEl.textContent = 'Giriş başarısız: ' + error.message;
             } else {
-                showDashboard();
+                // Admin rolü kontrolü
+                const { data: isAdmin } = await supabase.rpc('is_admin');
+                if (isAdmin) {
+                    showDashboard();
+                } else {
+                    await supabase.auth.signOut();
+                    errEl.textContent = 'Bu panele erişim yetkiniz yok. Sadece adminler girebilir.';
+                }
             }
         }
 
