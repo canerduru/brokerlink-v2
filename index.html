@@ -6418,6 +6418,10 @@
                     isMatching: false,
                     matchingProgress: 0,
 
+                    // Save state flags (must be declared here for Alpine reactivity)
+                    isSavingDemand: false,
+                    isSavingPortfolio: false,
+
                     // Subscription state
                     subscription: { tier: 'free', demands_used: 0, portfolios_used: 0, demands_limit: 2, portfolios_limit: 2 },
                     showLimitModal: false,
