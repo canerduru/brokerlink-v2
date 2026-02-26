@@ -3503,7 +3503,7 @@
     </div> <!-- End of scroll-content -->
 
     <!-- FAB Button Wrapper - Portfolio -->
-    <div class="fixed bottom-6 right-6 z-50 flex items-center justify-center pointer-events-none"
+    <div class="fixed bottom-6 right-6 z-50 flex items-center justify-center pointer-events-none md:hidden"
         x-show="currentTab === 'portfolios'">
         <button @click.prevent="openAddPortfolio()"
             class="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg pointer-events-auto hover:bg-blue-700 hover:scale-105 transition-all">
@@ -3515,7 +3515,7 @@
     </div>
 
     <!-- FAB Button Wrapper - Demands -->
-    <div class="fixed bottom-6 right-6 z-50 flex items-center justify-center pointer-events-none"
+    <div class="fixed bottom-6 right-6 z-50 flex items-center justify-center pointer-events-none md:hidden"
         x-show="currentTab === 'demands'">
         <button @click.prevent="openAddDemand()"
             class="w-14 h-14 bg-emerald-600 rounded-full flex items-center justify-center text-white shadow-lg pointer-events-auto hover:bg-emerald-700 hover:scale-105 transition-all">
