@@ -772,6 +772,56 @@
                             </div>
                         </div>
 
+                        <!-- Paket Bilgisi / Kota Kartı -->
+                        <div
+                            class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-4 mb-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-bold text-gray-800">Abonelik Paketiniz</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="{
+                                            'bg-gray-200 text-gray-700': subscription.tier === 'free',
+                                            'bg-blue-600 text-white': subscription.tier === 'pro',
+                                            'bg-amber-500 text-white': subscription.tier === 'enterprise'
+                                        }"
+                                        x-text="subscription.tier === 'free' ? 'Ücretsiz' : subscription.tier === 'pro' ? 'Pro' : 'Enterprise'">
+                                    </span>
+                                </div>
+                                <button @click="showLimitModal = true; limitModalType = 'demand'"
+                                    class="text-xs text-blue-600 font-semibold hover:underline"
+                                    x-show="subscription.tier === 'free'">
+                                    ⬆ Yükselt
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                        <span>Talepler</span>
+                                        <span
+                                            x-text="`${subscription.demands_used}/${subscription.demands_limit}`"></span>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full rounded-full transition-all"
+                                            :class="subscription.demands_used >= subscription.demands_limit ? 'bg-red-500' : 'bg-blue-500'"
+                                            :style="`width: ${Math.min(100, (subscription.demands_used / Math.max(1, subscription.demands_limit)) * 100)}%`">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                        <span>Portföyler</span>
+                                        <span
+                                            x-text="`${subscription.portfolios_used}/${subscription.portfolios_limit}`"></span>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full rounded-full transition-all"
+                                            :class="subscription.portfolios_used >= subscription.portfolios_limit ? 'bg-red-500' : 'bg-emerald-500'"
+                                            :style="`width: ${Math.min(100, (subscription.portfolios_used / Math.max(1, subscription.portfolios_limit)) * 100)}%`">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Son Eşleşmeler -->
                         <div>
                             <div class="flex justify-between items-center mb-4">
@@ -4550,11 +4600,25 @@
                             // 5. Load conversations from Supabase
                             await this.loadConversations();
 
+                            // 7. Load subscription / quota info
+                            await this.loadSubscription();
+
                             // 6. Calculate Trust Score
                             await this.calculateTrustScore();
                         } catch (e) {
                             console.error('CRITICAL ERROR in fetchData:', e);
                             alert('Bir hata oluştu: ' + e.message);
+                        }
+                    },
+
+                    async loadSubscription() {
+                        try {
+                            const { data, error } = await supabase.rpc('get_my_subscription');
+                            if (!error && data) {
+                                this.subscription = data;
+                            }
+                        } catch (e) {
+                            console.warn('Subscription load failed:', e);
                         }
                     },
 
@@ -5572,14 +5636,33 @@
                                 data = result.data;
                                 error = result.error;
                             } else {
-                                // ADD MODE: Insert new portfolio
-                                const result = await supabase
-                                    .from('portfolios')
-                                    .insert([portfolioData])
-                                    .select();
-
-                                data = result.data;
+                                // ADD MODE: Insert new portfolio via quota-checked RPC
+                                const payload = {
+                                    title: portfolioData.title,
+                                    price: String(portfolioData.price),
+                                    type: portfolioData.type || 'Satılık',
+                                    category: portfolioData.category,
+                                    rooms: portfolioData.rooms || '-',
+                                    city: portfolioData.city || '',
+                                    district: portfolioData.district || '',
+                                    area: portfolioData.area || '',
+                                    age: portfolioData.age || '',
+                                    image_url: portfolioData.image_url || ''
+                                };
+                                const result = await supabase.rpc('add_portfolio_with_quota', { portfolio_data: payload });
+                                data = result.data ? [result.data] : null;
                                 error = result.error;
+
+                                // Quota exceeded - show upgrade modal instead of generic error
+                                if (error && error.message && error.message.includes('QUOTA_EXCEEDED')) {
+                                    this.limitModalType = 'portfolio';
+                                    this.showLimitModal = true;
+                                    this.isSavingPortfolio = false;
+                                    return;
+                                }
+
+                                // Refresh subscription after insert
+                                if (!error) await this.loadSubscription();
                             }
 
                             if (error) {
@@ -5850,14 +5933,35 @@
                                 data = result.data;
                                 error = result.error;
                             } else {
-                                // ADD MODE: Insert new demand
-                                const result = await supabase
-                                    .from('demands')
-                                    .insert([demandData])
-                                    .select();
-
-                                data = result.data;
+                                // ADD MODE: Insert new demand via quota-checked RPC
+                                const payload = {
+                                    title: demandData.title,
+                                    type: demandData.type,
+                                    category: demandData.category,
+                                    budget: String(demandData.budget),
+                                    max_budget: demandData.max_budget ? String(demandData.max_budget) : '',
+                                    city: demandData.city || '',
+                                    location: demandData.location || '',
+                                    district: demandData.district || '',
+                                    district2: demandData.district2 || '',
+                                    district3: demandData.district3 || '',
+                                    rooms: demandData.rooms || '-',
+                                    is_urgent: String(demandData.is_urgent || false)
+                                };
+                                const result = await supabase.rpc('add_demand_with_quota', { demand_data: payload });
+                                data = result.data ? [result.data] : null;
                                 error = result.error;
+
+                                // Quota exceeded - show upgrade modal instead of generic error
+                                if (error && error.message && error.message.includes('QUOTA_EXCEEDED')) {
+                                    this.limitModalType = 'demand';
+                                    this.showLimitModal = true;
+                                    this.isSavingDemand = false;
+                                    return;
+                                }
+
+                                // Refresh subscription after insert
+                                if (!error) await this.loadSubscription();
                             }
 
                             if (error) {
@@ -6313,6 +6417,11 @@
 
                     isMatching: false,
                     matchingProgress: 0,
+
+                    // Subscription state
+                    subscription: { tier: 'free', demands_used: 0, portfolios_used: 0, demands_limit: 2, portfolios_limit: 2 },
+                    showLimitModal: false,
+                    limitModalType: 'demand', // 'demand' or 'portfolio'
 
                     // Helper: String normalization for district comparison
                     normalizeDistrict(district) {
@@ -7063,6 +7172,53 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+        <!-- ===== QUOTA LIMIT EXCEEDED MODAL ===== -->
+        <div x-show="showLimitModal" x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            @click.self="showLimitModal = false">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm mx-4 text-center">
+                <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                    🔒</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Aylık Limitinize Ulaştınız</h3>
+                <p class="text-gray-500 text-sm mb-1">
+                    <template x-if="limitModalType === 'demand'">
+                        <span>Bu ay ekleyebileceğiniz talep sayısı (<span x-text="subscription.demands_limit"></span>)
+                            doldu.</span>
+                    </template>
+                    <template x-if="limitModalType === 'portfolio'">
+                        <span>Bu ay ekleyebileceğiniz portföy sayısı (<span
+                                x-text="subscription.portfolios_limit"></span>) doldu.</span>
+                    </template>
+                </p>
+                <p class="text-gray-400 text-xs mb-6">Paketinizi yükselterek daha fazla ilan ekleyebilirsiniz.</p>
+                <div class="space-y-3 mb-6 text-left">
+                    <div class="flex items-center justify-between bg-blue-50 rounded-xl p-3">
+                        <div>
+                            <div class="font-bold text-blue-700 text-sm">Pro</div>
+                            <div class="text-xs text-blue-500">Ayda 10 talep + 10 portföy</div>
+                        </div>
+                        <a href="mailto:destek@brokerlink.com?subject=Pro Paket"
+                            class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
+                            Geç →
+                        </a>
+                    </div>
+                    <div class="flex items-center justify-between bg-amber-50 rounded-xl p-3">
+                        <div>
+                            <div class="font-bold text-amber-700 text-sm">Enterprise</div>
+                            <div class="text-xs text-amber-500">Ayda 50 talep + 50 portföy</div>
+                        </div>
+                        <a href="mailto:destek@brokerlink.com?subject=Enterprise Paket"
+                            class="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors">
+                            İletişim →
+                        </a>
+                    </div>
+                </div>
+                <button @click="showLimitModal = false"
+                    class="w-full py-2.5 border-2 border-gray-200 rounded-xl text-gray-600 font-semibold hover:bg-gray-50 transition-colors text-sm">
+                    Kapat
+                </button>
             </div>
         </div>
 </body>

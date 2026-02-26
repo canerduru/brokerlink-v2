@@ -731,9 +731,9 @@
         async function loadBrokers() {
             const { data, count } = await supabase
                 .from('profiles')
-                .select('id, name, company, title, avatar_url, created_at', { count: 'exact' })
+                .select('id, name, company, title, avatar_url, created_at, user_subscriptions(tier, demands_used, portfolios_used)', { count: 'exact' })
                 .order('created_at', { ascending: false })
-                .limit(10);
+                .limit(20);
 
             document.getElementById('brokersCount').textContent = count ?? 0;
             const el = document.getElementById('brokersList');
@@ -743,21 +743,42 @@
                 return;
             }
 
-            el.innerHTML = data.map(b => `
-            <div class="table-row">
+            const tierLabels = { free: 'Ücretsiz', pro: 'Pro', enterprise: 'Enterprise' };
+            const tierColors = {
+                free: 'background:#e5e7eb;color:#374151',
+                pro: 'background:#2563eb;color:#fff',
+                enterprise: 'background:#f59e0b;color:#fff'
+            };
+
+            el.innerHTML = data.map(b => {
+                const sub = b.user_subscriptions?.[0] || { tier: 'free', demands_used: 0, portfolios_used: 0 };
+                const tierLimit = sub.tier === 'free' ? 2 : sub.tier === 'pro' ? 10 : 50;
+                return `
+            <div class="table-row" style="flex-wrap:wrap;gap:6px;">
                 <div class="avatar">
                     ${b.avatar_url
-                    ? `<img src="${escapeHTML(b.avatar_url)}" alt="">`
-                    : escapeHTML((b.name?.charAt(0) || '?').toUpperCase())
-                }
+                        ? `<img src="${escapeHTML(b.avatar_url)}" alt="">`
+                        : escapeHTML((b.name?.charAt(0) || '?').toUpperCase())
+                    }
                 </div>
                 <div class="row-info">
                     <div class="row-name">${escapeHTML(b.name || 'İsimsiz')}</div>
-                    <div class="row-sub">${escapeHTML(b.company || b.title || 'Broker')}</div>
+                    <div class="row-sub">${escapeHTML(b.company || b.title || 'Broker')} &nbsp;·&nbsp;
+                        T:${sub.demands_used}/${tierLimit} &nbsp;P:${sub.portfolios_used}/${tierLimit}
+                    </div>
                 </div>
-                <span class="row-badge badge-blue">${formatDate(b.created_at)}</span>
-            </div>
-        `).join('');
+                <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;${tierColors[sub.tier] || tierColors.free}">
+                    ${escapeHTML(tierLabels[sub.tier] || 'Ücretsiz')}
+                </span>
+                <select onchange="updateTier('${b.id}', this.value)" style="font-size:11px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:6px;padding:2px 6px;cursor:pointer;">
+                    <option value="" disabled selected>Tier Değiştir</option>
+                    <option value="free">Ücretsiz</option>
+                    <option value="pro">Pro</option>
+                    <option value="enterprise">Enterprise</option>
+                </select>
+                <button onclick="resetQuota('${b.id}')" style="font-size:10px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:3px 8px;border-radius:6px;cursor:pointer;">Kotayı Sıfırla</button>
+            </div>`;
+            }).join('');
         }
 
         async function loadPortfolios() {
@@ -862,6 +883,27 @@
             if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
             if (val >= 1000) return (val / 1000).toFixed(0) + 'K';
             return val.toString();
+        }
+
+        async function updateTier(userId, newTier) {
+            if (!newTier) return;
+            const { error } = await supabase.rpc('admin_update_tier', { target_user_id: userId, new_tier: newTier });
+            if (error) {
+                alert('Tier güncellenemedi: ' + error.message);
+            } else {
+                await loadBrokers();
+            }
+        }
+
+        async function resetQuota(userId) {
+            if (!confirm('Bu kullanıcının aylık kotasını sıfırlamak istediğinizden emin misiniz?')) return;
+            const { error } = await supabase.rpc('admin_reset_quota', { target_user_id: userId });
+            if (error) {
+                alert('Kota sıfırlanamadı: ' + error.message);
+            } else {
+                await loadBrokers();
+                alert('Kota başarıyla sıfırlandı!');
+            }
         }
 
         function startAutoRefresh() {
