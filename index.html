@@ -4356,6 +4356,13 @@
                                 await this.fetchNetworkDemands(); // Load network demands
                                 await this.fetchNetworkPortfolios(); // Load network portfolios
 
+                                // ✅ Yetki Belgesi zorunlu kontrolü
+                                // Profil yüklendikten sonra ttyb_number boşsa profil sekmesine yönlendir
+                                if (!this.userProfile.ttyb_number) {
+                                    this.currentTab = 'profile';
+                                    this.editMode = true;
+                                }
+
                                 // Realtime Subscription for Auto-Matching & Network Updates
                                 supabase
                                     .channel('auto-match')
