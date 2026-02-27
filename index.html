@@ -2842,8 +2842,8 @@
                                     class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
                                     Kaydet
                                 </button>
-                                <!-- İptal butonu: sadece Yetki Belgesi No doluysa gorunur -->
-                                <button type="button" @click="editMode = false" x-show="userProfile.ttyb_number"
+                                <!-- İptal butonu: sadece Supabase'de kayıtlı Yetki Belgesi No varsa gorunur -->
+                                <button type="button" @click="editMode = false" x-show="savedTtybNumber"
                                     class="px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                                     İptal
                                 </button>
@@ -3661,6 +3661,7 @@
                         bio: '',
                         ttyb_number: '',
                         ttyb_verified: false,
+                        savedTtybNumber: '', // Supabase'de kayitli deger (input'tan ayri)
                         avatar_url: '',
                         cover_url: '',
                         service_areas: [], // Hizmet bölgeleri
@@ -4803,6 +4804,9 @@
                                     ...this.userProfile,
                                     ...data
                                 };
+                                // Supabase'de kayitli ttyb degerini ayri bir degiskene al
+                                // Bu sayede iptal butonu sadece gercekten kaydedilmis deger varsa gorunur
+                                this.savedTtybNumber = data.ttyb_number || '';
                             }
                         } catch (error) {
                             console.error('Error fetching profile:', error);
