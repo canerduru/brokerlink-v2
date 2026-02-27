@@ -428,11 +428,10 @@
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             gap: 20px;
-            padding-bottom: 12px;
+            padding-bottom: 24px;
+            /* Dots alanı için yer açtık */
             scrollbar-width: none;
             /* Firefox */
-            transform: scale(0.85);
-            transform-origin: right center;
         }
 
         .mockup-slider::-webkit-scrollbar {
@@ -441,8 +440,29 @@
         }
 
         .mockup-slider .mockup-card {
-            flex: 0 0 85%;
+            flex: 0 0 100%;
             scroll-snap-align: center;
+        }
+
+        .slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: -8px;
+            margin-bottom: 16px;
+        }
+
+        .slider-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .slider-dot.active {
+            background: var(--primary);
+            width: 24px;
+            border-radius: 4px;
         }
 
         @keyframes pulse-glow {
@@ -1164,7 +1184,13 @@
                                 Onaylı</div>
                         </div>
                     </div>
+                </div>
 
+                <!-- Slider Noktalari -->
+                <div class="slider-dots">
+                    <div class="slider-dot active"></div>
+                    <div class="slider-dot"></div>
+                    <div class="slider-dot"></div>
                 </div>
             </div>
         </div>
