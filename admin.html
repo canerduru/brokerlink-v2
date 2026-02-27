@@ -582,21 +582,21 @@
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
                     <span style="font-size:14px;font-weight:700;color:#94a3b8;">📊 Paket Dağılımı</span>
                 </div>
-                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <div style="display:flex;flex-direction:column;gap:10px;">
                     <div
-                        style="flex:1;min-width:80px;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.2);border-radius:10px;padding:10px 14px;text-align:center;">
-                        <div style="font-size:22px;font-weight:800;color:#e2e8f0;" id="tierFreeCount">—</div>
-                        <div style="font-size:11px;color:#64748b;margin-top:2px;">Ücretsiz</div>
+                        style="background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.2);border-radius:10px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;">
+                        <div style="font-size:13px;color:#94a3b8;font-weight:600;">Ücretsiz</div>
+                        <div style="font-size:26px;font-weight:800;color:#e2e8f0;" id="tierFreeCount">—</div>
                     </div>
                     <div
-                        style="flex:1;min-width:80px;background:rgba(37,99,235,0.12);border:1px solid rgba(37,99,235,0.25);border-radius:10px;padding:10px 14px;text-align:center;">
-                        <div style="font-size:22px;font-weight:800;color:#60a5fa;" id="tierProCount">—</div>
-                        <div style="font-size:11px;color:#64748b;margin-top:2px;">Pro</div>
+                        style="background:rgba(37,99,235,0.12);border:1px solid rgba(37,99,235,0.25);border-radius:10px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;">
+                        <div style="font-size:13px;color:#60a5fa;font-weight:600;">Pro</div>
+                        <div style="font-size:26px;font-weight:800;color:#60a5fa;" id="tierProCount">—</div>
                     </div>
                     <div
-                        style="flex:1;min-width:80px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 14px;text-align:center;">
-                        <div style="font-size:22px;font-weight:800;color:#fbbf24;" id="tierEnterpriseCount">—</div>
-                        <div style="font-size:11px;color:#64748b;margin-top:2px;">Enterprise</div>
+                        style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;">
+                        <div style="font-size:13px;color:#fbbf24;font-weight:600;">Enterprise</div>
+                        <div style="font-size:26px;font-weight:800;color:#fbbf24;" id="tierEnterpriseCount">—</div>
                     </div>
                 </div>
             </div>
@@ -630,7 +630,7 @@
 
             </div>
 
-            <div class="table-card">
+            <div class="table-card" style="grid-column: 1 / -1;">
                 <div class="table-header">
                     <h3>👥 Tüm Brokerlar</h3>
                     <span class="count" id="brokersCount">—</span>
