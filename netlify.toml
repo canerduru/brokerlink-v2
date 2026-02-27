@@ -1,0 +1,23 @@
+# Netlify Deployment Konfigürasyonu - Evliyo
+# Bu dosya mevcut hiçbir koda dokunmaz, sadece Netlify'a yönlendirme kuralları söyler.
+
+[build]
+  publish = "."   # Kök dizini yayınla
+
+# Kural 1: evliyo.com → landing.html (URL değişmez, rewrite)
+[[redirects]]
+  from = "/"
+  to = "/landing.html"
+  status = 200
+
+# Kural 2: evliyo.com/app → index.html (ana uygulama - ileride kullanılacak)
+[[redirects]]
+  from = "/app"
+  to = "/index.html"
+  status = 200
+
+# Kural 3: evliyo.com/app/* → index.html (tüm alt sayfalar da buraya)
+[[redirects]]
+  from = "/app/*"
+  to = "/index.html"
+  status = 200
