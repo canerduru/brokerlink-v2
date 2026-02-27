@@ -413,6 +413,36 @@
             animation: pulse-glow 2s infinite;
         }
 
+        .mockup-notification.blue {
+            background: #3b82f6;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .mockup-notification.orange {
+            background: #f97316;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+        }
+
+        .mockup-slider {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 20px;
+            padding-bottom: 12px;
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .mockup-slider::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari */
+        }
+
+        .mockup-slider .mockup-card {
+            flex: 0 0 calc(100% - 10px);
+            scroll-snap-align: center;
+        }
+
         @keyframes pulse-glow {
 
             0%,
@@ -1051,27 +1081,88 @@
 
             <!-- Mockup -->
             <div class="hero-mockup">
-                <div class="mockup-card">
-                    <div class="mockup-notification">✨ Yeni Eşleşme!</div>
-                    <div class="mockup-header">
-                        <div class="mockup-dot red"></div>
-                        <div class="mockup-dot yellow"></div>
-                        <div class="mockup-dot green"></div>
-                    </div>
-                    <div class="mockup-match">
-                        <div class="mockup-match-title">🎯 Eşleşme Bulundu</div>
-                        <div class="mockup-match-text">3+1 Daire — Kadıköy, Moda</div>
-                        <div class="mockup-match-details">
-                            <span>Talep: 8.500.000 - 10.000.000 ₺</span>
-                            <span class="mockup-match-score">%92 Uyum</span>
+                <div class="mockup-slider">
+
+                    <!-- Kart 1: Eslesme Bulundu (Mevcut) -->
+                    <div class="mockup-card">
+                        <div class="mockup-notification">✨ Yeni Eşleşme!</div>
+                        <div class="mockup-header">
+                            <div class="mockup-dot red"></div>
+                            <div class="mockup-dot yellow"></div>
+                            <div class="mockup-dot green"></div>
+                        </div>
+                        <div class="mockup-match">
+                            <div class="mockup-match-title">🎯 Eşleşme Bulundu</div>
+                            <div class="mockup-match-text">3+1 Daire — Kadıköy, Moda</div>
+                            <div class="mockup-match-details">
+                                <span>Talep: 8.500.000 - 10.000.000 ₺</span>
+                                <span class="mockup-match-score">%92 Uyum</span>
+                            </div>
+                        </div>
+                        <div class="mockup-score">
+                            <div>
+                                <div class="mockup-score-label">Güven Skoru</div>
+                            </div>
+                            <div class="mockup-score-value">98<span style="font-size: 16px; opacity: 0.6;">/100</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="mockup-score">
-                        <div>
-                            <div class="mockup-score-label">Güven Skoru</div>
+
+                    <!-- Kart 2: Sicak Talep Alarmi -->
+                    <div class="mockup-card">
+                        <div class="mockup-notification orange">🔥 Sıcak Fırsat!</div>
+                        <div class="mockup-header">
+                            <div class="mockup-dot red"></div>
+                            <div class="mockup-dot yellow"></div>
+                            <div class="mockup-dot green"></div>
                         </div>
-                        <div class="mockup-score-value">98<span style="font-size: 16px; opacity: 0.6;">/100</span></div>
+                        <div class="mockup-match"
+                            style="background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.2);">
+                            <div class="mockup-match-title" style="color: #f97316;">🔔 Sıcak Talep Alarmı</div>
+                            <div class="mockup-match-text" style="font-size: 14px;">Bitez, Bodrum bölgesinde 15 M₺
+                                bütçeli 3+1 arayışı.</div>
+                            <div class="mockup-match-details" style="margin-top: 8px;">
+                                <span style="color: #fca5a5; font-weight: 600;">Sizin 2 portföyünüz bu taleple %95
+                                    eşleşiyor!</span>
+                            </div>
+                        </div>
+                        <div class="mockup-score"
+                            style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2);">
+                            <div>
+                                <div class="mockup-score-label" style="color: #93c5fd;">Aksiyon</div>
+                            </div>
+                            <div class="mockup-score-value" style="font-size: 16px; color: #60a5fa;">⚡ İlk iletişime
+                                geçen siz olun</div>
+                        </div>
                     </div>
+
+                    <!-- Kart 3: Yeni Baglanti Talebi -->
+                    <div class="mockup-card">
+                        <div class="mockup-notification blue">👋 Network Talebi</div>
+                        <div class="mockup-header">
+                            <div class="mockup-dot red"></div>
+                            <div class="mockup-dot yellow"></div>
+                            <div class="mockup-dot green"></div>
+                        </div>
+                        <div class="mockup-match"
+                            style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2);">
+                            <div class="mockup-match-title" style="color: #60a5fa;">🤝 Yeni Bağlantı Talebi</div>
+                            <div class="mockup-match-text" style="font-size: 14px;">Ahmet Y. (Lüks Konut Uzmanı)
+                                bağlantı kurmak istiyor.</div>
+                            <div class="mockup-match-details" style="margin-top: 8px;">
+                                <span>Ortak Bölge: İzmir | 12 Ortak Bağlantı</span>
+                            </div>
+                        </div>
+                        <div class="mockup-score"
+                            style="background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2);">
+                            <div>
+                                <div class="mockup-score-label" style="color: #86efac;">Doğrulama Durumu</div>
+                            </div>
+                            <div class="mockup-score-value" style="font-size: 16px; color: #4ade80;">🟢 Yetki Belgesi
+                                Onaylı</div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
