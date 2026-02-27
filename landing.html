@@ -428,8 +428,7 @@
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             gap: 20px;
-            padding-bottom: 24px;
-            /* Dots alanı için yer açtık */
+            padding-bottom: 8px;
             scrollbar-width: none;
             /* Firefox */
         }
@@ -444,12 +443,11 @@
             scroll-snap-align: center;
         }
 
-        .slider-dots {
+        .slider-dots-container {
             display: flex;
             justify-content: center;
             gap: 8px;
-            margin-top: -8px;
-            margin-bottom: 16px;
+            margin-top: 20px;
         }
 
         .slider-dot {
@@ -457,6 +455,7 @@
             height: 8px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
         }
 
         .slider-dot.active {
@@ -1102,8 +1101,9 @@
             </div>
 
             <!-- Mockup -->
-            <div class="hero-mockup">
-                <div class="mockup-slider">
+            <div class="hero-mockup" x-data="{ activeSlide: 0 }">
+                <div class="mockup-slider"
+                    @scroll="activeSlide = Math.round($event.target.scrollLeft / $event.target.offsetWidth)">
 
                     <!-- Kart 1: Eslesme Bulundu (Mevcut) -->
                     <div class="mockup-card">
@@ -1184,13 +1184,14 @@
                                 Onaylı</div>
                         </div>
                     </div>
+
                 </div>
 
-                <!-- Slider Noktalari -->
-                <div class="slider-dots">
-                    <div class="slider-dot active"></div>
-                    <div class="slider-dot"></div>
-                    <div class="slider-dot"></div>
+                <!-- 3 Nokta Navigasyon -->
+                <div class="slider-dots-container">
+                    <div class="slider-dot" :class="{ 'active': activeSlide === 0 }"></div>
+                    <div class="slider-dot" :class="{ 'active': activeSlide === 1 }"></div>
+                    <div class="slider-dot" :class="{ 'active': activeSlide === 2 }"></div>
                 </div>
             </div>
         </div>
