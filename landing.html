@@ -41,9 +41,7 @@
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Google reCAPTCHA -->
-    <script
-        src="https://www.google.com/recaptcha/enterprise.js?render=6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta"></script>
+    <!-- Google reCAPTCHA Kaldirildi (Yerine Honeypot Korumasi Eklendi) -->
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -1220,13 +1218,6 @@
                 gap: 50px;
             }
         }
-
-        /* Force reCAPTCHA badge visibility */
-        .grecaptcha-badge {
-            z-index: 999999 !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
     </style>
 </head>
 
@@ -1255,6 +1246,9 @@
                 <h2>Zaman kaybettiren mesaj gruplarından kurtulun. Siz sadece ne aradığınızı veya ne sattığınızı girin;
                     Evliyo'nun kapalı algoritması arka planda çalışıp mükemmel eşleşmeyi saniyeler içinde bulsun.</h2>
                 <div class="hero-form">
+                    <!-- Honeypot alanı (Sadece botlar doldurur, insanlar göremez) -->
+                    <input type="text" x-model="heroHoneypot" name="website_url_hp" style="display:none !important"
+                        tabindex="-1" autocomplete="off">
                     <input type="email" x-model="heroEmail" placeholder="E-posta adresinizi girin..." required>
                     <button class="btn-primary btn-large" @click="submitEmail('hero')" :disabled="heroSubmitting">
                         <span x-show="!heroSubmitting">Erken Erişime Katıl</span>
@@ -1506,6 +1500,9 @@
                 değişimin bir parçası olmak için davetiyenizi hemen isteyin.</p>
 
             <div class="cta-form">
+                <!-- Honeypot -->
+                <input type="text" x-model="ctaHoneypot" name="website_url_hp" style="display:none !important"
+                    tabindex="-1" autocomplete="off">
                 <input type="email" x-model="ctaEmail" placeholder="E-posta adresiniz...">
                 <button @click="submitEmail('cta')" :disabled="ctaSubmitting">
                     <span x-show="!ctaSubmitting">Davetiye Talep Et</span>
@@ -1593,6 +1590,8 @@
                 scrolled: false,
                 heroEmail: '',
                 ctaEmail: '',
+                heroHoneypot: '',
+                ctaHoneypot: '',
                 heroMessage: '',
                 ctaMessage: '',
                 heroSuccess: false,
@@ -1630,26 +1629,12 @@
                     else this.ctaSubmitting = true;
 
                     try {
-                        // 1. Google reCAPTCHA Doğrulaması (Frontend Kalkanı)
-                        let recaptchaToken = null;
-                        try {
-                            // Robot mu insan mı olduğuna dair token üret
-                            recaptchaToken = await new Promise((resolve, reject) => {
-                                grecaptcha.enterprise.ready(async () => {
-                                    try {
-                                        const token = await grecaptcha.enterprise.execute('6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta', { action: 'JOIN_WAITLIST' });
-                                        resolve(token);
-                                    } catch (e) {
-                                        reject(e);
-                                    }
-                                });
-                            });
-                            console.log("✅ Başarılı: Google reCAPTCHA Token Alındı (Bot engellendi) ->", recaptchaToken.substring(0, 15) + "...");
-
-                            if (!recaptchaToken) throw new Error("Token boş döndü.");
-                        } catch (reErr) {
-                            console.error('reCAPTCHA Doğrulama Hatası:', reErr);
-                            setMsg('Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.', false);
+                        // HONEYPOT (Bal Küpü) Koruması
+                        const honeypotVal = source === 'hero' ? this.heroHoneypot : this.ctaHoneypot;
+                        if (honeypotVal !== '') {
+                            // Robot tuzağa düştü (gizli alanı doldurdu)
+                            console.warn("🛡️ Güvenlik Kalkanı: Honeypot alanını dolduran bir bot engellendi.");
+                            setMsg('Güvenlik doğrulaması başarısız.', false);
                             return;
                         }
 
