@@ -826,7 +826,7 @@
 
             const { data: profiles, count } = await supabase
                 .from('profiles')
-                .select('id, name, company, title, avatar_url, created_at', { count: 'exact' })
+                .select('id, name, company, title, avatar_url, ttyb_number, created_at', { count: 'exact' })
                 .order('created_at', { ascending: false })
                 .range(from, to);
 
@@ -875,6 +875,12 @@
                     <div class="row-sub">${escapeHTML(b.company || b.title || 'Broker')} &nbsp;·&nbsp;
                         T:${sub.demands_used}/${tierLimit} &nbsp;P:${sub.portfolios_used}/${tierLimit}
                     </div>
+                </div>
+                <div style="font-size:11px;color:#94a3b8;margin-left:auto;">
+                    ${b.ttyb_number
+                        ? `<span style="background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3);padding:2px 8px;border-radius:6px;font-weight:700;">✓ Belge: ${escapeHTML(b.ttyb_number)}</span>`
+                        : `<span style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);padding:2px 8px;border-radius:6px;font-weight:700;">⚠ Belge Yok</span>`
+                    }
                 </div>
                 <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;${tierColors[sub.tier] || tierColors.free}">
                     ${escapeHTML(tierLabels[sub.tier] || 'Ücretsiz')}

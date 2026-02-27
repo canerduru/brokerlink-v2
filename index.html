@@ -2842,10 +2842,18 @@
                                     class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
                                     Kaydet
                                 </button>
-                                <button type="button" @click="editMode = false"
+                                <!-- İptal butonu: sadece Yetki Belgesi No doluysa gorunur -->
+                                <button type="button" @click="editMode = false" x-show="userProfile.ttyb_number"
                                     class="px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                                     İptal
                                 </button>
+                            </div>
+                            <!-- Uyari: Yetki Belgesi No bos iken -->
+                            <div x-show="!userProfile.ttyb_number"
+                                class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p class="text-xs text-red-600 font-semibold">
+                                    ⚠️ Yetki Belgesi No zorunludur. Bu alanı doldurmadan devam edemezsiniz.
+                                </p>
                             </div>
                         </form>
                     </div>
