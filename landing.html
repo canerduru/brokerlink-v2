@@ -41,9 +41,8 @@
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Google reCAPTCHA Enterprise -->
-    <script
-        src="https://www.google.com/recaptcha/enterprise.js?render=6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta"></script>
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta"></script>
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -1635,9 +1634,9 @@
                         try {
                             // Robot mu insan mı olduğuna dair token üret
                             recaptchaToken = await new Promise((resolve, reject) => {
-                                grecaptcha.enterprise.ready(async () => {
+                                grecaptcha.ready(async () => {
                                     try {
-                                        const token = await grecaptcha.enterprise.execute('6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta', { action: 'JOIN_WAITLIST' });
+                                        const token = await grecaptcha.execute('6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta', { action: 'JOIN_WAITLIST' });
                                         resolve(token);
                                     } catch (e) {
                                         reject(e);
