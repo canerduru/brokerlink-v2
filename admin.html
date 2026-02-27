@@ -600,7 +600,35 @@
                 </div>
             </div>
 
-            <!-- Tüm Brokerlar -->
+            <!-- Bölge Dağılımı (3 kart) -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+
+                <!-- Broker Bölge Dağılımı -->
+                <div class="table-card" style="margin-bottom:0;padding:16px 20px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                        <span style="font-size:14px;font-weight:700;color:#94a3b8;">📍 Aktif Broker Bölgeleri</span>
+                    </div>
+                    <div id="brokerDistList" style="font-size:12px;color:#94a3b8;">Yükleniyor...</div>
+                </div>
+
+                <!-- Portföy Şehir Dağılımı -->
+                <div class="table-card" style="margin-bottom:0;padding:16px 20px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                        <span style="font-size:14px;font-weight:700;color:#94a3b8;">🏢 Portföy Şehirleri</span>
+                    </div>
+                    <div id="portfolioDistList" style="font-size:12px;color:#94a3b8;">Yükleniyor...</div>
+                </div>
+
+                <!-- Talep Şehir Dağılımı -->
+                <div class="table-card" style="margin-bottom:0;padding:16px 20px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                        <span style="font-size:14px;font-weight:700;color:#94a3b8;">📋 Talep Şehirleri</span>
+                    </div>
+                    <div id="demandDistList" style="font-size:12px;color:#94a3b8;">Yükleniyor...</div>
+                </div>
+
+            </div>
+
             <div class="table-card">
                 <div class="table-header">
                     <h3>👥 Tüm Brokerlar</h3>
@@ -746,7 +774,8 @@
                 loadBrokers(),
                 loadPortfolios(),
                 loadDemands(),
-                loadMatches()
+                loadMatches(),
+                loadDistributions()
             ]);
             const now = new Date();
             document.getElementById('lastUpdated').textContent =
@@ -879,6 +908,53 @@
             document.getElementById('tierFreeCount').textContent = data.free ?? 0;
             document.getElementById('tierProCount').textContent = data.pro ?? 0;
             document.getElementById('tierEnterpriseCount').textContent = data.enterprise ?? 0;
+        }
+
+        function renderDistList(el, rows, labelFn, countKey) {
+            if (!rows || rows.length === 0) {
+                el.innerHTML = '<span style="color:#475569">Veri yok</span>';
+                return;
+            }
+            const max = rows[0][countKey];
+            el.innerHTML = rows.map(r => {
+                const pct = Math.round((r[countKey] / max) * 100);
+                return `<div style="margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                        <span style="color:#cbd5e1;font-size:12px;">${escapeHTML(labelFn(r))}</span>
+                        <span style="color:#60a5fa;font-weight:700;font-size:12px;">${r[countKey]}</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.07);border-radius:4px;height:5px;">
+                        <div style="background:linear-gradient(90deg,#3b82f6,#818cf8);border-radius:4px;height:5px;width:${pct}%;"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function loadDistributions() {
+            const [brokerRes, porRes, demRes] = await Promise.all([
+                supabase.rpc('admin_get_broker_distribution'),
+                supabase.rpc('admin_get_portfolio_distribution'),
+                supabase.rpc('admin_get_demand_distribution')
+            ]);
+
+            renderDistList(
+                document.getElementById('brokerDistList'),
+                brokerRes.data,
+                r => `${r.city} / ${r.district}`,
+                'broker_count'
+            );
+            renderDistList(
+                document.getElementById('portfolioDistList'),
+                porRes.data,
+                r => r.city,
+                'portfolio_count'
+            );
+            renderDistList(
+                document.getElementById('demandDistList'),
+                demRes.data,
+                r => r.city,
+                'demand_count'
+            );
         }
 
         async function loadPortfolios() {
