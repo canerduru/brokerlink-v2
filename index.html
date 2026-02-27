@@ -4,7 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evliyo | Gayrimenkulde Güç Birliği: Profesyonel Danışman Ağı</title>
+        <title>Evliyo | Gayrimenkulde Güç Birliği: Profesyonel Danışman Ağı</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Evliyo Ağ Portalı - Türkiye'nin kapalı devre B2B gayrimenkul danışman ağı. İşlemlerinizi güvenli altyapı ile yönetin ve ağınızla anında eşleşin.">
+    <meta name="keywords" content="evliyo portal, gayrimenkul ağı giriş, broker portalı, emlak danışman ağı">
+    <link rel="canonical" href="https://app.evliyo.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Evliyo | Profesyonel Danışman Ağı Portalı">
+    <meta property="og:description" content="İşlemlerinizi güvenli altyapı ile yönetin ve ağınızla anında eşleşin.">
+    <meta property="og:image" content="evliyo_logo.png">
+    <meta property="og:type" content="webapp">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Evliyo Portal">
+    <meta name="twitter:description" content="Kapalı devre gayrimenkul ağı işlemleri.">
     <!-- Tailwind CSS (CDN for GitHub Pages) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -2521,8 +2537,8 @@
                             </div>
 
                             <div class="flex-1 mb-2">
-                                <h1 class="text-2xl font-bold text-gray-900"
-                                    x-text="userProfile?.name || user?.email || 'İsim Belirtilmemiş'"></h1>
+                                <h2 class="text-2xl font-bold text-gray-900"
+                                    x-text="userProfile?.name || user?.email || 'İsim Belirtilmemiş'"></h2>
                                 <p class="text-gray-600" x-text="userProfile?.title || 'Unvan Belirtilmemiş'"></p>
                                 <p class="text-sm text-gray-500" x-show="userProfile?.company"
                                     x-text="userProfile?.company">

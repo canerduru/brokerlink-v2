@@ -25,9 +25,13 @@
     <!-- Theme -->
     <meta name="theme-color" content="#1D5D63">
 
-    <!-- Favicon -->
+    <!-- SEO & Canonical -->
+    <link rel="canonical" href="https://app.evliyo.com/landing.html" />
+
+    <!-- Favicon & Icons -->
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="shortcut icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="evliyo_logo.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1137,80 +1141,80 @@
                 display: none;
             }
         }
-    
 
-            /* ===== TABLET / IPAD RESPONSIVE ===== */
-            @media (min-width: 769px) and (max-width: 1200px) {
-                .hero-container {
-                    grid-template-columns: 1fr;
-                    /* Tablette de alt alta goster */
-                    text-align: center;
-                    gap: 50px;
-                    padding-top: 40px;
-                }
 
-                .hero h1 {
-                    font-size: 42px;
-                    /* Mobilden buyuk, masaustunden kucuk */
-                    line-height: 1.2;
-                    margin-bottom: 20px;
-                }
-
-                .hero h2 {
-                    font-size: 17px;
-                    max-width: 80%;
-                    margin: 0 auto 36px auto;
-                }
-
-                .hero-badge {
-                    justify-content: center;
-                }
-
-                .hero-mockup {
-                    width: 100vw;
-                    max-width: 100vw;
-                    margin-left: -24px;
-                    overflow: hidden;
-                }
-
-                .mockup-slider {
-                    transform: scale(0.95);
-                    /* Tablete ozel iyi genislik */
-                    transform-origin: center top;
-                    gap: 20px;
-                    padding: 0 40px 16px 40px;
-                    margin-bottom: 0px;
-                }
-
-                .mockup-slider .mockup-card {
-                    flex: 0 0 calc(100vw - 80px);
-                }
-
-                .hero-form {
-                    flex-direction: row;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 12px;
-                    width: 100%;
-                    max-width: 600px;
-                    /* Tablette cok uzamasin diye merkezde tut */
-                    margin: 0 auto;
-                    box-sizing: border-box;
-                }
-
-                .hero-form input {
-                    flex: 1;
-                    font-size: 15px;
-                }
-
-                .hero-form button {
-                    flex-shrink: 0;
-                }
-
-                .exclusivity-content {
-                    gap: 50px;
-                }
+        /* ===== TABLET / IPAD RESPONSIVE ===== */
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                /* Tablette de alt alta goster */
+                text-align: center;
+                gap: 50px;
+                padding-top: 40px;
             }
+
+            .hero h1 {
+                font-size: 42px;
+                /* Mobilden buyuk, masaustunden kucuk */
+                line-height: 1.2;
+                margin-bottom: 20px;
+            }
+
+            .hero h2 {
+                font-size: 17px;
+                max-width: 80%;
+                margin: 0 auto 36px auto;
+            }
+
+            .hero-badge {
+                justify-content: center;
+            }
+
+            .hero-mockup {
+                width: 100vw;
+                max-width: 100vw;
+                margin-left: -24px;
+                overflow: hidden;
+            }
+
+            .mockup-slider {
+                transform: scale(0.95);
+                /* Tablete ozel iyi genislik */
+                transform-origin: center top;
+                gap: 20px;
+                padding: 0 40px 16px 40px;
+                margin-bottom: 0px;
+            }
+
+            .mockup-slider .mockup-card {
+                flex: 0 0 calc(100vw - 80px);
+            }
+
+            .hero-form {
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+                max-width: 600px;
+                /* Tablette cok uzamasin diye merkezde tut */
+                margin: 0 auto;
+                box-sizing: border-box;
+            }
+
+            .hero-form input {
+                flex: 1;
+                font-size: 15px;
+            }
+
+            .hero-form button {
+                flex-shrink: 0;
+            }
+
+            .exclusivity-content {
+                gap: 50px;
+            }
+        }
     </style>
 </head>
 
