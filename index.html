@@ -206,9 +206,10 @@
             <div class="fixed inset-0 z-50 bg-gray-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-3xl shadow-xl w-full max-w-md p-8 border border-gray-100">
                     <div class="text-center mb-8">
-                        <img src="evliyo_logo.png" alt="Evliyo Logo" class="h-28 object-contain mx-auto mb-6">
+                        <img src="evliyo_logo.png" alt="Evliyo Logo" class="h-28 object-contain mx-auto mb-4">
                         <h1 class="text-2xl font-bold text-gray-900">Evliyo'e Hoşgeldiniz</h1>
-                        <p class="text-gray-500 mt-2">Profesyonel Emlak Ağı</p>
+                        <p class="text-[13px] font-medium text-[#1D5D63] mt-2">Gayrimenkulde Güç Birliği: Profesyonel
+                            Danışman Ağı</p>
                     </div>
 
                     <form @submit.prevent="handleAuth" class="space-y-4">
@@ -263,8 +264,11 @@
         <aside
             class="hidden md:flex md:w-[280px] md:fixed md:h-screen md:flex-col bg-white border-r border-gray-100 z-50">
             <div class="p-6 border-b border-gray-100">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col items-start gap-1">
                     <img src="evliyo_logo.png" alt="Evliyo Logo" class="h-16 object-contain hidden md:block">
+                    <p class="text-[11px] font-semibold text-[#1D5D63] leading-tight hidden md:block mt-1">
+                        Gayrimenkulde Güç Birliği:<br>Profesyonel Danışman Ağı
+                    </p>
                 </div>
             </div>
 
@@ -604,7 +608,12 @@
             <!-- MOBILE HEADER -->
             <div class="mobile-header sticky top-0 z-30 bg-white px-5 py-4 border-b border-gray-100 md:hidden">
                 <div class="flex justify-between items-center">
-                    <img src="evliyo_logo.png" alt="Evliyo Logo" class="h-12 object-contain">
+                    <div class="flex flex-col">
+                        <img src="evliyo_logo.png" alt="Evliyo Logo" class="h-10 object-contain self-start">
+                        <p class="text-[9px] font-semibold text-[#1D5D63] leading-tight mt-0.5">
+                            Gayrimenkulde Güç Birliği:<br>Profesyonel Danışman Ağı
+                        </p>
+                    </div>
                     <div class="flex items-center gap-2">
                         <!-- Messages Button -->
                         <button @click="currentTab = 'messages'"
