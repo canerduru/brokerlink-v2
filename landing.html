@@ -1012,6 +1012,18 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+                /* Dengelemek icin mobilde h1 boyutunu belirginlestir/kucult */
+                margin-bottom: 16px;
+            }
+
+            .hero h2 {
+                font-size: 15px;
+                /* Mobilde aciklama metnini biraz daha kuculttuk */
+                margin-bottom: 28px;
+            }
+
             .hero-container {
                 grid-template-columns: 1fr;
                 text-align: center;
@@ -1044,16 +1056,30 @@
             }
 
             .hero-form {
-                flex-direction: column;
-                gap: 12px;
+                flex-direction: row;
+                /* Mobilde alt alta degil yan yana tut */
+                gap: 8px;
+                /* Boslugu kisalim */
                 width: 100%;
                 max-width: 100%;
             }
 
-            .hero-form input,
+            .hero-form input {
+                width: 60%;
+                /* Input'a daha cok yer ayir */
+                padding: 12px 14px;
+                /* Mobilde ic boslugu daralt */
+                font-size: 13px;
+                /* Fontu kucult */
+            }
+
             .hero-form button {
-                width: 100%;
-                box-sizing: border-box;
+                width: 40%;
+                /* Buton geriye kalani alsin */
+                padding: 12px 14px;
+                /* Buton padding'i de daralsin */
+                font-size: 13px;
+                /* Fontu kucult */
             }
 
             .cards-grid {
