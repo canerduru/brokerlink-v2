@@ -41,6 +41,10 @@
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- Google reCAPTCHA Enterprise -->
+    <script
+        src="https://www.google.com/recaptcha/enterprise.js?render=6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta"></script>
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -1619,6 +1623,19 @@
                     else this.ctaSubmitting = true;
 
                     try {
+                        // 1. Google reCAPTCHA Doğrulaması (Frontend Kalkanı)
+                        let recaptchaToken = null;
+                        try {
+                            // Robot mu insan mı olduğuna dair token üret
+                            recaptchaToken = await grecaptcha.enterprise.execute('6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta', {action: 'JOIN_WAITLIST'});
+                            if (!recaptchaToken) throw new Error("Token boş döndü.");
+                        } catch (reErr) {
+                            console.error('reCAPTCHA Doğrulama Hatası:', reErr);
+                            setMsg('Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.', false);
+                            return;
+                        }
+
+                        // 2. Supabase'e Kayıt
                         const { error } = await _supabase
                             .from('waitlist')
                             .insert({ email: email.trim().toLowerCase(), source: source });
