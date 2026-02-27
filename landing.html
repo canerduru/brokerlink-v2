@@ -1220,6 +1220,13 @@
                 gap: 50px;
             }
         }
+
+        /* Force reCAPTCHA badge visibility */
+        .grecaptcha-badge {
+            z-index: 999999 !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
     </style>
 </head>
 
@@ -1627,7 +1634,9 @@
                         let recaptchaToken = null;
                         try {
                             // Robot mu insan mı olduğuna dair token üret
-                            recaptchaToken = await grecaptcha.enterprise.execute('6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta', {action: 'JOIN_WAITLIST'});
+                            recaptchaToken = await grecaptcha.enterprise.execute('6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta', { action: 'JOIN_WAITLIST' });
+                            console.log("✅ Başarılı: Google reCAPTCHA Token Alındı (Bot engellendi) ->", recaptchaToken.substring(0, 15) + "...");
+
                             if (!recaptchaToken) throw new Error("Token boş döndü.");
                         } catch (reErr) {
                             console.error('reCAPTCHA Doğrulama Hatası:', reErr);
