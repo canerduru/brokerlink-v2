@@ -1634,7 +1634,16 @@
                         let recaptchaToken = null;
                         try {
                             // Robot mu insan mı olduğuna dair token üret
-                            recaptchaToken = await grecaptcha.enterprise.execute('6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta', { action: 'JOIN_WAITLIST' });
+                            recaptchaToken = await new Promise((resolve, reject) => {
+                                grecaptcha.enterprise.ready(async () => {
+                                    try {
+                                        const token = await grecaptcha.enterprise.execute('6Lf5BnosAAAAAMpHA_ZuVplIHQqcyixtZZBT25ta', { action: 'JOIN_WAITLIST' });
+                                        resolve(token);
+                                    } catch (e) {
+                                        reject(e);
+                                    }
+                                });
+                            });
                             console.log("✅ Başarılı: Google reCAPTCHA Token Alındı (Bot engellendi) ->", recaptchaToken.substring(0, 15) + "...");
 
                             if (!recaptchaToken) throw new Error("Token boş döndü.");
