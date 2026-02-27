@@ -75,6 +75,7 @@
 
         html {
             scroll-behavior: smooth;
+            overflow-x: hidden;
         }
 
         body {
@@ -83,6 +84,7 @@
             color: var(--gray-900);
             line-height: 1.6;
             overflow-x: hidden;
+            width: 100%;
         }
 
         /* ===== NAVBAR ===== */
@@ -183,6 +185,7 @@
             background: linear-gradient(170deg, var(--gray-50) 0%, var(--white) 50%, rgba(29, 93, 99, 0.03) 100%);
             position: relative;
             overflow: hidden;
+            /* Prevent radial gradients from causing scroll */
         }
 
         .hero::before {
@@ -1014,6 +1017,27 @@
 
             .hero-badge {
                 justify-content: center;
+            }
+
+            .hero-mockup {
+                width: 100vw;
+                max-width: 100vw;
+                margin-left: -24px;
+                overflow: hidden;
+            }
+
+            .mockup-slider {
+                transform: scale(0.9);
+                transform-origin: center top;
+                gap: 12px;
+                padding: 0 24px 8px 24px;
+                /* Add padding to match the container offset */
+                margin-bottom: -20px;
+            }
+
+            .mockup-slider .mockup-card {
+                flex: 0 0 calc(100vw - 48px);
+                /* Card width equals screen width minus padding */
             }
 
             .hero-form {
