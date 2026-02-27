@@ -34,6 +34,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
 
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -1007,8 +1010,7 @@
                 <img src="evliyo_logo.png" alt="Evliyo Logo">
             </a>
             <div class="nav-actions">
-                <a href="index.html" class="btn-ghost">Giriş Yap</a>
-                <a href="#cta" class="btn-primary">Davetiye Talep Et</a>
+                <a href="#cta" class="btn-primary">Davetiye Talep Et →</a>
             </div>
         </div>
     </nav>
@@ -1256,6 +1258,11 @@
     </footer>
 
     <script>
+        // Supabase client (sadece waitlist için - ana siteye dokunmaz)
+        const SUPABASE_URL = 'https://redwdkfeypnpuyndvysl.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_-nD1cds8uhQ80CjphgIG1A__NrAP7v1';
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         // Navbar scroll effect
         window.addEventListener('scroll', function () {
             const navbar = document.getElementById('navbar');
@@ -1301,33 +1308,47 @@
                 async submitEmail(source) {
                     const email = source === 'hero' ? this.heroEmail : this.ctaEmail;
 
-                    if (!email || !email.includes('@')) {
+                    const setMsg = (msg, success) => {
                         if (source === 'hero') {
-                            this.heroMessage = 'Lütfen geçerli bir e-posta adresi girin.';
-                            this.heroSuccess = false;
+                            this.heroMessage = msg;
+                            this.heroSuccess = success;
+                            this.heroSubmitting = false;
                         } else {
-                            this.ctaMessage = 'Lütfen geçerli bir e-posta adresi girin.';
-                            this.ctaSuccess = false;
+                            this.ctaMessage = msg;
+                            this.ctaSuccess = success;
+                            this.ctaSubmitting = false;
                         }
+                    };
+
+                    if (!email || !email.includes('@') || !email.includes('.')) {
+                        setMsg('Lütfen geçerli bir e-posta adresi girin.', false);
                         return;
                     }
 
                     if (source === 'hero') this.heroSubmitting = true;
                     else this.ctaSubmitting = true;
 
-                    // Simulate submission (replace with real API later)
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    try {
+                        const { error } = await _supabase
+                            .from('waitlist')
+                            .insert({ email: email.trim().toLowerCase(), source: source });
 
-                    if (source === 'hero') {
-                        this.heroMessage = '🎉 Başarılı! Davetiyeniz en kısa sürede e-posta adresinize gönderilecek.';
-                        this.heroSuccess = true;
-                        this.heroSubmitting = false;
-                        this.heroEmail = '';
-                    } else {
-                        this.ctaMessage = '🎉 Başarılı! Davetiyeniz en kısa sürede e-posta adresinize gönderilecek.';
-                        this.ctaSuccess = true;
-                        this.ctaSubmitting = false;
-                        this.ctaEmail = '';
+                        if (error) {
+                            if (error.code === '23505') {
+                                // Unique constraint - email already exists
+                                setMsg('✅ Bu e-posta zaten listede! Sizi bekliyoruz.', true);
+                            } else {
+                                console.error('Waitlist error:', error);
+                                setMsg('Bir hata oluştu. Lütfen tekrar deneyin.', false);
+                            }
+                        } else {
+                            if (source === 'hero') this.heroEmail = '';
+                            else this.ctaEmail = '';
+                            setMsg('🎉 Harika! Listeye eklendiniz. En kısa sürede davetiyenizi göndereceğiz.', true);
+                        }
+                    } catch (err) {
+                        console.error('Network error:', err);
+                        setMsg('Bağlantı hatası. Lütfen tekrar deneyin.', false);
                     }
                 }
             };
