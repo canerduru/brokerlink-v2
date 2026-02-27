@@ -9,6 +9,7 @@
   from = "/"
   to = "/landing.html"
   status = 200
+  force = true
 
 # Kural 2: evliyo.com/app → index.html (ana uygulama - ileride kullanılacak)
 [[redirects]]
