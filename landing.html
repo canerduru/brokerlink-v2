@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evliyo | Gayrimenkulde Güç Birliği: Profesyonel Danışman Ağı</title>
+    <meta name="description"
+        content="Türkiye'nin kapalı devre B2B gayrimenkul danışman ağı. Portföy ve talepleri akıllı eşleştirme ile saniyeler içinde buluşturun. WhatsApp gruplarına son verin.">
+    <meta name="keywords"
+        content="gayrimenkul danışman ağı, co-broking, broker platformu, portföy eşleştirme, emlak profesyonelleri, gayrimenkul ağı">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Evliyo | Gayrimenkulde Güç Birliği: Profesyonel Danışman Ağı">
+    <meta property="og:description"
+        content="Türkiye'nin kapalı devre B2B gayrimenkul danışman ağı. Portföy ve talepleri akıllı eşleştirme ile saniyeler içinde buluşturun.">
+    <meta property="og:image" content="evliyo_logo.png">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Evliyo | Profesyonel Danışman Ağı">
+    <meta name="twitter:description" content="Gayrimenkulde güç birliği. Kapalı devre danışman ağı.">
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#1D5D63">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #1D5D63;
+            --primary-light: #247a82;
+            --primary-dark: #154549;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --dark: #0f172a;
+            --dark-card: #1e293b;
+            --dark-border: #334155;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --white: #ffffff;
+            --gradient-primary: linear-gradient(135deg, #1D5D63, #247a82);
+            --gradient-dark: linear-gradient(135deg, #0f172a, #1e293b);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--white);
+            color: var(--gray-900);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 16px 0;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 10px 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo img {
+            height: 48px;
+            object-fit: contain;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1.5px solid var(--gray-300);
+            color: var(--gray-700);
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(29, 93, 99, 0.05);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            color: var(--white);
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(29, 93, 99, 0.3);
+            font-family: inherit;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(29, 93, 99, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-large {
+            padding: 16px 36px;
+            font-size: 16px;
+            border-radius: 14px;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 24px 80px;
+            background: linear-gradient(170deg, var(--gray-50) 0%, var(--white) 50%, rgba(29, 93, 99, 0.03) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(29, 93, 99, 0.06) 0%, transparent 70%);
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, transparent 70%);
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(29, 93, 99, 0.08);
+            border: 1px solid rgba(29, 93, 99, 0.15);
+            color: var(--primary);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 4.5vw, 52px);
+            font-weight: 900;
+            color: var(--primary-dark);
+            line-height: 1.15;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+
+        .hero h2 {
+            font-size: clamp(16px, 2vw, 19px);
+            font-weight: 400;
+            color: var(--gray-500);
+            line-height: 1.7;
+            margin-bottom: 36px;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+
+        .hero-form {
+            display: flex;
+            gap: 12px;
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+
+        .hero-form input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--gray-200);
+            border-radius: 14px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .hero-form input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(29, 93, 99, 0.1);
+        }
+
+        .hero-form input::placeholder {
+            color: var(--gray-400);
+        }
+
+        .hero-form-message {
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Hero Mockup */
+        .hero-mockup {
+            animation: fadeInUp 0.8s ease 0.4s both;
+            position: relative;
+        }
+
+        .mockup-card {
+            background: var(--dark);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--dark-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mockup-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .mockup-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .mockup-dot.red {
+            background: #ef4444;
+        }
+
+        .mockup-dot.yellow {
+            background: #f59e0b;
+        }
+
+        .mockup-dot.green {
+            background: #22c55e;
+        }
+
+        .mockup-match {
+            background: rgba(29, 93, 99, 0.15);
+            border: 1px solid rgba(29, 93, 99, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .mockup-match-title {
+            color: #22d3ee;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .mockup-match-text {
+            color: var(--gray-200);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .mockup-match-sub {
+            color: var(--gray-400);
+            font-size: 12px;
+        }
+
+        .mockup-score {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mockup-score-label {
+            color: var(--gray-400);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .mockup-score-value {
+            color: var(--accent-light);
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .mockup-notification {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: #22c55e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 4px 25px rgba(34, 197, 94, 0.6);
+            }
+        }
+
+        /* ===== SECTIONS COMMON ===== */
+        .section {
+            padding: 100px 24px;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(28px, 3.5vw, 42px);
+            font-weight: 800;
+            color: var(--gray-900);
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .section-subtitle {
+            font-size: 17px;
+            color: var(--gray-500);
+            max-width: 600px;
+            line-height: 1.7;
+            margin-bottom: 50px;
+        }
+
+        .section-center {
+            text-align: center;
+        }
+
+        .section-center .section-subtitle {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ===== PROBLEM / SOLUTION ===== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 20px;
+            padding: 36px 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 14px;
+            color: var(--gray-500);
+            line-height: 1.7;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            position: relative;
+        }
+
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gray-200), var(--gray-200), transparent);
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: var(--white);
+            font-size: 28px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 25px rgba(29, 93, 99, 0.3);
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 12px;
+        }
+
+        .step-text {
+            font-size: 14px;
+            color: var(--gray-500);
+            line-height: 1.7;
+        }
+
+        /* ===== EXCLUSIVITY SECTION ===== */
+        .section-dark {
+            background: var(--gradient-dark);
+            color: var(--white);
+        }
+
+        .section-dark .section-title {
+            color: var(--white);
+        }
+
+        .section-dark .section-subtitle {
+            color: var(--gray-400);
+        }
+
+        .exclusivity-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .exclusivity-text p {
+            font-size: 17px;
+            color: var(--gray-300);
+            line-height: 1.8;
+            margin-bottom: 32px;
+        }
+
+        .exclusivity-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--gray-400);
+            font-weight: 500;
+        }
+
+        /* ===== PRICING ===== */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            border-radius: 24px;
+            padding: 40px 32px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .pricing-card.featured {
+            background: var(--gradient-primary);
+            color: var(--white);
+            box-shadow: 0 20px 50px rgba(29, 93, 99, 0.3);
+        }
+
+        .pricing-card.featured::before {
+            content: '⭐ EN POPÜLER';
+            position: absolute;
+            top: 20px;
+            right: -32px;
+            background: var(--accent);
+            color: var(--dark);
+            padding: 4px 40px;
+            font-size: 10px;
+            font-weight: 800;
+            transform: rotate(45deg);
+            letter-spacing: 1px;
+        }
+
+        .pricing-card.secondary {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+        }
+
+        .pricing-name {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .pricing-price {
+            font-size: 44px;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .pricing-period {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-bottom: 28px;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .pricing-features li {
+            padding: 8px 0;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pricing-features li::before {
+            content: '✔️';
+            font-size: 14px;
+        }
+
+        .pricing-card.featured .pricing-features li::before {
+            content: '✅';
+        }
+
+        .pricing-note {
+            font-size: 12px;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .btn-pricing {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-pricing.white {
+            background: var(--white);
+            color: var(--primary);
+        }
+
+        .btn-pricing.white:hover {
+            background: var(--gray-100);
+        }
+
+        .btn-pricing.outline {
+            background: transparent;
+            border: 2px solid var(--gray-300);
+            color: var(--gray-600);
+        }
+
+        .btn-pricing.outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ===== FINAL CTA ===== */
+        .cta-section {
+            background: var(--gradient-primary);
+            padding: 100px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+        }
+
+        .cta-section .section-title {
+            color: var(--white);
+        }
+
+        .cta-section .section-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-form {
+            display: flex;
+            gap: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-form input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 14px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .cta-form input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .cta-form input:focus {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .cta-form button {
+            background: var(--white);
+            color: var(--primary);
+            border: none;
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .cta-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--dark);
+            color: var(--gray-400);
+            padding: 60px 24px 30px;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .footer-brand img {
+            height: 40px;
+            margin-bottom: 16px;
+            filter: brightness(0) invert(1);
+        }
+
+        .footer-brand p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--gray-400);
+        }
+
+        .footer-contact h4,
+        .footer-social h4 {
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .footer-contact a {
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-contact a:hover {
+            color: var(--white);
+        }
+
+        .footer-social-icons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .footer-social-icons a {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-social-icons a:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .footer-links a {
+            color: var(--gray-500);
+            text-decoration: none;
+            margin-left: 20px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 40px;
+            }
+
+            .hero-badge {
+                justify-content: center;
+            }
+
+            .hero-form {
+                flex-direction: column;
+            }
+
+            .hero-form button {
+                width: 100%;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .steps-grid::before {
+                display: none;
+            }
+
+            .exclusivity-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .cta-form {
+                flex-direction: column;
+            }
+
+            .nav-actions .btn-ghost {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body x-data="landingApp()" x-init="init()">
+
+    <!-- 1️⃣ NAVBAR -->
+    <nav class="navbar" :class="{ 'scrolled': scrolled }" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <img src="evliyo_logo.png" alt="Evliyo Logo">
+            </a>
+            <div class="nav-actions">
+                <a href="index.html" class="btn-ghost">Giriş Yap</a>
+                <a href="#cta" class="btn-primary">Davetiye Talep Et</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2️⃣ HERO SECTION -->
+    <section class="hero" id="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    🚀 Sadece Lisanslı Gayrimenkul Danışmanlarına Özel
+                </div>
+                <h1>Gayrimenkulde Güç Birliği:<br>Profesyonel Danışman Ağı</h1>
+                <h2>Zaman kaybettiren mesaj gruplarından kurtulun. Siz sadece ne aradığınızı veya ne sattığınızı girin;
+                    Evliyo'nun kapalı algoritması arka planda çalışıp mükemmel eşleşmeyi saniyeler içinde bulsun.</h2>
+                <div class="hero-form">
+                    <input type="email" x-model="heroEmail" placeholder="E-posta adresinizi girin..." required>
+                    <button class="btn-primary btn-large" @click="submitEmail('hero')" :disabled="heroSubmitting">
+                        <span x-show="!heroSubmitting">Erken Erişime Katıl</span>
+                        <span x-show="heroSubmitting">Gönderiliyor...</span>
+                    </button>
+                </div>
+                <div class="hero-form-message" x-show="heroMessage" x-text="heroMessage"
+                    :style="heroSuccess ? 'color: #22c55e' : 'color: #ef4444'"></div>
+            </div>
+
+            <!-- Mockup -->
+            <div class="hero-mockup">
+                <div class="mockup-card">
+                    <div class="mockup-notification">✨ Yeni Eşleşme!</div>
+                    <div class="mockup-header">
+                        <div class="mockup-dot red"></div>
+                        <div class="mockup-dot yellow"></div>
+                        <div class="mockup-dot green"></div>
+                    </div>
+                    <div class="mockup-match">
+                        <div class="mockup-match-title">🎯 Eşleşme Bulundu</div>
+                        <div class="mockup-match-text">3+1 Daire — Kadıköy, Moda</div>
+                        <div class="mockup-match-sub">Talep: 3.500.000 - 5.000.000 ₺ | %92 uyum</div>
+                    </div>
+                    <div class="mockup-score">
+                        <div>
+                            <div class="mockup-score-label">Güven Skoru</div>
+                        </div>
+                        <div class="mockup-score-value">98<span style="font-size: 16px; opacity: 0.6;">/100</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3️⃣ PROBLEM & ÇÖZÜM -->
+    <section class="section" id="problem" style="background: var(--gray-50);">
+        <div class="section-container section-center">
+            <div class="section-badge">NEDEN EVLİYO?</div>
+            <h2 class="section-title">WhatsApp Gruplarında<br>Kaybolmaya Son Verin.</h2>
+            <p class="section-subtitle">Spama dönen gruplara karşı bizim düzenimiz.</p>
+
+            <div class="cards-grid">
+                <div class="card animate-on-scroll">
+                    <span class="card-icon">📱</span>
+                    <h3 class="card-title">Bitmeyen Bildirimler</h3>
+                    <p class="card-text">Binlerce mesaj arasında aradığınızı bulamamak ve kaçan fırsatlar. Değerli
+                        zamanınızı spam mesajlarla harcamayın.</p>
+                </div>
+                <div class="card animate-on-scroll">
+                    <span class="card-icon">🎯</span>
+                    <h3 class="card-title">Akıllı Eşleştirme</h3>
+                    <p class="card-text">Algoritmamız sadece aradığınız kriterdeki portföy ve talepleri karşınıza
+                        çıkarır. Gürültü yok, sadece sonuç.</p>
+                </div>
+                <div class="card animate-on-scroll">
+                    <span class="card-icon">🤝</span>
+                    <h3 class="card-title">Doğrulanmış Ağ</h3>
+                    <p class="card-text">Kiminle iş yaptığınızı bilir, Güven Skoru sayesinde sürpriz yaşamazsınız. Her
+                        danışman doğrulanmış ve puanlanmıştır.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4️⃣ NASIL ÇALIŞIR? -->
+    <section class="section section-center" id="how">
+        <div class="section-container">
+            <div class="section-badge">3 BASİT ADIM</div>
+            <h2 class="section-title">Üç Adımda Kârlı Ortak İşlemler<br>(Co-Broking)</h2>
+            <p class="section-subtitle">Kullanıcıyı yormadan, sistemin basitliğini görün.</p>
+
+            <div class="steps-grid">
+                <div class="step animate-on-scroll">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Ekleyin</h3>
+                    <p class="step-text">Satılık/kiralık portföylerinizi veya müşterinizin arayış talebini sisteme
+                        saniyeler içinde girin.</p>
+                </div>
+                <div class="step animate-on-scroll">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Eşleşin</h3>
+                    <p class="step-text">Evliyo, kriterlere uyan en doğru portföy ve talepleri otomatik olarak
+                        eşleştirip size bildirsin.</p>
+                </div>
+                <div class="step animate-on-scroll">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">İşlemi Kapatın</h3>
+                    <p class="step-text">Güven skorunu incelediğiniz meslektaşınızla platform üzerinden mesajlaşın ve
+                        ortak satışı tamamlayın.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5️⃣ AYRICLIK & KAPALI AĞ -->
+    <section class="section section-dark" id="exclusive">
+        <div class="section-container">
+            <div class="exclusivity-content">
+                <div class="exclusivity-text animate-on-scroll">
+                    <div class="section-badge" style="color: var(--accent-light);">KAPALI AĞ</div>
+                    <h2 class="section-title">Sadece İşin Ehli<br>Profesyoneller İçin.</h2>
+                    <p>Evliyo sıradan bir ilan sitesi değildir; kapalı bir ağdır. İçeride son tüketici (müşteri)
+                        bulunmaz. Sadece mesleğine değer veren, aktif gayrimenkul danışmanları bu ağın bir parçası
+                        olabilir.</p>
+                    <p>Kendi profesyonel ağınızı kurun ve sektörde bir adım öne çıkın.</p>
+                </div>
+                <div class="exclusivity-stats animate-on-scroll">
+                    <div class="stat-item">
+                        <div class="stat-icon">🔒</div>
+                        <div class="stat-label">Kapalı Devre Ağ</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🛡️</div>
+                        <div class="stat-label">Güven Skoru Sistemi</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🤝</div>
+                        <div class="stat-label">Profesyonel Co-Broking</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-label">Anlık Eşleştirme</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6️⃣ FİYATLANDIRMA -->
+    <section class="section section-center" id="pricing" style="background: var(--gray-50);">
+        <div class="section-container">
+            <div class="section-badge">FİYATLANDIRMA</div>
+            <h2 class="section-title">Deneme Süresi Yok,<br>Sürpriz Ücret Yok.</h2>
+            <p class="section-subtitle">Tamamen risksiz başlayın. Kredi kartı gerekmez.</p>
+
+            <div class="pricing-grid">
+                <!-- Freemium -->
+                <div class="pricing-card featured animate-on-scroll">
+                    <div class="pricing-name">Başlangıç</div>
+                    <div class="pricing-price">0 ₺</div>
+                    <div class="pricing-period">Ömür Boyu Ücretsiz</div>
+                    <ul class="pricing-features">
+                        <li>Ayda 2 Portföy & Talep Ekleme</li>
+                        <li>Akıllı Eşleştirme Algoritması</li>
+                        <li>Platform İçi Mesajlaşma</li>
+                        <li>Güven Skoru Profili</li>
+                    </ul>
+                    <p class="pricing-note">Sınırlı süreli değil, her zaman ücretsiz.</p>
+                    <a href="index.html" class="btn-pricing white"
+                        style="display: block; text-align: center; text-decoration: none; margin-top: 16px;">Hemen
+                        Başla</a>
+                </div>
+
+                <!-- Pro & Enterprise -->
+                <div class="pricing-card secondary animate-on-scroll">
+                    <div class="pricing-name" style="color: var(--primary);">Profesyonel Ağ</div>
+                    <div class="pricing-price" style="color: var(--gray-900);">Çok Yakında</div>
+                    <div class="pricing-period" style="color: var(--gray-500);">Pro & Enterprise</div>
+                    <ul class="pricing-features" style="color: var(--gray-700);">
+                        <li>Sınırsız Portföy ve Talep</li>
+                        <li>Gelişmiş Filtreleme</li>
+                        <li>Ofis / Ekip Yönetimi</li>
+                        <li>Sınırsız Co-Broking</li>
+                    </ul>
+                    <button class="btn-pricing outline" style="margin-top: 16px;">Detaylar İçin Takipte Kalın</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7️⃣ KAPANIŞ ÇAĞRISI -->
+    <section class="cta-section" id="cta">
+        <div class="section-container section-center" style="position: relative; z-index: 1;">
+            <h2 class="section-title">Sektörün Yeni Nesil Ağında<br>Öncü Olun.</h2>
+            <p class="section-subtitle">Emlak sektöründe güvenin ve ortak işlemin yeni standardını belirliyoruz. Bu
+                değişimin bir parçası olmak için davetiyenizi hemen isteyin.</p>
+
+            <div class="cta-form">
+                <input type="email" x-model="ctaEmail" placeholder="E-posta adresiniz...">
+                <button @click="submitEmail('cta')" :disabled="ctaSubmitting">
+                    <span x-show="!ctaSubmitting">Davetiye Talep Et</span>
+                    <span x-show="ctaSubmitting">Gönderiliyor...</span>
+                </button>
+            </div>
+            <div class="hero-form-message" x-show="ctaMessage" x-text="ctaMessage"
+                :style="ctaSuccess ? 'color: #bbf7d0' : 'color: #fca5a5'" style="margin-top: 12px;"></div>
+        </div>
+    </section>
+
+    <!-- 8️⃣ FOOTER -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <img src="evliyo_logo.png" alt="Evliyo">
+                    <p>Türkiye'nin B2B Gayrimenkul Ağı. Portföy ve talepleri akıllı eşleştirme ile buluşturan kapalı
+                        devre profesyonel danışman platformu.</p>
+                </div>
+                <div class="footer-contact">
+                    <h4>İletişim</h4>
+                    <a href="mailto:evliyoapp@gmail.com">evliyoapp@gmail.com</a>
+                </div>
+                <div class="footer-social">
+                    <h4>Bizi Takip Edin</h4>
+                    <div class="footer-social-icons">
+                        <a href="#" target="_blank" title="LinkedIn">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                            </svg>
+                        </a>
+                        <a href="#" target="_blank" title="Instagram">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 Evliyo. Tüm Hakları Saklıdır.</span>
+                <div class="footer-links">
+                    <a href="#">Gizlilik Politikası</a>
+                    <a href="#">Kullanım Koşulları</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll animations (Intersection Observer)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Alpine.js app
+        function landingApp() {
+            return {
+                scrolled: false,
+                heroEmail: '',
+                ctaEmail: '',
+                heroMessage: '',
+                ctaMessage: '',
+                heroSuccess: false,
+                ctaSuccess: false,
+                heroSubmitting: false,
+                ctaSubmitting: false,
+
+                init() {
+                    window.addEventListener('scroll', () => {
+                        this.scrolled = window.scrollY > 50;
+                    });
+                },
+
+                async submitEmail(source) {
+                    const email = source === 'hero' ? this.heroEmail : this.ctaEmail;
+
+                    if (!email || !email.includes('@')) {
+                        if (source === 'hero') {
+                            this.heroMessage = 'Lütfen geçerli bir e-posta adresi girin.';
+                            this.heroSuccess = false;
+                        } else {
+                            this.ctaMessage = 'Lütfen geçerli bir e-posta adresi girin.';
+                            this.ctaSuccess = false;
+                        }
+                        return;
+                    }
+
+                    if (source === 'hero') this.heroSubmitting = true;
+                    else this.ctaSubmitting = true;
+
+                    // Simulate submission (replace with real API later)
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    if (source === 'hero') {
+                        this.heroMessage = '🎉 Başarılı! Davetiyeniz en kısa sürede e-posta adresinize gönderilecek.';
+                        this.heroSuccess = true;
+                        this.heroSubmitting = false;
+                        this.heroEmail = '';
+                    } else {
+                        this.ctaMessage = '🎉 Başarılı! Davetiyeniz en kısa sürede e-posta adresinize gönderilecek.';
+                        this.ctaSuccess = true;
+                        this.ctaSubmitting = false;
+                        this.ctaEmail = '';
+                    }
+                }
+            };
+        }
+    </script>
+
+</body>
+
+</html>
